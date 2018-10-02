@@ -1,0 +1,16 @@
+{
+  "name": "preview",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "pkg .",
+    "start": "node app.js"
+  },
+  "bin": {
+    "preview": "app.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {}
+}

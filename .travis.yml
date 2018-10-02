@@ -1,0 +1,7 @@
+deploy:
+  provider: releases
+  api_key: $GITHUB_TOKEN
+  file: "preview-win.exe"
+  skip_cleanup: true
+  on:
+    tags: true
