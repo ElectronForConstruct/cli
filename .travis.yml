@@ -20,4 +20,4 @@ deploy:
   draft: true
   on:
     branche: master
-    tags: false
+    tags: true
