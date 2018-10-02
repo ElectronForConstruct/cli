@@ -5,7 +5,7 @@ node_js:
 
 before_script:
   - npm install -g pkg
-script: build
+script: npm run build
 
 deploy:
   provider: releases
