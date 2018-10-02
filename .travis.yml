@@ -9,12 +9,17 @@ before_script:
 script:
   - npm run build
   - ls
+  - ls bin
 
 deploy:
   provider: releases
   api_key: $GITHUB_TOKEN
-  file: "preview-win.exe"
+  file:
+  - "bin/preview-win.exe"
+  - "bin/preview-macos"
+  - "bin/preview-linux"
   skip_cleanup: true
   overwrite: true
   on:
+    all_branches: true
     tags: false
