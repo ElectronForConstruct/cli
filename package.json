@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "pkg .",
+    "build": "pkg . --out-path bin",
     "start": "node app.js"
   },
   "bin": {

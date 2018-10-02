@@ -1,5 +1,5 @@
 assets
 bin
 tools
-*.exe
-
+node_modules
+.idea
