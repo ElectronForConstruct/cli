@@ -3,6 +3,10 @@ node_js:
   - "10"
   - "9"
 
+before_script:
+  - npm install -g pkg
+script: build
+
 deploy:
   provider: releases
   api_key: $GITHUB_TOKEN
