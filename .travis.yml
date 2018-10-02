@@ -1,15 +1,12 @@
 language: node_js
 node_js:
   - "10"
-  - "9"
 
 before_script:
   - npm install -g pkg
   -
 script:
   - npm run build
-  - ls
-  - ls bin
 
 deploy:
   provider: releases
