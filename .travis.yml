@@ -5,12 +5,16 @@ node_js:
 
 before_script:
   - npm install -g pkg
-script: npm run build
+  -
+script:
+  - npm run build
+  - ls
 
 deploy:
   provider: releases
   api_key: $GITHUB_TOKEN
   file: "preview-win.exe"
   skip_cleanup: true
+  overwrite: true
   on:
-    tags: true
+    tags: false
