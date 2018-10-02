@@ -19,5 +19,5 @@ deploy:
   overwrite: true
   draft: true
   on:
-    all_branches: true
+    branche: master
     tags: false
