@@ -1,7 +1,7 @@
 {
-  "name": "preview",
+  "name": "preview-script",
   "version": "1.0.0",
-  "description": "",
+  "description": "A small utility to manage your Construct Electron projects",
   "main": "index.js",
   "scripts": {
     "build": "pkg . --out-path bin",
@@ -10,7 +10,11 @@
   "bin": {
     "preview": "app.js"
   },
-  "author": "",
+  "author": "Armaldio <armaldio@gmail.com>",
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {
+    "inquirer": "^6.2.0",
+    "minimist": "^1.2.0",
+    "opn": "^5.4.0"
+  }
 }

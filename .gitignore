@@ -3,3 +3,4 @@ bin
 tools
 node_modules
 .idea
+config
