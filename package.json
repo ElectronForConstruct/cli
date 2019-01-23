@@ -1,20 +1,29 @@
 {
-  "name": "preview-script",
+  "name": "@electronforconstruct/preview",
   "version": "1.0.0",
   "description": "A small utility to manage your Construct Electron projects",
   "main": "index.js",
   "scripts": {
     "build": "pkg . --out-path bin",
-    "start": "node app.js"
+    "start": "nodemon --exec babel-node app.js",
+    "release": "np"
   },
   "bin": {
-    "preview": "app.js"
+    "construct-preview": "app.js"
   },
   "author": "Armaldio <armaldio@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "@babel/node": "^7.2.2",
     "inquirer": "^6.2.0",
     "minimist": "^1.2.0",
-    "opn": "^5.4.0"
+    "opn": "^5.4.0",
+    "yargs": "^12.0.5"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.2.0",
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.2.0",
+    "nodemon": "^1.18.9"
   }
 }

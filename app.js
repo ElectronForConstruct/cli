@@ -1,6 +1,7 @@
-const fs       = require('fs');
-const actions  = require('./actions');
-const minimist = require('minimist');
+import fs from 'fs';
+import path from 'path';
+import actions from './actions';
+import yargs from 'yargs';
 
 const isDev = !process.pkg;
 
@@ -30,7 +31,7 @@ if (!isDev) {
 // If project is configured, pass, otherwise throw an error
 if (!isProjectConfigured) {
   console.log('Your project is not configured yet, please download the associated Toolbox App (https://github.com/ElectronForConstruct/toolbox-app)');
-  return actions.beforeExit();
+  actions.beforeExit();
 }
 
 // Try to read the config file
@@ -39,18 +40,34 @@ try {
   config = JSON.parse(fs.readFileSync(actions.getPathToConfig()));
 } catch (e) {
   console.log('There was an error reading your configuration file.');
-  return actions.beforeExit();
+  actions.beforeExit();
 }
 
-const argv = minimist(process.argv.slice(2));
 if (isDev)
   console.dir(argv);
 
+// yargs
+const argv = yargs
+  .command('build [-c build_config.json]', 'Build you game using configuration file', () => yargs.option('config', {
+    alias  : 'c',
+    default: 'here',
+    type   : 'string',
+  }))
+  .option('c', {
+    alias       : 'config',
+    demandOption: false,
+    default     : path.join(__dirname, 'config'),
+    describe    : 'Directory where configuration files are located',
+    type        : 'string',
+  })
+  .help('help')
+  .argv;
+
 if (argv[ 'preview-c3' ]) {
   actions.startPreview(argv[ 'preview-c3' ]);
-  return actions.beforeExit();
+  actions.beforeExit();
 } else if (argv[ '_' ][ 0 ]) {
-  const arg = argv[ '_' ][ 0 ];
+  const arg   = argv[ '_' ][ 0 ];
   const regex = /(https?:\/\/)?((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])|localhost):\d*\/?$/;
   if (arg.match(regex)) {
     actions.startPreview(arg);
