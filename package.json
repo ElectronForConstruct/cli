@@ -1,11 +1,11 @@
 {
   "name": "@electronforconstruct/cli",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A small utility to manage your Construct Electron projects",
   "scripts": {
     "build": "babel src --out-dir dist --ignore node_modules",
     "start": "babel-node src/index.js",
-    "release": "npm publish --access public"
+    "release": "yarn publish --access public"
   },
   "bin": {
     "e4c": "dist/index.js"
