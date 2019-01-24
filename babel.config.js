@@ -1,11 +1,10 @@
-module.exports = function (api) {
-  const presets = [ '@babel/preset-env' ];
-  const plugins = [];
-
-  api.cache(true);
-
-  return {
-    presets,
-    plugins,
+module.exports = {
+    presets: [
+      '@babel/env',
+    ],
+    plugins: [
+      ['@babel/plugin-proposal-class-properties'],
+      ['@babel/plugin-proposal-object-rest-spread'],
+    ],
   };
-};
+  
