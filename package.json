@@ -1,6 +1,6 @@
 {
   "name": "@electronforconstruct/cli",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A small utility to manage your Construct Electron projects",
   "scripts": {
     "build": "rollup -c",
@@ -49,6 +49,7 @@
     "rollup": "^1.1.2",
     "rollup-plugin-babel": "^4.3.2",
     "rollup-plugin-node-resolve": "^4.0.0",
+    "rollup-plugin-shebang": "^0.1.5",
     "webpack": "^4.29.0",
     "webpack-cli": "^3.2.1"
   }
