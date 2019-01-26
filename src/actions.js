@@ -12,7 +12,7 @@ import process from 'process';
 import isDev from './isDev';
 
 export const installDeps = () => {
-  const spinner = ora('Installing dependencies...').start();
+  const spinner = ora('Installing dependencies... This may take a while, relax and take a coffe').start();
 
   const npm = (process.platform === 'win32' ? 'npm.cmd' : 'npm');
   const npmstart = spawn(npm, ['install', '--no-package-lock']); /* , {
@@ -175,18 +175,6 @@ export const showMenu = async () => {
   let dependenciesInstalled = true;
   let isCorrectElectronFolder = false;
 
-  // check node_modules
-  if (!fs.existsSync('./node_modules')) {
-    dependenciesInstalled = false;
-    console.log(
-      `
-${chalk.yellow('Oopsie! Dependencies are not installed!')}
-Please install them using ${chalk.underline('npm install')} or ${chalk.underline('yarn install')}
-
-`,
-    );
-  }
-
   // check configuration
 
   if (
@@ -194,6 +182,18 @@ Please install them using ${chalk.underline('npm install')} or ${chalk.underline
     && fs.existsSync('./preview.exe')
   ) {
     isCorrectElectronFolder = true;
+
+    // check node_modules
+    if (!fs.existsSync('./node_modules')) {
+      dependenciesInstalled = false;
+      console.log(
+        `
+${chalk.yellow('Oopsie! Dependencies are not installed!')}
+Please install them using ${chalk.underline('npm install')} or ${chalk.underline('yarn install')}
+
+`,
+      );
+    }
   }
 
   const choices = [];

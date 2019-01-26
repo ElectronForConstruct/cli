@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 
+process.env.NODE_ENV = "production";
+
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 require('@babel/polyfill');
@@ -55,7 +57,7 @@ function _asyncToGenerator(fn) {
 }
 
 var installDeps = function installDeps() {
-  var spinner = ora('Installing dependencies...').start();
+  var spinner = ora('Installing dependencies... This may take a while, relax and take a coffe').start();
   var npm = process$1.platform === 'win32' ? 'npm.cmd' : 'npm';
   var npmstart = child_process.spawn(npm, ['install', '--no-package-lock']);
   /* , {
@@ -165,7 +167,7 @@ var showHelp = function showHelp() {
 };
 var reportAnIssue = function reportAnIssue() {
   var msg = "\nConfiguration:\n- OS: ".concat(os.platform(), "\n- Arch: ").concat(os.arch(), "\n\nSteps to reproduce: \n- \n  ").trim();
-  opn("https://github.com/ElectronForConstruct/preview-script/issues/new?body=".concat(encodeURI(msg)));
+  opn("https://github.com/ElectronForConstruct/preview/issues/new?body=".concat(encodeURI(msg)));
 };
 
 var downloadPreview =
@@ -325,16 +327,15 @@ function () {
           case 0:
             if (isDev && fs.existsSync('MyGame')) process$1.chdir('MyGame');
             dependenciesInstalled = true;
-            isCorrectElectronFolder = false; // check node_modules
-
-            if (!fs.existsSync('./node_modules')) {
-              dependenciesInstalled = false;
-              console.log("\n".concat(chalk.yellow('Oopsie! Dependencies are not installed!'), "\nPlease install them using ").concat(chalk.underline('npm install'), " or ").concat(chalk.underline('yarn install'), "\n\n"));
-            } // check configuration
-
+            isCorrectElectronFolder = false; // check configuration
 
             if (fs.existsSync('./config.js') && fs.existsSync('./preview.exe')) {
-              isCorrectElectronFolder = true;
+              isCorrectElectronFolder = true; // check node_modules
+
+              if (!fs.existsSync('./node_modules')) {
+                dependenciesInstalled = false;
+                console.log("\n".concat(chalk.yellow('Oopsie! Dependencies are not installed!'), "\nPlease install them using ").concat(chalk.underline('npm install'), " or ").concat(chalk.underline('yarn install'), "\n\n"));
+              }
             }
 
             choices = []; // if the folder is a valid supported electron project
@@ -384,11 +385,11 @@ function () {
               choices: choices
             };
             answers = {};
-            _context6.prev = 10;
-            _context6.next = 13;
+            _context6.prev = 9;
+            _context6.next = 12;
             return enquirer.prompt(questions);
 
-          case 13:
+          case 12:
             answers = _context6.sent;
 
             if (isDev) {
@@ -397,56 +398,56 @@ function () {
 
 
             _context6.t0 = answers.action;
-            _context6.next = _context6.t0 === 0 ? 18 : _context6.t0 === 1 ? 20 : _context6.t0 === 2 ? 22 : _context6.t0 === 3 ? 24 : _context6.t0 === 4 ? 26 : _context6.t0 === 5 ? 28 : _context6.t0 === 6 ? 30 : 32;
+            _context6.next = _context6.t0 === 0 ? 17 : _context6.t0 === 1 ? 19 : _context6.t0 === 2 ? 21 : _context6.t0 === 3 ? 23 : _context6.t0 === 4 ? 25 : _context6.t0 === 5 ? 27 : _context6.t0 === 6 ? 29 : 31;
             break;
 
-          case 18:
+          case 17:
             previewC2();
-            return _context6.abrupt("break", 34);
+            return _context6.abrupt("break", 33);
 
-          case 20:
+          case 19:
             previewC3();
-            return _context6.abrupt("break", 34);
+            return _context6.abrupt("break", 33);
 
-          case 22:
+          case 21:
             generateElectronProject();
-            return _context6.abrupt("break", 34);
+            return _context6.abrupt("break", 33);
 
-          case 24:
+          case 23:
             showHelp();
-            return _context6.abrupt("break", 34);
+            return _context6.abrupt("break", 33);
 
-          case 26:
+          case 25:
             reportAnIssue();
-            return _context6.abrupt("break", 34);
+            return _context6.abrupt("break", 33);
 
-          case 28:
+          case 27:
             process$1.exit(0);
-            return _context6.abrupt("break", 34);
+            return _context6.abrupt("break", 33);
 
-          case 30:
+          case 29:
             installDeps();
-            return _context6.abrupt("break", 34);
+            return _context6.abrupt("break", 33);
 
-          case 32:
+          case 31:
             console.log('unexpected case');
-            return _context6.abrupt("break", 34);
+            return _context6.abrupt("break", 33);
 
-          case 34:
-            _context6.next = 39;
+          case 33:
+            _context6.next = 38;
             break;
 
-          case 36:
-            _context6.prev = 36;
-            _context6.t1 = _context6["catch"](10);
+          case 35:
+            _context6.prev = 35;
+            _context6.t1 = _context6["catch"](9);
             console.log('Aborted');
 
-          case 39:
+          case 38:
           case "end":
             return _context6.stop();
         }
       }
-    }, _callee6, this, [[10, 36]]);
+    }, _callee6, this, [[9, 35]]);
   }));
 
   return function showMenu() {
