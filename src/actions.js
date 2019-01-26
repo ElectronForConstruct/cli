@@ -78,7 +78,7 @@ export const previewC3 = async () => {
   startPreview(answers.url);
 };
 
-export const getPathToConfig = () => path.join(process.cwd(), 'config.json');
+export const getPathToConfig = () => path.join(process.cwd(), 'config.js');
 
 export const showHelp = () => {
   console.log('To get help, please refer to this link: https://github.com/ElectronForConstruct/template');
@@ -94,8 +94,28 @@ Steps to reproduce:
 - 
   `.trim();
 
-  opn(`https://github.com/ElectronForConstruct/preview-script/issues/new?body=${encodeURI(msg)}`);
+  opn(`https://github.com/ElectronForConstruct/preview/issues/new?body=${encodeURI(msg)}`);
 };
+
+const downloadPreview = async fullPath => new Promise((resolve) => {
+  request({
+    url: 'https://api.github.com/repos/ElectronForConstruct/preview/releases/latest',
+    headers: {
+      'User-Agent': 'ElectronForContruct',
+    },
+  }, (error, response, body) => {
+    const json = JSON.parse(body);
+    const assetUrl = json.assets
+      .find(asset => asset.name === 'preview.exe').browser_download_url;
+    request(assetUrl)
+      .pipe(fs.createWriteStream(
+        path.join(fullPath, 'preview.exe'),
+      ))
+      .on('finish', () => {
+        resolve(true);
+      });
+  });
+});
 
 const generateElectronProject = async () => {
   const dir = process.cwd();
@@ -139,43 +159,10 @@ const generateElectronProject = async () => {
       .on('error', (err) => {
         console.error('err', err);
       })
-      .on('end', () => {
-        const isWin = process.platform === 'win32';
-        const isLinux = process.platform === 'linux';
-        const isMac = process.platform === 'darwin';
-
-        let name;
-        if (isWin) {
-          name = 'preview-win.exe';
-        } else if (isLinux) {
-          name = 'preview-linux';
-        } else if (isMac) {
-          name = 'preview-macos';
-        } else {
-          throw new Error('Unknown OS');
-        }
-
-        request({
-          url: 'https://api.github.com/repos/ElectronForConstruct/preview-script/releases/latest',
-          headers: {
-            'User-Agent': 'ElectronForContruct',
-          },
-        }, (error, response, body) => {
-          const json = JSON.parse(body);
-          /* console.log(json);
-                              console.log(json.assets);
-                              console.log(json.assets.find(asset => asset.name === name)); */
-          const assetUrl = json.assets
-            .find(asset => asset.name === name).browser_download_url;
-          request(assetUrl)
-            .pipe(fs.createWriteStream(
-              path.join(fullPath, `preview${isWin ? '.exe' : ''}`),
-            ))
-            .on('finish', () => {
-              spinner.succeed('Downloaded');
-              console.log(`\nYou can now go to your project by using "cd ${answers.name}" and install dependencies with either "npm install" or "yarn install"\n`);
-            });
-        });
+      .on('end', async () => {
+        if (process.platform === 'win32') await downloadPreview(fullPath);
+        spinner.succeed('Downloaded');
+        console.log(`\nYou can now go to your project by using "cd ${answers.name}" and install dependencies with either "npm install" or "yarn install"\n`);
       });
   } catch (e) {
     console.log('Aborted');
@@ -183,7 +170,7 @@ const generateElectronProject = async () => {
 };
 
 export const showMenu = async () => {
-  if (isDev) process.chdir('MyGame');
+  if (isDev && fs.existsSync('MyGame')) process.chdir('MyGame');
 
   let dependenciesInstalled = true;
   let isCorrectElectronFolder = false;

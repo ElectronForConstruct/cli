@@ -1,3 +1,4 @@
+import '@babel/polyfill'
 import isDev from './isDev';
 import { showMenu } from './actions';
 
