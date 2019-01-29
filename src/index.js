@@ -1,4 +1,6 @@
-import '@babel/polyfill'
+import '@babel/polyfill';
+import chalk from 'chalk';
+import checkForUpdate from './updateCheck';
 import isDev from './isDev';
 import { showMenu } from './actions';
 
@@ -17,23 +19,26 @@ if (isDev) {
  | (__/ _ \\ ' \\(_-<  _| '_| || / _|  _|
   \\___\\___/_||_/__/\\__|_|  \\_,_\\__|\\__|
 
+
 `);
 }
 
-const config = {};
+checkForUpdate()
+  .then((update) => {
+    if (update) {
+      console.log(`
+  ${chalk.redBright('You are using an outdated version of this tool')}
+      
+  The latest version is ${chalk.yellow.bold.underline(update.version)}.
+  Update using ${chalk.reset.bold.underline(`npm i -g ${update.name}`)}
+  
+  `);
+    }
 
-/* if (argv[ 'preview-c3' ]) {
-  actions.startPreview(argv[ 'preview-c3' ]);
-  actions.beforeExit();
-} else if (argv[ '_' ][ 0 ]) {
-  const arg   = argv[ '_' ][ 0 ];
-  const regex =
-  /(https?:\/\/)?((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.)
-  {3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])|localhost):\d*\/?$/;
-  if (arg.match(regex)) {
-    actions.startPreview(arg);
-  } else {
-    console.log('Invalid url');
-  }
-} */
-showMenu(config);
+    showMenu();
+  })
+  .catch((e) => {
+    console.error(
+      `Failed to check for updates: ${e}`,
+    );
+  });

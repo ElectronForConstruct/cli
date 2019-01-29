@@ -2,16 +2,20 @@ import { prompt } from 'enquirer';
 import { spawn, exec } from 'child_process';
 import path from 'path';
 import fs from 'fs';
+import zip from 'zip-a-folder';
 import opn from 'opn';
+import rimraf from 'rimraf';
 import os from 'os';
 import ghdownload from 'github-download';
 import request from 'request';
 import ora from 'ora';
 import chalk from 'chalk';
 import process from 'process';
+import tmp from 'tmp';
+import shelljs from 'shelljs';
 import isDev from './isDev';
 
-export const installDeps = () => {
+const installDeps = async () => new Promise((resolve) => {
   const spinner = ora('Installing dependencies... This may take a while, relax and take a coffe').start();
 
   const npm = (process.platform === 'win32' ? 'npm.cmd' : 'npm');
@@ -31,10 +35,11 @@ export const installDeps = () => {
 
   npmstart.on('exit', (/* code */) => {
     spinner.succeed('Dependencies successfully installed');
+    resolve(true);
   });
-};
+});
 
-export const startPreview = (url) => {
+const startPreview = (url) => {
   console.log(`Starting preview on "${url}"`);
 
   const npmstart = exec(`npm run start -- ${url}`, {
@@ -54,11 +59,11 @@ export const startPreview = (url) => {
   });
 };
 
-export const previewC2 = async () => {
+const previewC2 = async () => {
   console.log('To preview a Construct 2 project, please follow instructions here: https://github.com/ElectronForConstruct/template');
 };
 
-export const previewC3 = async () => {
+const previewC3 = async () => {
   console.log('To preview your Construct 3 project in Electron, you need a valid subscription to Construct 3');
   console.log('Then, go to the preview menu and hit "Remote preview" and paste the link that appear here');
   const answers = await prompt([
@@ -78,13 +83,11 @@ export const previewC3 = async () => {
   startPreview(answers.url);
 };
 
-export const getPathToConfig = () => path.join(process.cwd(), 'config.js');
-
-export const showHelp = () => {
+const showHelp = () => {
   console.log('To get help, please refer to this link: https://github.com/ElectronForConstruct/template');
 };
 
-export const reportAnIssue = () => {
+const reportAnIssue = () => {
   const msg = `
 Configuration:
 - OS: ${os.platform()}
@@ -117,58 +120,105 @@ const downloadPreview = async fullPath => new Promise((resolve) => {
   });
 });
 
-const generateElectronProject = async () => {
-  const dir = process.cwd();
+const downloadTemplate = async (fullPath, branch = 'develop') => new Promise((resolve) => {
+  ghdownload({
+    user: 'ElectronForConstruct',
+    repo: 'template',
+    ref: branch,
+  }, fullPath)
+    .on('error', (err) => {
+      console.error('err', err);
+    })
+    .on('end', async () => {
+      if (process.platform === 'win32') await downloadPreview(fullPath);
+      resolve(true);
+    });
+});
 
-  const questions = {
-    type: 'input',
-    name: 'name',
-    message: 'What is the name of your project?',
-    initial: () => 'MyGame',
-    format: name => path.join(dir, name),
-    validate: (name) => {
-      if (fs.existsSync(path.join(dir, name))) {
-        return 'This path already exist!';
-      }
-      return true;
-    },
-  };
-
+const generateElectronProject = async (projectName = null) => {
   let answers = {};
+  const dir = process.cwd();
+  let name = projectName;
+
   try {
-    answers = await prompt(questions);
-    const fullPath = path.join(dir, answers.name);
+    // if I already have a folder name, eg update, no need to ask again for it
+    if (!projectName) {
+      const questions = {
+        type: 'input',
+        name: 'name',
+        message: 'What is the name of your project?',
+        initial: () => 'MyGame',
+        format: typedName => path.join(dir, typedName),
+        validate: (typedName) => {
+          if (fs.existsSync(path.join(dir, typedName))) {
+            return 'This path already exist!';
+          }
+          return true;
+        },
+      };
+
+      answers = await prompt(questions);
+      ({ name } = answers);
+    }
+
+    const fullPath = path.join(dir, name);
 
     const spinner = ora('Downloading template...').start();
+    await downloadTemplate(fullPath);
+    spinner.succeed('Downloaded');
 
-    ghdownload({
-      user: 'ElectronForConstruct',
-      repo: 'template',
-      ref: 'develop',
-    }, fullPath)
-      .on('dir', (/* dir */) => {
-        // onsole.log('dir', dir);
-      })
-      .on('file', (/* file */) => {
-        // console.log('file', file);
-      })
-      // only emitted if Github API limit is reached and the zip file is downloaded
-      .on('zip', (/* zipUrl */) => {
-        // console.log('zipUrl', zipUrl);
-      })
-      .on('error', (err) => {
-        console.error('err', err);
-      })
-      .on('end', async () => {
-        if (process.platform === 'win32') await downloadPreview(fullPath);
-        spinner.succeed('Downloaded');
-        console.log(`\nYou can now go to your project by using "cd ${answers.name}" and install dependencies with either "npm install" or "yarn install"\n`);
-      });
+    if (!projectName) console.log(`\nYou can now go to your project by using "cd ${name}" and install dependencies with either "npm install" or "yarn install"\n`);
   } catch (e) {
     console.log('Aborted');
   }
 };
 
+const updateApp = async () => {
+  tmp.setGracefulCleanup();
+  shelljs.set('-v');
+
+  const folderName = path.basename(process.cwd());
+  const fullDirectoryPath = path.join(process.cwd());
+
+  shelljs.cd('..');
+
+  // create a temporary directory for saving files
+  const tmpobj = tmp.dirSync();
+  console.log('Creating temp directory: ', tmpobj.name);
+
+  // move files to it (config.js + app folder)
+  shelljs.cp('-r', path.join(fullDirectoryPath, 'config.js'), path.join(fullDirectoryPath, 'app'), tmpobj.name);
+  console.log(`Moving config.js + app folder to ${tmpobj.name}`);
+
+  // make a backup
+  // shelljs.mv(`${fullDirectoryPath}/**`, `${fullDirectoryPath}_backup`);
+  await zip.zip(fullDirectoryPath, `${fullDirectoryPath}.zip`);
+  console.log(`Making a backup to ${fullDirectoryPath}.zip`);
+
+  rimraf(fullDirectoryPath, (a, b, c) => {
+    console.log(a, b, c);
+  });
+  console.log(`Removing ${folderName}`);
+
+  // remove folder
+  // shelljs.rm('-r', fullDirectoryPath);
+
+  // download new template
+  // await generateElectronProject(folderName);
+
+  // move new template files to old directory
+
+  // install deps
+
+  // move saved files in temp to old directory
+
+  // profit
+  // tmpobj.removeCallback();
+};
+
+const exit = () => process.exit(0);
+
+// eslint-disable-next-line
 export const showMenu = async () => {
   if (isDev && fs.existsSync('MyGame')) process.chdir('MyGame');
 
@@ -188,7 +238,7 @@ export const showMenu = async () => {
       dependenciesInstalled = false;
       console.log(
         `
-${chalk.yellow('Oopsie! Dependencies are not installed!')}
+${chalk.yellow('Whoops! Dependencies are not installed!')}
 Please install them using ${chalk.underline('npm install')} or ${chalk.underline('yarn install')}
 
 `,
@@ -203,20 +253,30 @@ Please install them using ${chalk.underline('npm install')} or ${chalk.underline
     if (dependenciesInstalled) {
       choices.push(
         {
-          message: 'Preview C2',
-          name: 0,
+          name: 'Preview with',
+          disabled: '>',
+          choices: [
+            {
+              name: 'Construct 2',
+              value: 0,
+            },
+            {
+              name: 'Construct 3',
+              value: 1,
+            },
+          ],
         },
-        {
-          message: 'Preview C3',
-          name: 1,
-        },
+        /* {
+          message: 'Update app',
+          name: 7,
+        }, */
       );
     } else {
       // but deps not installed
       choices.push(
         {
-          message: 'Install dependencies',
-          name: 6,
+          name: 'Install dependencies',
+          value: 6,
         },
       );
     }
@@ -224,8 +284,8 @@ Please install them using ${chalk.underline('npm install')} or ${chalk.underline
     // if the folder i not a upported electron project
     choices.push(
       {
-        message: 'Generate a new Electron project',
-        name: 2,
+        name: 'Generate a new Electron project',
+        value: 2,
       },
     );
   }
@@ -235,16 +295,20 @@ Please install them using ${chalk.underline('npm install')} or ${chalk.underline
       value: chalk.dim('────'),
     },
     {
-      message: 'View help',
-      name: 3,
+      name: 'View help',
+      value: 3,
     },
     {
-      message: 'Report an issue',
-      name: 4,
+      name: 'Report an issue',
+      value: 4,
     },
     {
-      message: 'Exit',
-      name: 5,
+      name: 'Donate',
+      value: 8,
+    },
+    {
+      name: 'Exit',
+      value: 5,
     },
   );
 
@@ -253,51 +317,30 @@ Please install them using ${chalk.underline('npm install')} or ${chalk.underline
     name: 'action',
     message: 'What do you want to do?',
     choices,
+    result() {
+      return this.focused;
+    },
   };
 
   let answers = {};
   try {
     answers = await prompt(questions);
-    if (isDev) {
-      console.log(answers);
-    }
 
-    // override type if was not previously set
+    const actions = [
+      [0, previewC2],
+      [1, previewC3],
+      [2, generateElectronProject],
+      [3, showHelp],
+      [4, reportAnIssue],
+      [5, exit],
+      [6, installDeps],
+      [7, updateApp],
+      [8, () => opn('https://armaldio.xyz/#/donations')],
+    ];
 
-    switch (answers.action) {
-      case 0:
-        previewC2();
-        break;
-
-      case 1:
-        previewC3();
-        break;
-
-      case 2:
-        generateElectronProject();
-        break;
-
-      case 3:
-        showHelp();
-        break;
-
-      case 4:
-        reportAnIssue();
-        break;
-
-      case 5:
-        process.exit(0);
-        break;
-
-      case 6:
-        installDeps();
-        break;
-
-      default:
-        console.log('unexpected case');
-        break;
-    }
+    await actions.find(a => a[0] === answers.action.value)[1]();
   } catch (e) {
-    console.log('Aborted');
+    console.log('Aborted:', e);
   }
+  console.log('Happy with ElectronForConstruct ? ► Donate: https://armaldio.xyz/#/donations ♥');
 };

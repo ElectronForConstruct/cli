@@ -6,17 +6,108 @@ process.env.NODE_ENV = "production";
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 require('@babel/polyfill');
+var chalk = _interopDefault(require('chalk'));
+var request = _interopDefault(require('request'));
+var semver = _interopDefault(require('semver'));
 var enquirer = require('enquirer');
 var child_process = require('child_process');
 var path = _interopDefault(require('path'));
 var fs = _interopDefault(require('fs'));
+var zip = _interopDefault(require('zip-a-folder'));
 var opn = _interopDefault(require('opn'));
+var rimraf = _interopDefault(require('rimraf'));
 var os = _interopDefault(require('os'));
 var ghdownload = _interopDefault(require('github-download'));
-var request = _interopDefault(require('request'));
 var ora = _interopDefault(require('ora'));
-var chalk = _interopDefault(require('chalk'));
 var process$1 = _interopDefault(require('process'));
+var tmp = _interopDefault(require('tmp'));
+var shelljs = _interopDefault(require('shelljs'));
+
+var name = "@electronforconstruct/cli";
+var version = "1.0.7";
+var description = "A small utility to manage your Construct Electron projects";
+var scripts = {
+	build: "rollup -c",
+	start: "babel-node src/index.js",
+	prerelease: "yarn build",
+	release: "yarn publish --access public"
+};
+var preferGlobal = true;
+var bin = {
+	e4c: "dist/bundle.js"
+};
+var author = "Armaldio <armaldio@gmail.com>";
+var license = "MIT";
+var dependencies = {
+	"@babel/polyfill": "^7.2.5",
+	"@babel/runtime": "^7.3.1",
+	chalk: "^2.4.2",
+	enquirer: "^2.3.0",
+	"github-download": "^0.5.0",
+	inquirer: "^6.2.0",
+	lowdb: "^1.0.0",
+	minimist: "^1.2.0",
+	opn: "^5.4.0",
+	ora: "^3.0.0",
+	request: "^2.88.0",
+	rimraf: "^2.6.3",
+	semver: "^5.6.0",
+	shelljs: "^0.8.3",
+	tmp: "^0.0.33",
+	"update-check": "^1.5.3",
+	uuid: "^3.3.2",
+	yargs: "^12.0.5",
+	"zip-a-folder": "^0.0.7"
+};
+var devDependencies = {
+	"@babel/cli": "^7.2.3",
+	"@babel/core": "^7.2.2",
+	"@babel/node": "^7.2.2",
+	"@babel/plugin-proposal-class-properties": "^7.3.0",
+	"@babel/plugin-proposal-object-rest-spread": "^7.3.1",
+	"@babel/plugin-transform-runtime": "^7.2.0",
+	"@babel/preset-env": "^7.3.1",
+	"babel-loader": "^8.0.5",
+	"babel-plugin-transform-runtime": "^6.23.0",
+	eslint: "^5.12.1",
+	"eslint-config-airbnb": "^17.1.0",
+	"eslint-plugin-import": "^2.15.0",
+	"eslint-plugin-jsx-a11y": "^6.1.2",
+	"eslint-plugin-react": "^7.12.4",
+	nodemon: "^1.18.9",
+	np: "^4.0.1",
+	rollup: "^1.1.2",
+	"rollup-plugin-babel": "^4.3.2",
+	"rollup-plugin-json": "^3.1.0",
+	"rollup-plugin-node-resolve": "^4.0.0",
+	webpack: "^4.29.0",
+	"webpack-cli": "^3.2.1"
+};
+var pkg = {
+	name: name,
+	version: version,
+	description: description,
+	scripts: scripts,
+	preferGlobal: preferGlobal,
+	bin: bin,
+	author: author,
+	license: license,
+	dependencies: dependencies,
+	devDependencies: devDependencies
+};
+
+var checkForUpdate = (function () {
+  return new Promise(function (resolve, reject) {
+    request('https://api.npms.io/v2/package/@electronforconstruct%2fcli', {
+      json: true
+    }, function (error, response, body) {
+      if (error) reject(error);
+      var metadata = body.collected.metadata;
+      if (semver.lt(pkg.version, metadata.version)) resolve(metadata);
+      resolve(false);
+    });
+  });
+});
 
 var isDev = process.env.NODE_ENV !== 'production';
 
@@ -56,28 +147,53 @@ function _asyncToGenerator(fn) {
   };
 }
 
-var installDeps = function installDeps() {
-  var spinner = ora('Installing dependencies... This may take a while, relax and take a coffe').start();
-  var npm = process$1.platform === 'win32' ? 'npm.cmd' : 'npm';
-  var npmstart = child_process.spawn(npm, ['install', '--no-package-lock']);
-  /* , {
-  stdio: 'inherit',
-  cwd: process.cwd(),
-  detached: true,
-  }); */
+var installDeps =
+/*#__PURE__*/
+function () {
+  var _ref = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee() {
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            return _context.abrupt("return", new Promise(function (resolve) {
+              var spinner = ora('Installing dependencies... This may take a while, relax and take a coffe').start();
+              var npm = process$1.platform === 'win32' ? 'npm.cmd' : 'npm';
+              var npmstart = child_process.spawn(npm, ['install', '--no-package-lock']);
+              /* , {
+              stdio: 'inherit',
+              cwd: process.cwd(),
+              detached: true,
+              }); */
 
-  npmstart.stdout.on('data', function (data) {
-    spinner.text = data.toString();
-  });
-  npmstart.stderr.on('data', function (data) {
-    spinner.warn("Error: ".concat(data.toString())).start();
-  });
-  npmstart.on('exit', function ()
-  /* code */
-  {
-    spinner.succeed('Dependencies successfully installed');
-  });
-};
+              npmstart.stdout.on('data', function (data) {
+                spinner.text = data.toString();
+              });
+              npmstart.stderr.on('data', function (data) {
+                spinner.warn("Error: ".concat(data.toString())).start();
+              });
+              npmstart.on('exit', function ()
+              /* code */
+              {
+                spinner.succeed('Dependencies successfully installed');
+                resolve(true);
+              });
+            }));
+
+          case 1:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee, this);
+  }));
+
+  return function installDeps() {
+    return _ref.apply(this, arguments);
+  };
+}();
+
 var startPreview = function startPreview(url) {
   console.log("Starting preview on \"".concat(url, "\""));
   var npmstart = child_process.exec("npm run start -- ".concat(url), {
@@ -93,44 +209,46 @@ var startPreview = function startPreview(url) {
     console.log("Electron exited: ".concat(code.toString()));
   });
 };
+
 var previewC2 =
-/*#__PURE__*/
-function () {
-  var _ref = _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee() {
-    return regeneratorRuntime.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            console.log('To preview a Construct 2 project, please follow instructions here: https://github.com/ElectronForConstruct/template');
-
-          case 1:
-          case "end":
-            return _context.stop();
-        }
-      }
-    }, _callee, this);
-  }));
-
-  return function previewC2() {
-    return _ref.apply(this, arguments);
-  };
-}();
-var previewC3 =
 /*#__PURE__*/
 function () {
   var _ref2 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee2() {
-    var answers;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
+            console.log('To preview a Construct 2 project, please follow instructions here: https://github.com/ElectronForConstruct/template');
+
+          case 1:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, _callee2, this);
+  }));
+
+  return function previewC2() {
+    return _ref2.apply(this, arguments);
+  };
+}();
+
+var previewC3 =
+/*#__PURE__*/
+function () {
+  var _ref3 = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee3() {
+    var answers;
+    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
             console.log('To preview your Construct 3 project in Electron, you need a valid subscription to Construct 3');
             console.log('Then, go to the preview menu and hit "Remote preview" and paste the link that appear here');
-            _context2.next = 4;
+            _context3.next = 4;
             return enquirer.prompt([{
               type: 'input',
               name: 'url',
@@ -147,24 +265,26 @@ function () {
             }]);
 
           case 4:
-            answers = _context2.sent;
+            answers = _context3.sent;
             startPreview(answers.url);
 
           case 6:
           case "end":
-            return _context2.stop();
+            return _context3.stop();
         }
       }
-    }, _callee2, this);
+    }, _callee3, this);
   }));
 
   return function previewC3() {
-    return _ref2.apply(this, arguments);
+    return _ref3.apply(this, arguments);
   };
 }();
+
 var showHelp = function showHelp() {
   console.log('To get help, please refer to this link: https://github.com/ElectronForConstruct/template');
 };
+
 var reportAnIssue = function reportAnIssue() {
   var msg = "\nConfiguration:\n- OS: ".concat(os.platform(), "\n- Arch: ").concat(os.arch(), "\n\nSteps to reproduce: \n- \n  ").trim();
   opn("https://github.com/ElectronForConstruct/preview/issues/new?body=".concat(encodeURI(msg)));
@@ -173,14 +293,14 @@ var reportAnIssue = function reportAnIssue() {
 var downloadPreview =
 /*#__PURE__*/
 function () {
-  var _ref3 = _asyncToGenerator(
+  var _ref4 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee3(fullPath) {
-    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+  regeneratorRuntime.mark(function _callee4(fullPath) {
+    return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
-        switch (_context3.prev = _context3.next) {
+        switch (_context4.prev = _context4.next) {
           case 0:
-            return _context3.abrupt("return", new Promise(function (resolve) {
+            return _context4.abrupt("return", new Promise(function (resolve) {
               request({
                 url: 'https://api.github.com/repos/ElectronForConstruct/preview/releases/latest',
                 headers: {
@@ -199,29 +319,110 @@ function () {
 
           case 1:
           case "end":
-            return _context3.stop();
+            return _context4.stop();
         }
       }
-    }, _callee3, this);
+    }, _callee4, this);
   }));
 
   return function downloadPreview(_x) {
-    return _ref3.apply(this, arguments);
+    return _ref4.apply(this, arguments);
+  };
+}();
+
+var downloadTemplate =
+/*#__PURE__*/
+function () {
+  var _ref5 = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee6(fullPath) {
+    var branch,
+        _args6 = arguments;
+    return regeneratorRuntime.wrap(function _callee6$(_context6) {
+      while (1) {
+        switch (_context6.prev = _context6.next) {
+          case 0:
+            branch = _args6.length > 1 && _args6[1] !== undefined ? _args6[1] : 'develop';
+            return _context6.abrupt("return", new Promise(function (resolve) {
+              ghdownload({
+                user: 'ElectronForConstruct',
+                repo: 'template',
+                ref: branch
+              }, fullPath).on('error', function (err) {
+                console.error('err', err);
+              }).on('end',
+              /*#__PURE__*/
+              _asyncToGenerator(
+              /*#__PURE__*/
+              regeneratorRuntime.mark(function _callee5() {
+                return regeneratorRuntime.wrap(function _callee5$(_context5) {
+                  while (1) {
+                    switch (_context5.prev = _context5.next) {
+                      case 0:
+                        if (!(process$1.platform === 'win32')) {
+                          _context5.next = 3;
+                          break;
+                        }
+
+                        _context5.next = 3;
+                        return downloadPreview(fullPath);
+
+                      case 3:
+                        resolve(true);
+
+                      case 4:
+                      case "end":
+                        return _context5.stop();
+                    }
+                  }
+                }, _callee5, this);
+              })));
+            }));
+
+          case 2:
+          case "end":
+            return _context6.stop();
+        }
+      }
+    }, _callee6, this);
+  }));
+
+  return function downloadTemplate(_x2) {
+    return _ref5.apply(this, arguments);
   };
 }();
 
 var generateElectronProject =
 /*#__PURE__*/
 function () {
-  var _ref4 = _asyncToGenerator(
+  var _ref7 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee5() {
-    var dir, questions, answers, fullPath, spinner;
-    return regeneratorRuntime.wrap(function _callee5$(_context5) {
+  regeneratorRuntime.mark(function _callee7() {
+    var projectName,
+        answers,
+        dir,
+        name,
+        questions,
+        _answers,
+        fullPath,
+        spinner,
+        _args7 = arguments;
+
+    return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
-        switch (_context5.prev = _context5.next) {
+        switch (_context7.prev = _context7.next) {
           case 0:
+            projectName = _args7.length > 0 && _args7[0] !== undefined ? _args7[0] : null;
+            answers = {};
             dir = process$1.cwd();
+            name = projectName;
+            _context7.prev = 4;
+
+            if (projectName) {
+              _context7.next = 12;
+              break;
+            }
+
             questions = {
               type: 'input',
               name: 'name',
@@ -229,101 +430,125 @@ function () {
               initial: function initial() {
                 return 'MyGame';
               },
-              format: function format(name) {
-                return path.join(dir, name);
+              format: function format(typedName) {
+                return path.join(dir, typedName);
               },
-              validate: function validate(name) {
-                if (fs.existsSync(path.join(dir, name))) {
+              validate: function validate(typedName) {
+                if (fs.existsSync(path.join(dir, typedName))) {
                   return 'This path already exist!';
                 }
 
                 return true;
               }
             };
-            answers = {};
-            _context5.prev = 3;
-            _context5.next = 6;
+            _context7.next = 9;
             return enquirer.prompt(questions);
 
-          case 6:
-            answers = _context5.sent;
-            fullPath = path.join(dir, answers.name);
-            spinner = ora('Downloading template...').start();
-            ghdownload({
-              user: 'ElectronForConstruct',
-              repo: 'template',
-              ref: 'develop'
-            }, fullPath).on('dir', function ()
-            /* dir */
-            {// onsole.log('dir', dir);
-            }).on('file', function ()
-            /* file */
-            {// console.log('file', file);
-            }) // only emitted if Github API limit is reached and the zip file is downloaded
-            .on('zip', function ()
-            /* zipUrl */
-            {// console.log('zipUrl', zipUrl);
-            }).on('error', function (err) {
-              console.error('err', err);
-            }).on('end',
-            /*#__PURE__*/
-            _asyncToGenerator(
-            /*#__PURE__*/
-            regeneratorRuntime.mark(function _callee4() {
-              return regeneratorRuntime.wrap(function _callee4$(_context4) {
-                while (1) {
-                  switch (_context4.prev = _context4.next) {
-                    case 0:
-                      if (!(process$1.platform === 'win32')) {
-                        _context4.next = 3;
-                        break;
-                      }
-
-                      _context4.next = 3;
-                      return downloadPreview(fullPath);
-
-                    case 3:
-                      spinner.succeed('Downloaded');
-                      console.log("\nYou can now go to your project by using \"cd ".concat(answers.name, "\" and install dependencies with either \"npm install\" or \"yarn install\"\n"));
-
-                    case 5:
-                    case "end":
-                      return _context4.stop();
-                  }
-                }
-              }, _callee4, this);
-            })));
-            _context5.next = 15;
-            break;
+          case 9:
+            answers = _context7.sent;
+            _answers = answers;
+            name = _answers.name;
 
           case 12:
-            _context5.prev = 12;
-            _context5.t0 = _context5["catch"](3);
+            fullPath = path.join(dir, name);
+            spinner = ora('Downloading template...').start();
+            _context7.next = 16;
+            return downloadTemplate(fullPath);
+
+          case 16:
+            spinner.succeed('Downloaded');
+            if (!projectName) console.log("\nYou can now go to your project by using \"cd ".concat(name, "\" and install dependencies with either \"npm install\" or \"yarn install\"\n"));
+            _context7.next = 23;
+            break;
+
+          case 20:
+            _context7.prev = 20;
+            _context7.t0 = _context7["catch"](4);
             console.log('Aborted');
 
-          case 15:
+          case 23:
           case "end":
-            return _context5.stop();
+            return _context7.stop();
         }
       }
-    }, _callee5, this, [[3, 12]]);
+    }, _callee7, this, [[4, 20]]);
   }));
 
   return function generateElectronProject() {
-    return _ref4.apply(this, arguments);
+    return _ref7.apply(this, arguments);
   };
 }();
+
+var updateApp =
+/*#__PURE__*/
+function () {
+  var _ref8 = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee8() {
+    var folderName, fullDirectoryPath, tmpobj;
+    return regeneratorRuntime.wrap(function _callee8$(_context8) {
+      while (1) {
+        switch (_context8.prev = _context8.next) {
+          case 0:
+            tmp.setGracefulCleanup();
+            shelljs.set('-v');
+            folderName = path.basename(process$1.cwd());
+            fullDirectoryPath = path.join(process$1.cwd());
+            shelljs.cd('..'); // create a temporary directory for saving files
+
+            tmpobj = tmp.dirSync();
+            console.log('Creating temp directory: ', tmpobj.name); // move files to it (config.js + app folder)
+
+            shelljs.cp('-r', path.join(fullDirectoryPath, 'config.js'), path.join(fullDirectoryPath, 'app'), tmpobj.name);
+            console.log("Moving config.js + app folder to ".concat(tmpobj.name)); // make a backup
+            // shelljs.mv(`${fullDirectoryPath}/**`, `${fullDirectoryPath}_backup`);
+
+            _context8.next = 11;
+            return zip.zip(fullDirectoryPath, "".concat(fullDirectoryPath, ".zip"));
+
+          case 11:
+            console.log("Making a backup to ".concat(fullDirectoryPath, ".zip"));
+            rimraf(fullDirectoryPath, function (a, b, c) {
+              console.log(a, b, c);
+            });
+            console.log("Removing ".concat(folderName)); // remove folder
+            // shelljs.rm('-r', fullDirectoryPath);
+            // download new template
+            // await generateElectronProject(folderName);
+            // move new template files to old directory
+            // install deps
+            // move saved files in temp to old directory
+            // profit
+            // tmpobj.removeCallback();
+
+          case 14:
+          case "end":
+            return _context8.stop();
+        }
+      }
+    }, _callee8, this);
+  }));
+
+  return function updateApp() {
+    return _ref8.apply(this, arguments);
+  };
+}();
+
+var exit = function exit() {
+  return process$1.exit(0);
+}; // eslint-disable-next-line
+
 
 var showMenu =
 /*#__PURE__*/
 function () {
-  var _ref6 = _asyncToGenerator(
+  var _ref9 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee6() {
-    var dependenciesInstalled, isCorrectElectronFolder, choices, questions, answers;
-    return regeneratorRuntime.wrap(function _callee6$(_context6) {
+  regeneratorRuntime.mark(function _callee9() {
+    var dependenciesInstalled, isCorrectElectronFolder, choices, questions, answers, actions;
+    return regeneratorRuntime.wrap(function _callee9$(_context9) {
       while (1) {
-        switch (_context6.prev = _context6.next) {
+        switch (_context9.prev = _context9.next) {
           case 0:
             if (isDev && fs.existsSync('MyGame')) process$1.chdir('MyGame');
             dependenciesInstalled = true;
@@ -334,7 +559,7 @@ function () {
 
               if (!fs.existsSync('./node_modules')) {
                 dependenciesInstalled = false;
-                console.log("\n".concat(chalk.yellow('Oopsie! Dependencies are not installed!'), "\nPlease install them using ").concat(chalk.underline('npm install'), " or ").concat(chalk.underline('yarn install'), "\n\n"));
+                console.log("\n".concat(chalk.yellow('Whoops! Dependencies are not installed!'), "\nPlease install them using ").concat(chalk.underline('npm install'), " or ").concat(chalk.underline('yarn install'), "\n\n"));
               }
             }
 
@@ -344,24 +569,33 @@ function () {
               // and deps are installed
               if (dependenciesInstalled) {
                 choices.push({
-                  message: 'Preview C2',
-                  name: 0
-                }, {
-                  message: 'Preview C3',
-                  name: 1
-                });
+                  name: 'Preview with',
+                  disabled: '>',
+                  choices: [{
+                    name: 'Construct 2',
+                    value: 0
+                  }, {
+                    name: 'Construct 3',
+                    value: 1
+                  }]
+                }
+                /* {
+                  message: 'Update app',
+                  name: 7,
+                }, */
+                );
               } else {
                 // but deps not installed
                 choices.push({
-                  message: 'Install dependencies',
-                  name: 6
+                  name: 'Install dependencies',
+                  value: 6
                 });
               }
             } else {
               // if the folder i not a upported electron project
               choices.push({
-                message: 'Generate a new Electron project',
-                name: 2
+                name: 'Generate a new Electron project',
+                value: 2
               });
             }
 
@@ -369,112 +603,79 @@ function () {
               role: 'separator',
               value: chalk.dim('────')
             }, {
-              message: 'View help',
-              name: 3
+              name: 'View help',
+              value: 3
             }, {
-              message: 'Report an issue',
-              name: 4
+              name: 'Report an issue',
+              value: 4
             }, {
-              message: 'Exit',
-              name: 5
+              name: 'Donate',
+              value: 8
+            }, {
+              name: 'Exit',
+              value: 5
             });
             questions = {
               type: 'select',
               name: 'action',
               message: 'What do you want to do?',
-              choices: choices
+              choices: choices,
+              result: function result() {
+                return this.focused;
+              }
             };
             answers = {};
-            _context6.prev = 9;
-            _context6.next = 12;
+            _context9.prev = 9;
+            _context9.next = 12;
             return enquirer.prompt(questions);
 
           case 12:
-            answers = _context6.sent;
+            answers = _context9.sent;
+            actions = [[0, previewC2], [1, previewC3], [2, generateElectronProject], [3, showHelp], [4, reportAnIssue], [5, exit], [6, installDeps], [7, updateApp], [8, function () {
+              return opn('https://armaldio.xyz/#/donations');
+            }]];
+            _context9.next = 16;
+            return actions.find(function (a) {
+              return a[0] === answers.action.value;
+            })[1]();
 
-            if (isDev) {
-              console.log(answers);
-            } // override type if was not previously set
-
-
-            _context6.t0 = answers.action;
-            _context6.next = _context6.t0 === 0 ? 17 : _context6.t0 === 1 ? 19 : _context6.t0 === 2 ? 21 : _context6.t0 === 3 ? 23 : _context6.t0 === 4 ? 25 : _context6.t0 === 5 ? 27 : _context6.t0 === 6 ? 29 : 31;
+          case 16:
+            _context9.next = 21;
             break;
 
-          case 17:
-            previewC2();
-            return _context6.abrupt("break", 33);
-
-          case 19:
-            previewC3();
-            return _context6.abrupt("break", 33);
+          case 18:
+            _context9.prev = 18;
+            _context9.t0 = _context9["catch"](9);
+            console.log('Aborted:', _context9.t0);
 
           case 21:
-            generateElectronProject();
-            return _context6.abrupt("break", 33);
+            console.log('Happy with ElectronForConstruct ? ► Donate: https://armaldio.xyz/#/donations ♥');
 
-          case 23:
-            showHelp();
-            return _context6.abrupt("break", 33);
-
-          case 25:
-            reportAnIssue();
-            return _context6.abrupt("break", 33);
-
-          case 27:
-            process$1.exit(0);
-            return _context6.abrupt("break", 33);
-
-          case 29:
-            installDeps();
-            return _context6.abrupt("break", 33);
-
-          case 31:
-            console.log('unexpected case');
-            return _context6.abrupt("break", 33);
-
-          case 33:
-            _context6.next = 38;
-            break;
-
-          case 35:
-            _context6.prev = 35;
-            _context6.t1 = _context6["catch"](9);
-            console.log('Aborted');
-
-          case 38:
+          case 22:
           case "end":
-            return _context6.stop();
+            return _context9.stop();
         }
       }
-    }, _callee6, this, [[9, 35]]);
+    }, _callee9, this, [[9, 18]]);
   }));
 
   return function showMenu() {
-    return _ref6.apply(this, arguments);
+    return _ref9.apply(this, arguments);
   };
 }();
 
 if (isDev) {
   console.log('Running in developement mode');
 } else {
-  console.log("\n  ___ _        _                       \n | __| |___ __| |_ _ _ ___ _ _         \n | _|| / -_) _|  _| '_/ _ \\ ' \\        \n |___|_\\___\\__|\\__|_| \\___/_||_|       \n      / _|___ _ _                      \n     |  _/ _ \\ '_|                     \n   __|_| \\___/_|   _               _   \n  / __|___ _ _  __| |_ _ _ _  _ __| |_ \n | (__/ _ \\ ' \\(_-<  _| '_| || / _|  _|\n  \\___\\___/_||_/__/\\__|_|  \\_,_\\__|\\__|\n\n");
+  console.log("\n  ___ _        _                       \n | __| |___ __| |_ _ _ ___ _ _         \n | _|| / -_) _|  _| '_/ _ \\ ' \\        \n |___|_\\___\\__|\\__|_| \\___/_||_|       \n      / _|___ _ _                      \n     |  _/ _ \\ '_|                     \n   __|_| \\___/_|   _               _   \n  / __|___ _ _  __| |_ _ _ _  _ __| |_ \n | (__/ _ \\ ' \\(_-<  _| '_| || / _|  _|\n  \\___\\___/_||_/__/\\__|_|  \\_,_\\__|\\__|\n\n\n");
 }
 
-var config = {};
-/* if (argv[ 'preview-c3' ]) {
-  actions.startPreview(argv[ 'preview-c3' ]);
-  actions.beforeExit();
-} else if (argv[ '_' ][ 0 ]) {
-  const arg   = argv[ '_' ][ 0 ];
-  const regex =
-  /(https?:\/\/)?((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.)
-  {3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])|localhost):\d*\/?$/;
-  if (arg.match(regex)) {
-    actions.startPreview(arg);
-  } else {
-    console.log('Invalid url');
+checkForUpdate().then(function (update) {
+  if (update) {
+    console.log("\n  ".concat(chalk.redBright('You are using an outdated version of this tool'), "\n      \n  The latest version is ").concat(chalk.yellow.bold.underline(update.version), ".\n  Update using ").concat(chalk.reset.bold.underline("npm i -g ".concat(update.name)), "\n  \n  "));
   }
-} */
 
-showMenu(config);
+  showMenu();
+}).catch(function (e) {
+  console.error("Failed to check for updates: ".concat(e));
+});
