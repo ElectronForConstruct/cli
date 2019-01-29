@@ -3,7 +3,6 @@ import chalk from 'chalk';
 import checkForUpdate from './updateCheck';
 import isDev from './isDev';
 import { showMenu } from './actions';
-import { version } from '../package.json';
 
 if (isDev) {
   console.log('Running in developement mode');
@@ -30,7 +29,7 @@ checkForUpdate()
       console.log(`
   ${chalk.redBright('You are using an outdated version of this tool')}
       
-  The latest version is ${chalk.yellow.bold.underline(update.version)} (> ${version}).
+  The latest version is ${chalk.yellow.bold.underline(update.version)}.
   Update using ${chalk.reset.bold.underline(`npm i -g ${update.name}`)}
   
   `);

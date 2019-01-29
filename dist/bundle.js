@@ -24,7 +24,7 @@ var tmp = _interopDefault(require('tmp'));
 var shelljs = _interopDefault(require('shelljs'));
 
 var name = "@electronforconstruct/cli";
-var version = "1.0.7";
+var version = "1.0.10";
 var description = "A small utility to manage your Construct Electron projects";
 var scripts = {
 	build: "rollup -c",
@@ -282,6 +282,7 @@ function () {
 }();
 
 var showHelp = function showHelp() {
+  console.log("Version: ", pkg.version);
   console.log('To get help, please refer to this link: https://github.com/ElectronForConstruct/template');
 };
 
@@ -401,7 +402,7 @@ function () {
     var projectName,
         answers,
         dir,
-        name,
+        name$$1,
         questions,
         _answers,
         fullPath,
@@ -415,7 +416,7 @@ function () {
             projectName = _args7.length > 0 && _args7[0] !== undefined ? _args7[0] : null;
             answers = {};
             dir = process$1.cwd();
-            name = projectName;
+            name$$1 = projectName;
             _context7.prev = 4;
 
             if (projectName) {
@@ -447,17 +448,17 @@ function () {
           case 9:
             answers = _context7.sent;
             _answers = answers;
-            name = _answers.name;
+            name$$1 = _answers.name;
 
           case 12:
-            fullPath = path.join(dir, name);
+            fullPath = path.join(dir, name$$1);
             spinner = ora('Downloading template...').start();
             _context7.next = 16;
             return downloadTemplate(fullPath);
 
           case 16:
             spinner.succeed('Downloaded');
-            if (!projectName) console.log("\nYou can now go to your project by using \"cd ".concat(name, "\" and install dependencies with either \"npm install\" or \"yarn install\"\n"));
+            if (!projectName) console.log("\nYou can now go to your project by using \"cd ".concat(name$$1, "\" and install dependencies with either \"npm install\" or \"yarn install\"\n"));
             _context7.next = 23;
             break;
 

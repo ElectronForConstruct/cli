@@ -13,6 +13,7 @@ import chalk from 'chalk';
 import process from 'process';
 import tmp from 'tmp';
 import shelljs from 'shelljs';
+import pkg from '../package.json';
 import isDev from './isDev';
 
 const installDeps = async () => new Promise((resolve) => {
@@ -84,6 +85,7 @@ const previewC3 = async () => {
 };
 
 const showHelp = () => {
+  console.log("Version: ", pkg.version);
   console.log('To get help, please refer to this link: https://github.com/ElectronForConstruct/template');
 };
 
