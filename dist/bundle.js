@@ -21,10 +21,11 @@ var ghdownload = _interopDefault(require('github-download'));
 var ora = _interopDefault(require('ora'));
 var process$1 = _interopDefault(require('process'));
 var tmp = _interopDefault(require('tmp'));
+var eb = require('electron-builder');
 var shelljs = _interopDefault(require('shelljs'));
 
 var name = "@electronforconstruct/cli";
-var version = "1.0.10";
+var version = "1.0.11";
 var description = "A small utility to manage your Construct Electron projects";
 var scripts = {
 	build: "rollup -c",
@@ -42,6 +43,7 @@ var dependencies = {
 	"@babel/polyfill": "^7.2.5",
 	"@babel/runtime": "^7.3.1",
 	chalk: "^2.4.2",
+	"electron-builder": "^20.38.5",
 	enquirer: "^2.3.0",
 	"github-download": "^0.5.0",
 	inquirer: "^6.2.0",
@@ -282,7 +284,7 @@ function () {
 }();
 
 var showHelp = function showHelp() {
-  console.log("Version: ", pkg.version);
+  console.log('Version: ', pkg.version);
   console.log('To get help, please refer to this link: https://github.com/ElectronForConstruct/template');
 };
 
@@ -486,15 +488,15 @@ function () {
   var _ref8 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee8() {
-    var folderName, fullDirectoryPath, tmpobj;
+    var fullDirectoryPath, folderName, tmpobj;
     return regeneratorRuntime.wrap(function _callee8$(_context8) {
       while (1) {
         switch (_context8.prev = _context8.next) {
           case 0:
             tmp.setGracefulCleanup();
             shelljs.set('-v');
+            fullDirectoryPath = process$1.cwd();
             folderName = path.basename(process$1.cwd());
-            fullDirectoryPath = path.join(process$1.cwd());
             shelljs.cd('..'); // create a temporary directory for saving files
 
             tmpobj = tmp.dirSync();
@@ -537,19 +539,70 @@ function () {
 
 var exit = function exit() {
   return process$1.exit(0);
-}; // eslint-disable-next-line
+};
 
-
-var showMenu =
+var build =
 /*#__PURE__*/
 function () {
   var _ref9 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee9() {
-    var dependenciesInstalled, isCorrectElectronFolder, choices, questions, answers, actions;
+    var config, result;
     return regeneratorRuntime.wrap(function _callee9$(_context9) {
       while (1) {
         switch (_context9.prev = _context9.next) {
+          case 0:
+            if (!(!fs.existsSync(path.join(process$1.cwd(), 'app', 'data.js')) && !fs.existsSync(path.join(process$1.cwd(), 'app', 'data.json')))) {
+              _context9.next = 4;
+              break;
+            }
+
+            console.warn('It seems that there ins\'t any Construct game inside the app folder. Did you forgot to export ?');
+            _context9.next = 15;
+            break;
+
+          case 4:
+            _context9.prev = 4;
+            // eslint-disable-next-line
+            config = require(path.join(process$1.cwd(), 'config.js'));
+            _context9.next = 8;
+            return eb.build(config.buil);
+
+          case 8:
+            result = _context9.sent;
+            console.log(result);
+            _context9.next = 15;
+            break;
+
+          case 12:
+            _context9.prev = 12;
+            _context9.t0 = _context9["catch"](4);
+            console.log('There was an error building your project:', _context9.t0);
+
+          case 15:
+          case "end":
+            return _context9.stop();
+        }
+      }
+    }, _callee9, this, [[4, 12]]);
+  }));
+
+  return function build() {
+    return _ref9.apply(this, arguments);
+  };
+}(); // eslint-disable-next-line
+
+
+var showMenu =
+/*#__PURE__*/
+function () {
+  var _ref10 = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee10() {
+    var dependenciesInstalled, isCorrectElectronFolder, choices, questions, answers, actions;
+    return regeneratorRuntime.wrap(function _callee10$(_context10) {
+      while (1) {
+        switch (_context10.prev = _context10.next) {
           case 0:
             if (isDev && fs.existsSync('MyGame')) process$1.chdir('MyGame');
             dependenciesInstalled = true;
@@ -579,6 +632,9 @@ function () {
                     name: 'Construct 3',
                     value: 1
                   }]
+                }, {
+                  name: 'Build',
+                  value: 9
                 }
                 /* {
                   message: 'Update app',
@@ -588,8 +644,9 @@ function () {
               } else {
                 // but deps not installed
                 choices.push({
-                  name: 'Install dependencies',
-                  value: 6
+                  name: 'Dependencies must be installed first!',
+                  value: 6,
+                  disabled: true
                 });
               }
             } else {
@@ -626,42 +683,42 @@ function () {
               }
             };
             answers = {};
-            _context9.prev = 9;
-            _context9.next = 12;
+            _context10.prev = 9;
+            _context10.next = 12;
             return enquirer.prompt(questions);
 
           case 12:
-            answers = _context9.sent;
+            answers = _context10.sent;
             actions = [[0, previewC2], [1, previewC3], [2, generateElectronProject], [3, showHelp], [4, reportAnIssue], [5, exit], [6, installDeps], [7, updateApp], [8, function () {
               return opn('https://armaldio.xyz/#/donations');
-            }]];
-            _context9.next = 16;
+            }], [9, build]];
+            _context10.next = 16;
             return actions.find(function (a) {
               return a[0] === answers.action.value;
             })[1]();
 
           case 16:
-            _context9.next = 21;
+            _context10.next = 21;
             break;
 
           case 18:
-            _context9.prev = 18;
-            _context9.t0 = _context9["catch"](9);
-            console.log('Aborted:', _context9.t0);
+            _context10.prev = 18;
+            _context10.t0 = _context10["catch"](9);
+            console.log('Aborted:', _context10.t0);
 
           case 21:
             console.log('Happy with ElectronForConstruct ? ► Donate: https://armaldio.xyz/#/donations ♥');
 
           case 22:
           case "end":
-            return _context9.stop();
+            return _context10.stop();
         }
       }
-    }, _callee9, this, [[9, 18]]);
+    }, _callee10, this, [[9, 18]]);
   }));
 
   return function showMenu() {
-    return _ref9.apply(this, arguments);
+    return _ref10.apply(this, arguments);
   };
 }();
 

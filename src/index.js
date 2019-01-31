@@ -4,6 +4,8 @@ import checkForUpdate from './updateCheck';
 import isDev from './isDev';
 import { showMenu } from './actions';
 
+// TODO https://bili.egoist.sh/#/
+
 if (isDev) {
   console.log('Running in developement mode');
 } else {

@@ -12,6 +12,7 @@ import ora from 'ora';
 import chalk from 'chalk';
 import process from 'process';
 import tmp from 'tmp';
+import * as eb from 'electron-builder';
 import shelljs from 'shelljs';
 import pkg from '../package.json';
 import isDev from './isDev';
@@ -85,7 +86,7 @@ const previewC3 = async () => {
 };
 
 const showHelp = () => {
-  console.log("Version: ", pkg.version);
+  console.log('Version: ', pkg.version);
   console.log('To get help, please refer to this link: https://github.com/ElectronForConstruct/template');
 };
 
@@ -179,8 +180,8 @@ const updateApp = async () => {
   tmp.setGracefulCleanup();
   shelljs.set('-v');
 
+  const fullDirectoryPath = process.cwd();
   const folderName = path.basename(process.cwd());
-  const fullDirectoryPath = path.join(process.cwd());
 
   shelljs.cd('..');
 
@@ -219,6 +220,23 @@ const updateApp = async () => {
 };
 
 const exit = () => process.exit(0);
+
+const build = async () => {
+  if (
+    !fs.existsSync(path.join(process.cwd(), 'app', 'data.js'))
+    && !fs.existsSync(path.join(process.cwd(), 'app', 'data.json'))) {
+    console.warn('It seems that there ins\'t any Construct game inside the app folder. Did you forgot to export ?');
+  } else {
+    try {
+      // eslint-disable-next-line
+      const config = require(path.join(process.cwd(), 'config.js'));
+      const result = await eb.build(config.buil);
+      console.log(result);
+    } catch (e) {
+      console.log('There was an error building your project:', e);
+    }
+  }
+};
 
 // eslint-disable-next-line
 export const showMenu = async () => {
@@ -268,6 +286,10 @@ Please install them using ${chalk.underline('npm install')} or ${chalk.underline
             },
           ],
         },
+        {
+          name: 'Build',
+          value: 9,
+        },
         /* {
           message: 'Update app',
           name: 7,
@@ -277,8 +299,9 @@ Please install them using ${chalk.underline('npm install')} or ${chalk.underline
       // but deps not installed
       choices.push(
         {
-          name: 'Install dependencies',
+          name: 'Dependencies must be installed first!',
           value: 6,
+          disabled: true,
         },
       );
     }
@@ -338,6 +361,7 @@ Please install them using ${chalk.underline('npm install')} or ${chalk.underline
       [6, installDeps],
       [7, updateApp],
       [8, () => opn('https://armaldio.xyz/#/donations')],
+      [9, build],
     ];
 
     await actions.find(a => a[0] === answers.action.value)[1]();

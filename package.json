@@ -1,6 +1,6 @@
 {
   "name": "@electronforconstruct/cli",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "A small utility to manage your Construct Electron projects",
   "scripts": {
     "build": "rollup -c",
@@ -18,6 +18,7 @@
     "@babel/polyfill": "^7.2.5",
     "@babel/runtime": "^7.3.1",
     "chalk": "^2.4.2",
+    "electron-builder": "^20.38.5",
     "enquirer": "^2.3.0",
     "github-download": "^0.5.0",
     "inquirer": "^6.2.0",
