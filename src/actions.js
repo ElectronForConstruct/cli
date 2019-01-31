@@ -17,10 +17,11 @@ import shelljs from 'shelljs';
 import pkg from '../package.json';
 import isDev from './isDev';
 
+const npm = (process.platform === 'win32' ? 'npm.cmd' : 'npm');
+
 const installDeps = async () => new Promise((resolve) => {
   const spinner = ora('Installing dependencies... This may take a while, relax and take a coffe').start();
 
-  const npm = (process.platform === 'win32' ? 'npm.cmd' : 'npm');
   const npmstart = spawn(npm, ['install', '--no-package-lock']); /* , {
     stdio: 'inherit',
     cwd: process.cwd(),
@@ -44,7 +45,10 @@ const installDeps = async () => new Promise((resolve) => {
 const startPreview = (url) => {
   console.log(`Starting preview on "${url}"`);
 
-  const npmstart = exec(`npm run start -- ${url}`, {
+  let command;
+  if (url) { command = `${npm} run start -- ${url}`; } else { command = `${npm} run start`; }
+
+  const npmstart = exec(command, {
     cwd: process.cwd(),
   });
 
@@ -59,6 +63,10 @@ const startPreview = (url) => {
   npmstart.on('exit', (code) => {
     console.log(`Electron exited: ${code.toString()}`);
   });
+};
+
+const previewAppFolder = async () => {
+  startPreview();
 };
 
 const previewC2 = async () => {
@@ -284,6 +292,10 @@ Please install them using ${chalk.underline('npm install')} or ${chalk.underline
               name: 'Construct 3',
               value: 1,
             },
+            {
+              name: 'Currently exported project',
+              value: 10,
+            },
           ],
         },
         {
@@ -362,6 +374,7 @@ Please install them using ${chalk.underline('npm install')} or ${chalk.underline
       [7, updateApp],
       [8, () => opn('https://armaldio.xyz/#/donations')],
       [9, build],
+      [10, previewAppFolder],
     ];
 
     await actions.find(a => a[0] === answers.action.value)[1]();

@@ -25,7 +25,7 @@ var eb = require('electron-builder');
 var shelljs = _interopDefault(require('shelljs'));
 
 var name = "@electronforconstruct/cli";
-var version = "1.0.11";
+var version = "1.0.12";
 var description = "A small utility to manage your Construct Electron projects";
 var scripts = {
 	build: "rollup -c",
@@ -149,6 +149,8 @@ function _asyncToGenerator(fn) {
   };
 }
 
+var npm = process$1.platform === 'win32' ? 'npm.cmd' : 'npm';
+
 var installDeps =
 /*#__PURE__*/
 function () {
@@ -161,7 +163,6 @@ function () {
           case 0:
             return _context.abrupt("return", new Promise(function (resolve) {
               var spinner = ora('Installing dependencies... This may take a while, relax and take a coffe').start();
-              var npm = process$1.platform === 'win32' ? 'npm.cmd' : 'npm';
               var npmstart = child_process.spawn(npm, ['install', '--no-package-lock']);
               /* , {
               stdio: 'inherit',
@@ -198,7 +199,15 @@ function () {
 
 var startPreview = function startPreview(url) {
   console.log("Starting preview on \"".concat(url, "\""));
-  var npmstart = child_process.exec("npm run start -- ".concat(url), {
+  var command;
+
+  if (url) {
+    command = "".concat(npm, " run start -- ").concat(url);
+  } else {
+    command = "".concat(npm, " run start");
+  }
+
+  var npmstart = child_process.exec(command, {
     cwd: process$1.cwd()
   });
   npmstart.stdout.on('data', function (data) {
@@ -212,7 +221,7 @@ var startPreview = function startPreview(url) {
   });
 };
 
-var previewC2 =
+var previewAppFolder =
 /*#__PURE__*/
 function () {
   var _ref2 = _asyncToGenerator(
@@ -222,7 +231,7 @@ function () {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            console.log('To preview a Construct 2 project, please follow instructions here: https://github.com/ElectronForConstruct/template');
+            startPreview();
 
           case 1:
           case "end":
@@ -232,25 +241,50 @@ function () {
     }, _callee2, this);
   }));
 
-  return function previewC2() {
+  return function previewAppFolder() {
     return _ref2.apply(this, arguments);
+  };
+}();
+
+var previewC2 =
+/*#__PURE__*/
+function () {
+  var _ref3 = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee3() {
+    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            console.log('To preview a Construct 2 project, please follow instructions here: https://github.com/ElectronForConstruct/template');
+
+          case 1:
+          case "end":
+            return _context3.stop();
+        }
+      }
+    }, _callee3, this);
+  }));
+
+  return function previewC2() {
+    return _ref3.apply(this, arguments);
   };
 }();
 
 var previewC3 =
 /*#__PURE__*/
 function () {
-  var _ref3 = _asyncToGenerator(
+  var _ref4 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee3() {
+  regeneratorRuntime.mark(function _callee4() {
     var answers;
-    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+    return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
-        switch (_context3.prev = _context3.next) {
+        switch (_context4.prev = _context4.next) {
           case 0:
             console.log('To preview your Construct 3 project in Electron, you need a valid subscription to Construct 3');
             console.log('Then, go to the preview menu and hit "Remote preview" and paste the link that appear here');
-            _context3.next = 4;
+            _context4.next = 4;
             return enquirer.prompt([{
               type: 'input',
               name: 'url',
@@ -267,19 +301,19 @@ function () {
             }]);
 
           case 4:
-            answers = _context3.sent;
+            answers = _context4.sent;
             startPreview(answers.url);
 
           case 6:
           case "end":
-            return _context3.stop();
+            return _context4.stop();
         }
       }
-    }, _callee3, this);
+    }, _callee4, this);
   }));
 
   return function previewC3() {
-    return _ref3.apply(this, arguments);
+    return _ref4.apply(this, arguments);
   };
 }();
 
@@ -296,14 +330,14 @@ var reportAnIssue = function reportAnIssue() {
 var downloadPreview =
 /*#__PURE__*/
 function () {
-  var _ref4 = _asyncToGenerator(
+  var _ref5 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee4(fullPath) {
-    return regeneratorRuntime.wrap(function _callee4$(_context4) {
+  regeneratorRuntime.mark(function _callee5(fullPath) {
+    return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
-        switch (_context4.prev = _context4.next) {
+        switch (_context5.prev = _context5.next) {
           case 0:
-            return _context4.abrupt("return", new Promise(function (resolve) {
+            return _context5.abrupt("return", new Promise(function (resolve) {
               request({
                 url: 'https://api.github.com/repos/ElectronForConstruct/preview/releases/latest',
                 headers: {
@@ -322,31 +356,31 @@ function () {
 
           case 1:
           case "end":
-            return _context4.stop();
+            return _context5.stop();
         }
       }
-    }, _callee4, this);
+    }, _callee5, this);
   }));
 
   return function downloadPreview(_x) {
-    return _ref4.apply(this, arguments);
+    return _ref5.apply(this, arguments);
   };
 }();
 
 var downloadTemplate =
 /*#__PURE__*/
 function () {
-  var _ref5 = _asyncToGenerator(
+  var _ref6 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee6(fullPath) {
+  regeneratorRuntime.mark(function _callee7(fullPath) {
     var branch,
-        _args6 = arguments;
-    return regeneratorRuntime.wrap(function _callee6$(_context6) {
+        _args7 = arguments;
+    return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
-        switch (_context6.prev = _context6.next) {
+        switch (_context7.prev = _context7.next) {
           case 0:
-            branch = _args6.length > 1 && _args6[1] !== undefined ? _args6[1] : 'develop';
-            return _context6.abrupt("return", new Promise(function (resolve) {
+            branch = _args7.length > 1 && _args7[1] !== undefined ? _args7[1] : 'develop';
+            return _context7.abrupt("return", new Promise(function (resolve) {
               ghdownload({
                 user: 'ElectronForConstruct',
                 repo: 'template',
@@ -357,17 +391,17 @@ function () {
               /*#__PURE__*/
               _asyncToGenerator(
               /*#__PURE__*/
-              regeneratorRuntime.mark(function _callee5() {
-                return regeneratorRuntime.wrap(function _callee5$(_context5) {
+              regeneratorRuntime.mark(function _callee6() {
+                return regeneratorRuntime.wrap(function _callee6$(_context6) {
                   while (1) {
-                    switch (_context5.prev = _context5.next) {
+                    switch (_context6.prev = _context6.next) {
                       case 0:
                         if (!(process$1.platform === 'win32')) {
-                          _context5.next = 3;
+                          _context6.next = 3;
                           break;
                         }
 
-                        _context5.next = 3;
+                        _context6.next = 3;
                         return downloadPreview(fullPath);
 
                       case 3:
@@ -375,32 +409,32 @@ function () {
 
                       case 4:
                       case "end":
-                        return _context5.stop();
+                        return _context6.stop();
                     }
                   }
-                }, _callee5, this);
+                }, _callee6, this);
               })));
             }));
 
           case 2:
           case "end":
-            return _context6.stop();
+            return _context7.stop();
         }
       }
-    }, _callee6, this);
+    }, _callee7, this);
   }));
 
   return function downloadTemplate(_x2) {
-    return _ref5.apply(this, arguments);
+    return _ref6.apply(this, arguments);
   };
 }();
 
 var generateElectronProject =
 /*#__PURE__*/
 function () {
-  var _ref7 = _asyncToGenerator(
+  var _ref8 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee7() {
+  regeneratorRuntime.mark(function _callee8() {
     var projectName,
         answers,
         dir,
@@ -409,20 +443,20 @@ function () {
         _answers,
         fullPath,
         spinner,
-        _args7 = arguments;
+        _args8 = arguments;
 
-    return regeneratorRuntime.wrap(function _callee7$(_context7) {
+    return regeneratorRuntime.wrap(function _callee8$(_context8) {
       while (1) {
-        switch (_context7.prev = _context7.next) {
+        switch (_context8.prev = _context8.next) {
           case 0:
-            projectName = _args7.length > 0 && _args7[0] !== undefined ? _args7[0] : null;
+            projectName = _args8.length > 0 && _args8[0] !== undefined ? _args8[0] : null;
             answers = {};
             dir = process$1.cwd();
             name$$1 = projectName;
-            _context7.prev = 4;
+            _context8.prev = 4;
 
             if (projectName) {
-              _context7.next = 12;
+              _context8.next = 12;
               break;
             }
 
@@ -444,54 +478,54 @@ function () {
                 return true;
               }
             };
-            _context7.next = 9;
+            _context8.next = 9;
             return enquirer.prompt(questions);
 
           case 9:
-            answers = _context7.sent;
+            answers = _context8.sent;
             _answers = answers;
             name$$1 = _answers.name;
 
           case 12:
             fullPath = path.join(dir, name$$1);
             spinner = ora('Downloading template...').start();
-            _context7.next = 16;
+            _context8.next = 16;
             return downloadTemplate(fullPath);
 
           case 16:
             spinner.succeed('Downloaded');
             if (!projectName) console.log("\nYou can now go to your project by using \"cd ".concat(name$$1, "\" and install dependencies with either \"npm install\" or \"yarn install\"\n"));
-            _context7.next = 23;
+            _context8.next = 23;
             break;
 
           case 20:
-            _context7.prev = 20;
-            _context7.t0 = _context7["catch"](4);
+            _context8.prev = 20;
+            _context8.t0 = _context8["catch"](4);
             console.log('Aborted');
 
           case 23:
           case "end":
-            return _context7.stop();
+            return _context8.stop();
         }
       }
-    }, _callee7, this, [[4, 20]]);
+    }, _callee8, this, [[4, 20]]);
   }));
 
   return function generateElectronProject() {
-    return _ref7.apply(this, arguments);
+    return _ref8.apply(this, arguments);
   };
 }();
 
 var updateApp =
 /*#__PURE__*/
 function () {
-  var _ref8 = _asyncToGenerator(
+  var _ref9 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee8() {
+  regeneratorRuntime.mark(function _callee9() {
     var fullDirectoryPath, folderName, tmpobj;
-    return regeneratorRuntime.wrap(function _callee8$(_context8) {
+    return regeneratorRuntime.wrap(function _callee9$(_context9) {
       while (1) {
-        switch (_context8.prev = _context8.next) {
+        switch (_context9.prev = _context9.next) {
           case 0:
             tmp.setGracefulCleanup();
             shelljs.set('-v');
@@ -506,7 +540,7 @@ function () {
             console.log("Moving config.js + app folder to ".concat(tmpobj.name)); // make a backup
             // shelljs.mv(`${fullDirectoryPath}/**`, `${fullDirectoryPath}_backup`);
 
-            _context8.next = 11;
+            _context9.next = 11;
             return zip.zip(fullDirectoryPath, "".concat(fullDirectoryPath, ".zip"));
 
           case 11:
@@ -526,14 +560,14 @@ function () {
 
           case 14:
           case "end":
-            return _context8.stop();
+            return _context9.stop();
         }
       }
-    }, _callee8, this);
+    }, _callee9, this);
   }));
 
   return function updateApp() {
-    return _ref8.apply(this, arguments);
+    return _ref9.apply(this, arguments);
   };
 }();
 
@@ -544,51 +578,51 @@ var exit = function exit() {
 var build =
 /*#__PURE__*/
 function () {
-  var _ref9 = _asyncToGenerator(
+  var _ref10 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee9() {
+  regeneratorRuntime.mark(function _callee10() {
     var config, result;
-    return regeneratorRuntime.wrap(function _callee9$(_context9) {
+    return regeneratorRuntime.wrap(function _callee10$(_context10) {
       while (1) {
-        switch (_context9.prev = _context9.next) {
+        switch (_context10.prev = _context10.next) {
           case 0:
             if (!(!fs.existsSync(path.join(process$1.cwd(), 'app', 'data.js')) && !fs.existsSync(path.join(process$1.cwd(), 'app', 'data.json')))) {
-              _context9.next = 4;
+              _context10.next = 4;
               break;
             }
 
             console.warn('It seems that there ins\'t any Construct game inside the app folder. Did you forgot to export ?');
-            _context9.next = 15;
+            _context10.next = 15;
             break;
 
           case 4:
-            _context9.prev = 4;
+            _context10.prev = 4;
             // eslint-disable-next-line
             config = require(path.join(process$1.cwd(), 'config.js'));
-            _context9.next = 8;
+            _context10.next = 8;
             return eb.build(config.buil);
 
           case 8:
-            result = _context9.sent;
+            result = _context10.sent;
             console.log(result);
-            _context9.next = 15;
+            _context10.next = 15;
             break;
 
           case 12:
-            _context9.prev = 12;
-            _context9.t0 = _context9["catch"](4);
-            console.log('There was an error building your project:', _context9.t0);
+            _context10.prev = 12;
+            _context10.t0 = _context10["catch"](4);
+            console.log('There was an error building your project:', _context10.t0);
 
           case 15:
           case "end":
-            return _context9.stop();
+            return _context10.stop();
         }
       }
-    }, _callee9, this, [[4, 12]]);
+    }, _callee10, this, [[4, 12]]);
   }));
 
   return function build() {
-    return _ref9.apply(this, arguments);
+    return _ref10.apply(this, arguments);
   };
 }(); // eslint-disable-next-line
 
@@ -596,13 +630,13 @@ function () {
 var showMenu =
 /*#__PURE__*/
 function () {
-  var _ref10 = _asyncToGenerator(
+  var _ref11 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee10() {
+  regeneratorRuntime.mark(function _callee11() {
     var dependenciesInstalled, isCorrectElectronFolder, choices, questions, answers, actions;
-    return regeneratorRuntime.wrap(function _callee10$(_context10) {
+    return regeneratorRuntime.wrap(function _callee11$(_context11) {
       while (1) {
-        switch (_context10.prev = _context10.next) {
+        switch (_context11.prev = _context11.next) {
           case 0:
             if (isDev && fs.existsSync('MyGame')) process$1.chdir('MyGame');
             dependenciesInstalled = true;
@@ -631,6 +665,9 @@ function () {
                   }, {
                     name: 'Construct 3',
                     value: 1
+                  }, {
+                    name: 'Currently exported project',
+                    value: 10
                   }]
                 }, {
                   name: 'Build',
@@ -683,42 +720,42 @@ function () {
               }
             };
             answers = {};
-            _context10.prev = 9;
-            _context10.next = 12;
+            _context11.prev = 9;
+            _context11.next = 12;
             return enquirer.prompt(questions);
 
           case 12:
-            answers = _context10.sent;
+            answers = _context11.sent;
             actions = [[0, previewC2], [1, previewC3], [2, generateElectronProject], [3, showHelp], [4, reportAnIssue], [5, exit], [6, installDeps], [7, updateApp], [8, function () {
               return opn('https://armaldio.xyz/#/donations');
-            }], [9, build]];
-            _context10.next = 16;
+            }], [9, build], [10, previewAppFolder]];
+            _context11.next = 16;
             return actions.find(function (a) {
               return a[0] === answers.action.value;
             })[1]();
 
           case 16:
-            _context10.next = 21;
+            _context11.next = 21;
             break;
 
           case 18:
-            _context10.prev = 18;
-            _context10.t0 = _context10["catch"](9);
-            console.log('Aborted:', _context10.t0);
+            _context11.prev = 18;
+            _context11.t0 = _context11["catch"](9);
+            console.log('Aborted:', _context11.t0);
 
           case 21:
             console.log('Happy with ElectronForConstruct ? ► Donate: https://armaldio.xyz/#/donations ♥');
 
           case 22:
           case "end":
-            return _context10.stop();
+            return _context11.stop();
         }
       }
-    }, _callee10, this, [[9, 18]]);
+    }, _callee11, this, [[9, 18]]);
   }));
 
   return function showMenu() {
-    return _ref10.apply(this, arguments);
+    return _ref11.apply(this, arguments);
   };
 }();
 
