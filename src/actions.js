@@ -12,12 +12,15 @@ import ora from 'ora';
 import chalk from 'chalk';
 import process from 'process';
 import tmp from 'tmp';
+import got from 'got';
 import * as eb from 'electron-builder';
 import shelljs from 'shelljs';
+import box from './box';
 import pkg from '../package.json';
 import isDev from './isDev';
 
 const npm = (process.platform === 'win32' ? 'npm.cmd' : 'npm');
+// const electron = (process.platform === 'win32' ? 'electron.cmd' : 'npm');
 
 const installDeps = async () => new Promise((resolve) => {
   const spinner = ora('Installing dependencies... This may take a while, relax and take a coffe').start();
@@ -70,12 +73,12 @@ const previewAppFolder = async () => {
 };
 
 const previewC2 = async () => {
-  console.log('To preview a Construct 2 project, please follow instructions here: https://github.com/ElectronForConstruct/template');
+  opn('https://electronforconstruct.netlify.com/intro/using-the-module.html#previewing-a-construct-2-project');
 };
 
 const previewC3 = async () => {
   console.log('To preview your Construct 3 project in Electron, you need a valid subscription to Construct 3');
-  console.log('Then, go to the preview menu and hit "Remote preview" and paste the link that appear here');
+  console.log('Go to the preview menu, hit "Remote preview" and paste the link that appear here');
   const answers = await prompt([
     {
       type: 'input',
@@ -93,9 +96,18 @@ const previewC3 = async () => {
   startPreview(answers.url);
 };
 
-const showHelp = () => {
+const showHelp = async () => {
   console.log('Version: ', pkg.version);
-  console.log('To get help, please refer to this link: https://github.com/ElectronForConstruct/template');
+  console.log('To get help, please refer to this link: https://electronforconstruct.netlify.com');
+
+  const answers = await prompt([
+    {
+      type: 'confirm',
+      name: 'confirm',
+      message: 'Open browser ?',
+    },
+  ]);
+  if (answers.confirm) { opn('https://electronforconstruct.netlify.com'); }
 };
 
 const reportAnIssue = () => {
@@ -131,7 +143,7 @@ const downloadPreview = async fullPath => new Promise((resolve) => {
   });
 });
 
-const downloadTemplate = async (fullPath, branch = 'develop') => new Promise((resolve) => {
+const downloadTemplate = async (fullPath, branch = 'master') => new Promise((resolve) => {
   ghdownload({
     user: 'ElectronForConstruct',
     repo: 'template',
@@ -150,35 +162,60 @@ const generateElectronProject = async (projectName = null) => {
   let answers = {};
   const dir = process.cwd();
   let name = projectName;
+  let branch = 'master';
 
   try {
     // if I already have a folder name, eg update, no need to ask again for it
     if (!projectName) {
-      const questions = {
-        type: 'input',
-        name: 'name',
-        message: 'What is the name of your project?',
-        initial: () => 'MyGame',
-        format: typedName => path.join(dir, typedName),
-        validate: (typedName) => {
-          if (fs.existsSync(path.join(dir, typedName))) {
-            return 'This path already exist!';
-          }
-          return true;
+      let branches = [];
+      try {
+        branches = await got('https://api.github.com/repos/electronforconstruct/template/branches', { json: true });
+      } catch (e) {
+        console.log(e);
+      }
+      const choices = branches.body.map(b => ({
+        message: b.name === 'master' ? chalk.green(`${b.name} (recommended)`) : chalk.yellow(b.name),
+        name: b.name,
+        value: b.name,
+      }));
+
+      const questions = [
+        {
+          type: 'select',
+          name: 'branch',
+          message: 'What channel do you want to use ?',
+          initial: 'master',
+          choices,
+          result() {
+            return this.focused.value;
+          },
         },
-      };
+        {
+          type: 'input',
+          name: 'name',
+          message: 'What is the name of your project?',
+          initial: () => 'MyGame',
+          format: typedName => path.join(dir, typedName),
+          validate: (typedName) => {
+            if (fs.existsSync(path.join(dir, typedName))) {
+              return 'This path already exist!';
+            }
+            return true;
+          },
+        },
+      ];
 
       answers = await prompt(questions);
-      ({ name } = answers);
+      ({ name, branch } = answers);
     }
 
     const fullPath = path.join(dir, name);
 
-    const spinner = ora('Downloading template...').start();
+    const spinner = ora(`Downloading template from ${branch} channel...`).start();
     await downloadTemplate(fullPath);
     spinner.succeed('Downloaded');
 
-    if (!projectName) console.log(`\nYou can now go to your project by using "cd ${name}" and install dependencies with either "npm install" or "yarn install"\n`);
+    if (!projectName) console.log(`\nYou can now go to your project by using ${chalk.underline(`cd ${name}`)} and install dependencies with either ${chalk.underline('npm install')} or ${chalk.underline('yarn install')}`);
   } catch (e) {
     console.log('Aborted');
   }
@@ -227,7 +264,7 @@ const updateApp = async () => {
   // tmpobj.removeCallback();
 };
 
-const exit = () => process.exit(0);
+const exit = () => {};
 
 const build = async () => {
   if (
@@ -255,22 +292,14 @@ export const showMenu = async () => {
 
   // check configuration
 
-  if (
-    fs.existsSync('./config.js')
-    && fs.existsSync('./preview.exe')
-  ) {
+  if (fs.existsSync('./config.js')) {
     isCorrectElectronFolder = true;
 
     // check node_modules
     if (!fs.existsSync('./node_modules')) {
       dependenciesInstalled = false;
-      console.log(
-        `
-${chalk.yellow('Whoops! Dependencies are not installed!')}
-Please install them using ${chalk.underline('npm install')} or ${chalk.underline('yarn install')}
-
-`,
-      );
+      console.log(box(`${chalk.yellow('Whoops! Dependencies are not installed!')}
+Please install them using ${chalk.underline('npm install')} or ${chalk.underline('yarn install')}`));
     }
   }
 
@@ -293,7 +322,7 @@ Please install them using ${chalk.underline('npm install')} or ${chalk.underline
               value: 1,
             },
             {
-              name: 'Currently exported project',
+              name: 'Exported project',
               value: 10,
             },
           ],
@@ -377,9 +406,12 @@ Please install them using ${chalk.underline('npm install')} or ${chalk.underline
       [10, previewAppFolder],
     ];
 
+    console.log(); // just crlf
+
     await actions.find(a => a[0] === answers.action.value)[1]();
   } catch (e) {
     console.log('Aborted:', e);
   }
-  console.log('Happy with ElectronForConstruct ? ► Donate: https://armaldio.xyz/#/donations ♥');
+
+  console.log(box('Happy with ElectronForConstruct ? ► Donate: https://armaldio.xyz/#/donations ♥'));
 };
