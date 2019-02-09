@@ -14,6 +14,7 @@ import process from 'process';
 import tmp from 'tmp';
 import got from 'got';
 import * as eb from 'electron-builder';
+import replaceInFiles from 'replace-in-files';
 import shelljs from 'shelljs';
 import box from './box';
 import pkg from '../package.json';
@@ -49,7 +50,11 @@ const startPreview = (url) => {
   console.log(`Starting preview on "${url}"`);
 
   let command;
-  if (url) { command = `${npm} run start -- ${url}`; } else { command = `${npm} run start`; }
+  if (url) {
+    command = `${npm} run start -- ${url}`;
+  } else {
+    command = `${npm} run start`;
+  }
 
   const npmstart = exec(command, {
     cwd: process.cwd(),
@@ -107,7 +112,9 @@ const showHelp = async () => {
       message: 'Open browser ?',
     },
   ]);
-  if (answers.confirm) { opn('https://electronforconstruct.netlify.com'); }
+  if (answers.confirm) {
+    opn('https://electronforconstruct.netlify.com');
+  }
 };
 
 const reportAnIssue = () => {
@@ -143,26 +150,63 @@ const downloadPreview = async fullPath => new Promise((resolve) => {
   });
 });
 
-const downloadTemplate = async (fullPath, branch = 'master') => new Promise((resolve) => {
+const replaceContent = async (fullPath, from, to) => {
+  const options = {
+    files: path.join(fullPath, './**'),
+    from: new RegExp(from, 'g'),
+    to,
+    optionsForFiles: { // default
+      ignore: [
+        '**/node_modules/**',
+      ],
+    },
+  };
+
+  try {
+    const {
+      changedFiles,
+      countOfMatchesByPaths,
+      replaceInFilesOptions,
+    } = await replaceInFiles(options);
+    console.log('Modified files:', changedFiles);
+    console.log('Count of matches by paths:', countOfMatchesByPaths);
+    console.log('was called with:', replaceInFilesOptions);
+  } catch (error) {
+    console.log('Error occurred:', error);
+  }
+};
+
+const downloadRepo = (user, repo, branch, outputDir) => new Promise((resolve, reject) => {
   ghdownload({
-    user: 'ElectronForConstruct',
-    repo: 'template',
+    user,
+    repo,
     ref: branch,
-  }, fullPath)
+  }, outputDir)
     .on('error', (err) => {
-      console.error('err', err);
+      reject(err);
     })
-    .on('end', async () => {
-      if (process.platform === 'win32') await downloadPreview(fullPath);
-      resolve(true);
+    .on('end', () => {
+      resolve(outputDir);
     });
 });
+
+const downloadTemplate = async (fullPath, branch = 'master') => {
+  await downloadRepo('ElectronForConstruct', 'template', branch, `${fullPath}.tmp`);
+  shelljs.cp('-R', `${fullPath}.tmp/template`, fullPath);
+  shelljs.rm('-rf', `${fullPath}.tmp`);
+
+  if (process.platform === 'win32') await downloadPreview(fullPath);
+
+  await replaceContent(fullPath, '{{ name }}', 'MonNom');
+  // await replaceContent(fullPath, '{{ description }}', 'MaDescription');
+};
 
 const generateElectronProject = async (projectName = null) => {
   let answers = {};
   const dir = process.cwd();
   let name = projectName;
   let branch = 'master';
+  let spinner;
 
   try {
     // if I already have a folder name, eg update, no need to ask again for it
@@ -206,18 +250,21 @@ const generateElectronProject = async (projectName = null) => {
       ];
 
       answers = await prompt(questions);
-      ({ name, branch } = answers);
+      ({
+        name,
+        branch,
+      } = answers);
     }
 
     const fullPath = path.join(dir, name);
 
-    const spinner = ora(`Downloading template from ${branch} channel...`).start();
-    await downloadTemplate(fullPath);
+    spinner = ora(`Downloading template from ${branch} channel...`).start();
+    await downloadTemplate(fullPath, branch);
     spinner.succeed('Downloaded');
 
     if (!projectName) console.log(`\nYou can now go to your project by using ${chalk.underline(`cd ${name}`)} and install dependencies with either ${chalk.underline('npm install')} or ${chalk.underline('yarn install')}`);
   } catch (e) {
-    console.log('Aborted');
+    spinner.fail(`Aborted: ${e}`);
   }
 };
 
@@ -240,7 +287,7 @@ const updateApp = async () => {
 
   // make a backup
   // shelljs.mv(`${fullDirectoryPath}/**`, `${fullDirectoryPath}_backup`);
-  await zip.zip(fullDirectoryPath, `${fullDirectoryPath}.zip`);
+  await Zip.zip(fullDirectoryPath, `${fullDirectoryPath}.zip`);
   console.log(`Making a backup to ${fullDirectoryPath}.zip`);
 
   rimraf(fullDirectoryPath, (a, b, c) => {
@@ -264,7 +311,8 @@ const updateApp = async () => {
   // tmpobj.removeCallback();
 };
 
-const exit = () => {};
+const exit = () => {
+};
 
 const build = async () => {
   if (

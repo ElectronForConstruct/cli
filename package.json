@@ -5,7 +5,8 @@
   "scripts": {
     "build": "rollup -c",
     "start": "babel-node src/index.js",
-    "release": "yarn publish --access public"
+    "release2": "yarn publish --access public",
+    "release": "np --no-yarn"
   },
   "preferGlobal": true,
   "bin": {
@@ -27,6 +28,7 @@
     "minimist": "^1.2.0",
     "opn": "^5.4.0",
     "ora": "^3.0.0",
+    "replace-in-files": "^1.1.4",
     "request": "^2.88.0",
     "rimraf": "^2.6.3",
     "semver": "^5.6.0",
