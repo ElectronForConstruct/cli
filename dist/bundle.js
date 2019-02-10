@@ -34,13 +34,15 @@ var box = (function (input) {
 });
 
 var name = "@electronforconstruct/cli";
-var version = "1.1.0";
+var version = "1.0.13";
 var description = "A small utility to manage your Construct Electron projects";
 var scripts = {
 	build: "rollup -c",
 	start: "babel-node src/index.js",
 	release2: "yarn publish --access public",
-	release: "np --no-yarn"
+	release: "np --no-yarn",
+	preversion: "npm run build",
+	version: "git add dist"
 };
 var preferGlobal = true;
 var bin = {
