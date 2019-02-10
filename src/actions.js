@@ -4,17 +4,13 @@ import path from 'path';
 import fs from 'fs';
 import zip from 'zip-a-folder';
 import opn from 'opn';
-import rimraf from 'rimraf';
 import os from 'os';
 import ghdownload from 'github-download';
 import request from 'request';
 import ora from 'ora';
 import chalk from 'chalk';
 import process from 'process';
-import tmp from 'tmp';
-import got from 'got';
 import * as eb from 'electron-builder';
-import replaceInFiles from 'replace-in-files';
 import shelljs from 'shelljs';
 import box from './box';
 import pkg from '../package.json';
@@ -24,9 +20,9 @@ const npm = (process.platform === 'win32' ? 'npm.cmd' : 'npm');
 // const electron = (process.platform === 'win32' ? 'electron.cmd' : 'npm');
 
 const installDeps = async () => new Promise((resolve) => {
-  const spinner = ora('Installing dependencies... This may take a while, relax and take a coffe').start();
+  const spinner = ora('Installing dependencies... This may take a while, relax and take a coffee').start();
 
-  const npmstart = spawn(npm, ['install', '--no-package-lock']); /* , {
+  const npmstart = spawn(npm, [ 'install', '--no-package-lock' ]); /* , {
     stdio: 'inherit',
     cwd: process.cwd(),
     detached: true,
@@ -46,8 +42,8 @@ const installDeps = async () => new Promise((resolve) => {
   });
 });
 
-const startPreview = (url) => {
-  console.log(`Starting preview on "${url}"`);
+const startPreview = url => new Promise((resolve) => {
+  console.log(`Starting preview ${url ? `on "${url}"` : ''}`);
 
   let command;
   if (url) {
@@ -70,15 +66,16 @@ const startPreview = (url) => {
 
   npmstart.on('exit', (code) => {
     console.log(`Electron exited: ${code.toString()}`);
+    resolve(true);
   });
-};
+});
 
 const previewAppFolder = async () => {
-  startPreview();
+  await startPreview();
 };
 
 const previewC2 = async () => {
-  opn('https://electronforconstruct.netlify.com/intro/using-the-module.html#previewing-a-construct-2-project');
+  opn('https://electronforconstruct.armaldio.xyz/intro/using-the-module.html#previewing-a-construct-2-project');
 };
 
 const previewC3 = async () => {
@@ -86,9 +83,9 @@ const previewC3 = async () => {
   console.log('Go to the preview menu, hit "Remote preview" and paste the link that appear here');
   const answers = await prompt([
     {
-      type: 'input',
-      name: 'url',
-      message: 'Enter the Construct 3 preview URL: ',
+      type    : 'input',
+      name    : 'url',
+      message : 'Enter the Construct 3 preview URL: ',
       validate: (url) => {
         const regex = /https:\/\/preview\.construct\.net\/#.{8}$/;
         if (url.match(regex)) {
@@ -98,22 +95,22 @@ const previewC3 = async () => {
       },
     },
   ]);
-  startPreview(answers.url);
+  await startPreview(answers.url);
 };
 
 const showHelp = async () => {
   console.log('Version: ', pkg.version);
-  console.log('To get help, please refer to this link: https://electronforconstruct.netlify.com');
+  console.log('To get help, please refer to this link: https://electronforconstruct.armaldio.xyz');
 
   const answers = await prompt([
     {
-      type: 'confirm',
-      name: 'confirm',
+      type   : 'confirm',
+      name   : 'confirm',
       message: 'Open browser ?',
     },
   ]);
   if (answers.confirm) {
-    opn('https://electronforconstruct.netlify.com');
+    opn('https://electronforconstruct.armaldio.xyz');
   }
 };
 
@@ -132,49 +129,21 @@ Steps to reproduce:
 
 const downloadPreview = async fullPath => new Promise((resolve) => {
   request({
-    url: 'https://api.github.com/repos/ElectronForConstruct/preview/releases/latest',
+    url    : 'https://api.github.com/repos/ElectronForConstruct/preview/releases/latest',
     headers: {
       'User-Agent': 'ElectronForContruct',
     },
   }, (error, response, body) => {
-    const json = JSON.parse(body);
+    const json     = JSON.parse(body);
     const assetUrl = json.assets
-      .find(asset => asset.name === 'preview.exe').browser_download_url;
-    request(assetUrl)
-      .pipe(fs.createWriteStream(
-        path.join(fullPath, 'preview.exe'),
-      ))
-      .on('finish', () => {
-        resolve(true);
-      });
+                         .find(asset => asset.name === 'preview.exe').browser_download_url;
+    request(assetUrl).pipe(fs.createWriteStream(
+      path.join(fullPath, 'preview.exe'),
+    )).on('finish', () => {
+      resolve(true);
+    });
   });
 });
-
-const replaceContent = async (fullPath, from, to) => {
-  const options = {
-    files: path.join(fullPath, './**'),
-    from: new RegExp(from, 'g'),
-    to,
-    optionsForFiles: { // default
-      ignore: [
-        '**/node_modules/**',
-      ],
-    },
-  };
-
-  try {
-    const {
-      changedFiles,
-      countOfMatchesByPaths,
-      replaceInFilesOptions,
-    } = await replaceInFiles(options);
-    console.log('Modified files:', changedFiles);
-    console.log('Count of matches by paths:', countOfMatchesByPaths);
-    console.log('was called with:', replaceInFilesOptions);
-  } catch (error) {
-    console.log('Error occurred:', error);
-  }
-};
 
 const downloadRepo = (user, repo, branch, outputDir) => new Promise((resolve, reject) => {
   ghdownload({
@@ -190,125 +159,101 @@ const downloadRepo = (user, repo, branch, outputDir) => new Promise((resolve, re
     });
 });
 
-const downloadTemplate = async (fullPath, branch = 'master') => {
+const downloadTemplate = async (fullPath, branch) => {
   await downloadRepo('ElectronForConstruct', 'template', branch, `${fullPath}.tmp`);
-  shelljs.cp('-R', `${fullPath}.tmp/template`, fullPath);
+  if (!fs.existsSync(fullPath))
+    shelljs.mkdir(fullPath);
+  shelljs.cp('-R', `${fullPath}.tmp/template/*`, fullPath);
   shelljs.rm('-rf', `${fullPath}.tmp`);
 
   if (process.platform === 'win32') await downloadPreview(fullPath);
-
-  await replaceContent(fullPath, '{{ name }}', 'MonNom');
-  // await replaceContent(fullPath, '{{ description }}', 'MaDescription');
 };
 
-const generateElectronProject = async (projectName = null) => {
+const generateElectronProject = async (originPath) => {
+  let config = {};
+  // eslint-disable-next-line
+  if (fs.existsSync(path.join(process.cwd(), 'config.js'))) config = require(path.join(process.cwd(), 'config.js'));
+
+  const branch = config?.project?.branch || 'master';
+
   let answers = {};
-  const dir = process.cwd();
-  let name = projectName;
-  let branch = 'master';
-  let spinner;
+  const dir   = process.cwd();
+  let name    = '';
 
   try {
-    // if I already have a folder name, eg update, no need to ask again for it
-    if (!projectName) {
-      let branches = [];
-      try {
-        branches = await got('https://api.github.com/repos/electronforconstruct/template/branches', { json: true });
-      } catch (e) {
-        console.log(e);
-      }
-      const choices = branches.body.map(b => ({
-        message: b.name === 'master' ? chalk.green(`${b.name} (recommended)`) : chalk.yellow(b.name),
-        name: b.name,
-        value: b.name,
-      }));
-
-      const questions = [
-        {
-          type: 'select',
-          name: 'branch',
-          message: 'What channel do you want to use ?',
-          initial: 'master',
-          choices,
-          result() {
-            return this.focused.value;
-          },
+    if (!originPath) {
+      const questions = {
+        type    : 'input',
+        name    : 'name',
+        message : 'What is the name of your project?',
+        initial : () => 'MyGame',
+        format  : typedName => path.join(dir, typedName),
+        validate: (typedName) => {
+          if (fs.existsSync(path.join(dir, typedName))) {
+            return 'This path already exist!';
+          }
+          return true;
         },
-        {
-          type: 'input',
-          name: 'name',
-          message: 'What is the name of your project?',
-          initial: () => 'MyGame',
-          format: typedName => path.join(dir, typedName),
-          validate: (typedName) => {
-            if (fs.existsSync(path.join(dir, typedName))) {
-              return 'This path already exist!';
-            }
-            return true;
-          },
-        },
-      ];
-
-      answers = await prompt(questions);
+      };
+      answers         = await prompt(questions);
       ({
         name,
-        branch,
       } = answers);
     }
 
+    // eslint-disable-next-line
+    if (!name) name = originPath;
+
     const fullPath = path.join(dir, name);
 
-    spinner = ora(`Downloading template from ${branch} channel...`).start();
+    const spinner = ora(`Downloading template from ${branch} channel...`).start();
     await downloadTemplate(fullPath, branch);
     spinner.succeed('Downloaded');
 
-    if (!projectName) console.log(`\nYou can now go to your project by using ${chalk.underline(`cd ${name}`)} and install dependencies with either ${chalk.underline('npm install')} or ${chalk.underline('yarn install')}`);
+    if (!originPath) console.log(`\nYou can now go to your project by using ${chalk.underline(`cd ${name}`)} and install dependencies with either ${chalk.underline('npm install')} or ${chalk.underline('yarn install')}`);
   } catch (e) {
-    spinner.fail(`Aborted: ${e}`);
+    console.error('Aborted:', e);
   }
 };
 
 const updateApp = async () => {
-  tmp.setGracefulCleanup();
-  shelljs.set('-v');
+  console.log('Preparing ...');
 
   const fullDirectoryPath = process.cwd();
-  const folderName = path.basename(process.cwd());
+  const folderName        = path.basename(process.cwd());
 
   shelljs.cd('..');
 
-  // create a temporary directory for saving files
-  const tmpobj = tmp.dirSync();
-  console.log('Creating temp directory: ', tmpobj.name);
+  // remove node_modules
+  shelljs.rm('-rf', path.join(fullDirectoryPath, 'node_modules'));
 
-  // move files to it (config.js + app folder)
-  shelljs.cp('-r', path.join(fullDirectoryPath, 'config.js'), path.join(fullDirectoryPath, 'app'), tmpobj.name);
-  console.log(`Moving config.js + app folder to ${tmpobj.name}`);
+  // move files to bak dir
+  shelljs.cp('-r', fullDirectoryPath, `${fullDirectoryPath}.bak`);
 
-  // make a backup
-  // shelljs.mv(`${fullDirectoryPath}/**`, `${fullDirectoryPath}_backup`);
-  await Zip.zip(fullDirectoryPath, `${fullDirectoryPath}.zip`);
-  console.log(`Making a backup to ${fullDirectoryPath}.zip`);
+  // make a zip backup
+  await zip.zip(fullDirectoryPath, `${fullDirectoryPath}-${Date.now().toString()}.zip`);
 
-  rimraf(fullDirectoryPath, (a, b, c) => {
-    console.log(a, b, c);
-  });
-  console.log(`Removing ${folderName}`);
-
-  // remove folder
-  // shelljs.rm('-r', fullDirectoryPath);
+  // remove original folder
+  shelljs.rm('-rf', `${fullDirectoryPath}/*`);
 
   // download new template
-  // await generateElectronProject(folderName);
+  // eslint-disable-next-line
+  const config = require(path.join(`${fullDirectoryPath}.bak`, 'config.js'));
+  await generateElectronProject(folderName);
 
   // move new template files to old directory
 
+  shelljs.cp('-R', [
+    path.join(`${fullDirectoryPath}.bak`, 'config.js'),
+    path.join(`${fullDirectoryPath}.bak`, 'app'),
+  ], fullDirectoryPath);
+
   // install deps
 
-  // move saved files in temp to old directory
+  // cleanup
+  shelljs.rm('-rf', `${fullDirectoryPath}.bak`);
 
   // profit
-  // tmpobj.removeCallback();
 };
 
 const exit = () => {
@@ -323,7 +268,7 @@ const build = async () => {
     try {
       // eslint-disable-next-line
       const config = require(path.join(process.cwd(), 'config.js'));
-      const result = await eb.build(config.buil);
+      const result = await eb.build(config.build);
       console.log(result);
     } catch (e) {
       console.log('There was an error building your project:', e);
@@ -335,7 +280,7 @@ const build = async () => {
 export const showMenu = async () => {
   if (isDev && fs.existsSync('MyGame')) process.chdir('MyGame');
 
-  let dependenciesInstalled = true;
+  let dependenciesInstalled   = true;
   let isCorrectElectronFolder = false;
 
   // check configuration
@@ -356,40 +301,57 @@ Please install them using ${chalk.underline('npm install')} or ${chalk.underline
   if (isCorrectElectronFolder) {
     // and deps are installed
     if (dependenciesInstalled) {
+      /* *** Check new version of template *** */
+      // Nothing to check against actually
+      // eslint-disable-next-line
+      /* const config = require(path.join(process.cwd(), 'config.js'));
+      const p = () => new Promise((resolve) => {
+        request.get({
+          url: `https://raw.githubusercontent.com/ElectronForConstruct/template/${config.project.branch}/package.json`,
+          json: true,
+        }, (e, r, pkg) => {
+          resolve(pkg);
+        });
+      });
+
+      const pkgjson = await p();
+      console.log(pkgjson);
+      */
+
       choices.push(
         {
-          name: 'Preview with',
+          name    : 'Preview with',
           disabled: '>',
-          choices: [
+          choices : [
             {
-              name: 'Construct 2',
+              name : 'Construct 2',
               value: 0,
             },
             {
-              name: 'Construct 3',
+              name : 'Construct 3',
               value: 1,
             },
             {
-              name: 'Exported project',
+              name : 'Exported project',
               value: 10,
             },
           ],
         },
         {
-          name: 'Build',
+          name : 'Build',
           value: 9,
         },
-        /* {
+        {
           message: 'Update app',
-          name: 7,
-        }, */
+          name   : 7,
+        },
       );
     } else {
       // but deps not installed
       choices.push(
         {
-          name: 'Dependencies must be installed first!',
-          value: 6,
+          name    : 'Dependencies must be installed first!',
+          value   : 6,
           disabled: true,
         },
       );
@@ -398,37 +360,38 @@ Please install them using ${chalk.underline('npm install')} or ${chalk.underline
     // if the folder i not a upported electron project
     choices.push(
       {
-        name: 'Generate a new Electron project',
+        name : 'Generate a new Electron project',
         value: 2,
       },
     );
   }
+
   choices.push(
     {
-      role: 'separator',
+      role : 'separator',
       value: chalk.dim('────'),
     },
     {
-      name: 'View help',
+      name : 'View help',
       value: 3,
     },
     {
-      name: 'Report an issue',
+      name : 'Report an issue',
       value: 4,
     },
     {
-      name: 'Donate',
+      name : 'Donate',
       value: 8,
     },
     {
-      name: 'Exit',
+      name : 'Exit',
       value: 5,
     },
   );
 
   const questions = {
-    type: 'select',
-    name: 'action',
+    type   : 'select',
+    name   : 'action',
     message: 'What do you want to do?',
     choices,
     result() {
@@ -441,22 +404,22 @@ Please install them using ${chalk.underline('npm install')} or ${chalk.underline
     answers = await prompt(questions);
 
     const actions = [
-      [0, previewC2],
-      [1, previewC3],
-      [2, generateElectronProject],
-      [3, showHelp],
-      [4, reportAnIssue],
-      [5, exit],
-      [6, installDeps],
-      [7, updateApp],
-      [8, () => opn('https://armaldio.xyz/#/donations')],
-      [9, build],
-      [10, previewAppFolder],
+      [ 0, previewC2 ],
+      [ 1, previewC3 ],
+      [ 2, generateElectronProject ],
+      [ 3, showHelp ],
+      [ 4, reportAnIssue ],
+      [ 5, exit ],
+      [ 6, installDeps ],
+      [ 7, updateApp ],
+      [ 8, () => opn('https://armaldio.xyz/#/donations') ],
+      [ 9, build ],
+      [ 10, previewAppFolder ],
     ];
 
     console.log(); // just crlf
 
-    await actions.find(a => a[0] === answers.action.value)[1]();
+    await actions.find(a => a[ 0 ] === answers.action.value)[ 1 ]();
   } catch (e) {
     console.log('Aborted:', e);
   }
