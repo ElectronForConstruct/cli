@@ -263,12 +263,12 @@ const build = async () => {
   if (
     !fs.existsSync(path.join(process.cwd(), 'app', 'data.js'))
     && !fs.existsSync(path.join(process.cwd(), 'app', 'data.json'))) {
-    console.warn('It seems that there ins\'t any Construct game inside the app folder. Did you forgot to export ?');
+    console.warn('It seems that there isn\'t any Construct game inside the app folder. Did you forgot to export ?');
   } else {
     try {
       // eslint-disable-next-line
       const config = require(path.join(process.cwd(), 'config.js'));
-      const result = await eb.build(config.build);
+      const result = await eb.build({ config: config.build });
       console.log(result);
     } catch (e) {
       console.log('There was an error building your project:', e);

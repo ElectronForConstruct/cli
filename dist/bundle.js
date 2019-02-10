@@ -34,7 +34,7 @@ var box = (function (input) {
 });
 
 var name = "@electronforconstruct/cli";
-var version = "1.1.0";
+var version = "1.1.2";
 var description = "A small utility to manage your Construct Electron projects";
 var scripts = {
 	build: "rollup -c",
@@ -628,7 +628,7 @@ function () {
               break;
             }
 
-            console.warn('It seems that there ins\'t any Construct game inside the app folder. Did you forgot to export ?');
+            console.warn('It seems that there isn\'t any Construct game inside the app folder. Did you forgot to export ?');
             _context10.next = 15;
             break;
 
@@ -637,7 +637,9 @@ function () {
             // eslint-disable-next-line
             config = require(path.join(process$1.cwd(), 'config.js'));
             _context10.next = 8;
-            return eb.build(config.build);
+            return eb.build({
+              config: config.build
+            });
 
           case 8:
             result = _context10.sent;
