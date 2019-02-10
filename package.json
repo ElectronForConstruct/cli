@@ -7,7 +7,6 @@
     "start": "babel-node src/index.js",
     "release2": "yarn publish --access public",
     "release": "np --no-yarn",
-
     "preversion": "npm run build",
     "version": "git add dist"
   },
