@@ -34,7 +34,7 @@ var box = (function (input) {
 });
 
 var name = "@electronforconstruct/cli";
-var version = "1.1.2";
+var version = "1.1.3";
 var description = "A small utility to manage your Construct Electron projects";
 var scripts = {
 	build: "rollup -c",
@@ -397,10 +397,37 @@ function () {
                 }
               }, function (error, response, body) {
                 var json = JSON.parse(body);
-                var assetUrl = json.assets.find(function (asset) {
-                  return asset.name === 'preview.exe';
-                }).browser_download_url;
-                request(assetUrl).pipe(fs.createWriteStream(path.join(fullPath, 'preview.exe'))).on('finish', function () {
+                var assetUrl;
+                var exeName;
+
+                switch (os.platform()) {
+                  case 'darwin':
+                    assetUrl = json.assets.find(function (asset) {
+                      return asset.name === 'preview-mac';
+                    }).browser_download_url;
+                    exeName = 'preview';
+                    break;
+
+                  case 'linux':
+                    assetUrl = json.assets.find(function (asset) {
+                      return asset.name === 'preview.linux';
+                    }).browser_download_url;
+                    exeName = 'preview';
+                    break;
+
+                  case 'win32':
+                    assetUrl = json.assets.find(function (asset) {
+                      return asset.name === 'preview-windows.exe';
+                    }).browser_download_url;
+                    exeName = 'preview.exe';
+                    break;
+
+                  default:
+                    console.log('No preview script available for your platform');
+                    return;
+                }
+
+                request(assetUrl).pipe(fs.createWriteStream(path.join(fullPath, exeName))).on('finish', function () {
                   resolve(true);
                 });
               });
@@ -450,16 +477,10 @@ function () {
             if (!fs.existsSync(fullPath)) shelljs.mkdir(fullPath);
             shelljs.cp('-R', "".concat(fullPath, ".tmp/template/*"), fullPath);
             shelljs.rm('-rf', "".concat(fullPath, ".tmp"));
-
-            if (!(process$1.platform === 'win32')) {
-              _context7.next = 8;
-              break;
-            }
-
-            _context7.next = 8;
+            _context7.next = 7;
             return downloadPreview(fullPath);
 
-          case 8:
+          case 7:
           case "end":
             return _context7.stop();
         }
@@ -742,7 +763,7 @@ function () {
             } else {
               // if the folder i not a upported electron project
               choices.push({
-                name: 'Generate a new Electron project',
+                name: "".concat(chalk.underline('G'), "enerate a new Electron project"),
                 value: 2
               });
             }
@@ -779,6 +800,7 @@ function () {
 
           case 12:
             answers = _context11.sent;
+            // answers = await p.run();
             actions = [[0, previewC2], [1, previewC3], [2, generateElectronProject], [3, showHelp], [4, reportAnIssue], [5, exit], [6, installDeps], [7, updateApp], [8, function () {
               return opn('https://armaldio.xyz/#/donations');
             }], [9, build], [10, previewAppFolder]];

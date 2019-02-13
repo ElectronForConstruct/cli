@@ -1,4 +1,4 @@
-import { prompt } from 'enquirer';
+import { prompt, Select } from 'enquirer';
 import { spawn, exec } from 'child_process';
 import path from 'path';
 import fs from 'fs';
@@ -134,11 +134,33 @@ const downloadPreview = async fullPath => new Promise((resolve) => {
       'User-Agent': 'ElectronForContruct',
     },
   }, (error, response, body) => {
-    const json     = JSON.parse(body);
-    const assetUrl = json.assets
-                         .find(asset => asset.name === 'preview.exe').browser_download_url;
+    const json = JSON.parse(body);
+
+    let assetUrl;
+    let exeName;
+    switch (os.platform()) {
+      case 'darwin':
+        assetUrl = json.assets.find(asset => asset.name === 'preview-mac').browser_download_url;
+        exeName  = 'preview';
+        break;
+
+      case 'linux':
+        assetUrl = json.assets.find(asset => asset.name === 'preview.linux').browser_download_url;
+        exeName  = 'preview';
+        break;
+
+      case 'win32':
+        assetUrl = json.assets.find(asset => asset.name === 'preview-windows.exe').browser_download_url;
+        exeName  = 'preview.exe';
+        break;
+
+      default:
+        console.log('No preview script available for your platform');
+        return;
+    }
+
     request(assetUrl).pipe(fs.createWriteStream(
-      path.join(fullPath, 'preview.exe'),
+      path.join(fullPath, exeName),
     )).on('finish', () => {
       resolve(true);
     });
@@ -166,7 +188,7 @@ const downloadTemplate = async (fullPath, branch) => {
   shelljs.cp('-R', `${fullPath}.tmp/template/*`, fullPath);
   shelljs.rm('-rf', `${fullPath}.tmp`);
 
-  if (process.platform === 'win32') await downloadPreview(fullPath);
+  await downloadPreview(fullPath);
 };
 
 const generateElectronProject = async (originPath) => {
@@ -360,7 +382,7 @@ Please install them using ${chalk.underline('npm install')} or ${chalk.underline
     // if the folder i not a upported electron project
     choices.push(
       {
-        name : 'Generate a new Electron project',
+        name : `${chalk.underline('G')}enerate a new Electron project`,
         value: 2,
       },
     );
@@ -401,7 +423,13 @@ Please install them using ${chalk.underline('npm install')} or ${chalk.underline
 
   let answers = {};
   try {
+    // const p = new Select(questions);
+    /*p.on('keypress', (s, key) => {
+      console.log(p.options.choices);
+    });*/
     answers = await prompt(questions);
+
+    // answers = await p.run();
 
     const actions = [
       [ 0, previewC2 ],
