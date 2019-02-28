@@ -3,21 +3,20 @@
   "version": "1.1.3",
   "description": "A small utility to manage your Construct Electron projects",
   "scripts": {
-    "build": "rollup -c",
-    "start": "babel-node src/index.js",
-    "release2": "yarn publish --access public",
-    "release": "np --no-yarn",
-    "preversion": "npm run build",
-    "version": "git add dist"
+    "build": "webpack",
+    "serve": "webpack -w",
+    "start": "babel-node src/app.js",
+    "release": "yarn publish --access public"
   },
   "preferGlobal": true,
   "bin": {
-    "e4c": "dist/bundle.js"
+    "e4c": "index.js"
   },
   "author": "Armaldio <armaldio@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
+    "@babel/register": "^7.0.0",
     "@babel/runtime": "^7.3.1",
     "boxen": "^2.1.0",
     "chalk": "^2.4.2",
@@ -47,9 +46,12 @@
     "@babel/plugin-proposal-optional-chaining": "^7.2.0",
     "@babel/plugin-transform-runtime": "^7.2.0",
     "@babel/preset-env": "^7.3.1",
+    "@babel/types": "^7.3.4",
+    "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.5",
+    "babel-plugin-dynamic-import-node": "^2.2.0",
     "babel-plugin-transform-runtime": "^6.23.0",
-    "eslint": "^5.12.1",
+    "eslint": "^5.14.1",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-plugin-import": "^2.15.0",
     "eslint-plugin-jsx-a11y": "^6.1.2",
@@ -60,7 +62,8 @@
     "rollup-plugin-babel": "^4.3.2",
     "rollup-plugin-json": "^3.1.0",
     "rollup-plugin-node-resolve": "^4.0.0",
-    "webpack": "^4.29.0",
-    "webpack-cli": "^3.2.1"
+    "webpack": "^4.29.3",
+    "webpack-cli": "^3.2.1",
+    "webpack-node-externals": "^1.7.2"
   }
 }
