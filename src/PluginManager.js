@@ -100,7 +100,9 @@ export default class PluginManager {
    * @returns {Promise<void>}
    */
   async loadCustomCommands() {
-    await this.loadCommands(this.defaultCustomCommandPath);
+    if (fs.existsSync(this.defaultCustomCommandPath)) {
+      await this.loadCommands(this.defaultCustomCommandPath);
+    }
   }
 
   /**
