@@ -1,15 +1,21 @@
-import path from 'path';
-import process from 'process';
-import shelljs from 'shelljs';
+import request from 'request';
+import fs from 'fs';
 import zip from 'zip-a-folder';
-import generateElectronProject from './generateElectronProject';
+import install from 'install-packages';
+import { prompt } from 'enquirer';
+import { Prompt } from '../../lib';
 import Command from '../Command';
+import downloadPreview from '../utils/downloadPreview';
 import { isNewTemplateVersionAvailable } from '../updateCheck';
 
 export default class extends Command {
   constructor() {
     super('update', 'Update current template', 'u');
     this.setCategory('Utility');
+  }
+
+  show() {
+    return this.config.isReady && this.config.isElectron;
   }
 
   async onLoad() {
@@ -19,42 +25,61 @@ export default class extends Command {
   }
 
   async run() {
-    console.log('Preparing ...');
-
     const fullDirectoryPath = process.cwd();
-    const folderName = path.basename(process.cwd());
+    const backupName = `${fullDirectoryPath}-${Date.now().toString()}.zip`;
+    // const folderName = path.basename(process.cwd());
 
-    shelljs.cd('..');
+    const response = await prompt({
+      type: 'confirm',
+      name: 'choice',
+      initial: false,
+      message: 'Do you want to backup your project before updating ?',
+    });
 
-    // remove node_modules
-    shelljs.rm('-rf', path.join(fullDirectoryPath, 'node_modules'));
+    if (response.choice) {
+      console.log(`Backing up your files to ${backupName} ...`);
 
-    // move files to bak dir
-    shelljs.cp('-r', fullDirectoryPath, `${fullDirectoryPath}.bak`);
+      // make a zip backup
+      await zip.zip(fullDirectoryPath, backupName);
+    }
 
-    // make a zip backup
-    await zip.zip(fullDirectoryPath, `${fullDirectoryPath}-${Date.now().toString()}.zip`);
+    const filesToUpdate = ['preload.js', 'package.json', 'main.js'];
+    const promises = [];
 
-    // remove original folder
-    shelljs.rm('-rf', `${fullDirectoryPath}/*`);
+    console.log('Updating files...');
 
-    // download new template
-    // eslint-disable-next-line
-    const config = require(path.join(`${fullDirectoryPath}.bak`, 'config.js'));
-    await generateElectronProject(folderName);
+    const prom = file => new Promise((resolve) => {
+      request.get({
+        url: `https://raw.githubusercontent.com/ElectronForConstruct/template/${this.config.settings.project.branch}/template/${file}`,
+        json: false,
+      }, (e, r, content) => {
+        resolve({
+          content,
+          file,
+        });
+      });
+    });
 
-    // move new template files to old directory
+    // queue
+    filesToUpdate.forEach((file) => {
+      promises.push(prom(file));
+    });
 
-    shelljs.cp('-R', [
-      path.join(`${fullDirectoryPath}.bak`, 'config.js'),
-      path.join(`${fullDirectoryPath}.bak`, 'app'),
-      path.join(`${fullDirectoryPath}.bak`, 'build'),
-    ], fullDirectoryPath);
+    const resultFiles = await Promise.all(promises);
+
+    // write files
+    resultFiles.forEach(({ content, file }) => {
+      fs.writeFileSync(file, content, 'utf8');
+    });
+
+    await downloadPreview(process.cwd());
 
     // install deps
 
-    // cleanup
-    shelljs.rm('-rf', `${fullDirectoryPath}.bak`);
+    console.log(`Restoring packages: ${this.config.settings.dependencies.join(', ')}`);
+
+    await install();
+    await install({ packages: this.config.settings.dependencies });
 
     // profit
   }

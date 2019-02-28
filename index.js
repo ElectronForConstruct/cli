@@ -5,7 +5,7 @@ const path = require('path');
 require('@babel/register')({
   cwd: path.resolve(__dirname),
   ignore: [/node_modules/],
-  rootMode: 'upward',
+  filename: __filename,
 });
 require('@babel/polyfill');
 

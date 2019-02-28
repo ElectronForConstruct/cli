@@ -20,13 +20,7 @@ export default class extends Command {
   async run(originPath) {
     let config = {};
     // eslint-disable-next-line
-    if (fs.existsSync(path.join(process.cwd(), 'config.js'))) config = require(path.join(process.cwd(), 'config.js'));
-
-    // console.log(fs.existsSync(path.join(process.cwd(), 'config.js')));
-
-    // console.log(path.join(process.cwd(), 'config.js'));
-
-    // console.log(config);
+    if (fs.existsSync(path.join(process.cwd(), 'config.js'))) config = await import(path.join(process.cwd(), 'config.js'));
 
     const branch = (config && config.project && config.project.branch) || 'master';
 

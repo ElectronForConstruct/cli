@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import fs from 'fs';
+import path from 'path';
 import box from './box';
 import { checkForUpdate } from './updateCheck';
 import isDev from './isDev';
@@ -24,32 +25,36 @@ checkForUpdate()
 
     if (isDev && fs.existsSync('MyGame')) process.chdir('MyGame');
 
-    let isReady = true;
+    let isReady = false;
     let isElectron = false;
 
     // check configuration
 
-    if (fs.existsSync('./config.js')) {
+    let settings = {};
+    if (fs.existsSync(path.join(process.cwd(), 'config.js'))) {
       isElectron = true;
 
-      // check node_modules
-      if (!fs.existsSync('./node_modules')) {
-        isReady = false;
-        console.log(box(`${chalk.yellow('Whoops! Dependencies are not installed!')}
+      // eslint-disable-next-line
+      settings = await import(path.join(process.cwd(), 'config.js'));
+    }
+
+    // check node_modules
+    if (isElectron && !fs.existsSync(path.join(process.cwd(), 'node_modules', '@electronforconstruct', 'cli'))) {
+      console.log(box(`${chalk.yellow('Whoops! Dependencies are not installed!')}
 Please install them using ${chalk.underline('npm install')} or ${chalk.underline('yarn install')}`));
-      }
+    } else {
+      isReady = true;
     }
 
     const config = {
-      config: null,
+      settings,
       isReady,
       isElectron,
     };
 
-    await pm.loadDefaultCommands();
-    await pm.loadCustomCommands();
+    await pm.loadDefaultCommands(config);
+    if (isReady) await pm.loadCustomCommands(config);
 
-    await pm.setConfig(config);
     await pm.setModules(pm.commands);
 
     const args = process.argv.slice(2);

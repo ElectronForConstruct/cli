@@ -10,24 +10,22 @@ export default async (pm) => {
   let choices = [];
 
   pm.commands.forEach((command) => {
-    if (command.show()) {
-      if (!choices.find(c => c.name === command.category)) {
-        choices.push({
-          name: command.category,
-          disabled: '>',
-          choices: [],
-        });
-      }
-
-      choices.find(c => c.name === command.category).choices.push(
-        {
-          name: command.name,
-          value: command.id,
-          hint: command.hint,
-          shortcut: command.shortcut,
-        },
-      );
+    if (!choices.find(c => c.name === command.category)) {
+      choices.push({
+        name: command.category,
+        disabled: '>',
+        choices: [],
+      });
     }
+
+    choices.find(c => c.name === command.category).choices.push(
+      {
+        name: command.name,
+        value: command.id,
+        hint: command.hint,
+        shortcut: command.shortcut,
+      },
+    );
   });
 
   choices = choices.sort((choicea, choiceb) => {
@@ -51,7 +49,7 @@ export default async (pm) => {
     ];
 
     return (orders.find(o => o.name === choiceb.name)?.order || 0)
-             - (orders.find(o => o.name === choicea.name)?.order || 0);
+           - (orders.find(o => o.name === choicea.name)?.order || 0);
   });
 
   // Add invisible separator after each category
@@ -81,7 +79,6 @@ export default async (pm) => {
 
   let answers = {};
   try {
-    // const prompt = new CustomPrompt(questions);
     prompt = new Select(questions);
 
     prompt.on('keypress', (rawKey) => {

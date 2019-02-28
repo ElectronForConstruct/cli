@@ -46,7 +46,7 @@ export default class PluginManager {
    * @returns void
    * @private
    */
-  async loadCommands(commandsPath) {
+  async loadCommands(commandsPath, config) {
     let promises = [];
     const files = fs.readdirSync(commandsPath).filter(f => path.extname(f) !== 'js');
 
@@ -72,7 +72,10 @@ export default class PluginManager {
           /** @type Command */
           // eslint-disable-next-line
           const newClass = new x.module.default();
-          if (Object.getPrototypeOf(newClass.constructor).name === 'Command') {
+          newClass.setConfig(config);
+          if (!newClass.show()) {
+            resolve(undefined);
+          } else if (Object.getPrototypeOf(newClass.constructor).name === 'Command') {
             await newClass.onLoad();
             this._commands.push(newClass);
             resolve(newClass);
@@ -91,17 +94,17 @@ export default class PluginManager {
    * Load default commands
    * @returns {Promise<void>}
    */
-  async loadDefaultCommands() {
-    await this.loadCommands(this.defaultCommandPath);
+  async loadDefaultCommands(config = {}) {
+    await this.loadCommands(this.defaultCommandPath, config);
   }
 
   /**
    * Load commands from a cutom path
    * @returns {Promise<void>}
    */
-  async loadCustomCommands() {
+  async loadCustomCommands(config = {}) {
     if (fs.existsSync(this.defaultCustomCommandPath)) {
-      await this.loadCommands(this.defaultCustomCommandPath);
+      await this.loadCommands(this.defaultCustomCommandPath, config);
     }
   }
 

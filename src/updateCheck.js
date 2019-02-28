@@ -19,21 +19,21 @@ export const checkForUpdate = () => new Promise((resolve, reject) => {
 export const isNewTemplateVersionAvailable = async () => {
   // eslint-disable-next-line
   const config = require(path.join(process.cwd(), 'config.js'));
-  const prom = () => new Promise((resolve) => {
+  const dl = () => new Promise((resolve) => {
     request.get({
-      url: `https://raw.githubusercontent.com/ElectronForConstruct/template/${config.project.branch}/package.json`,
+      url: `https://raw.githubusercontent.com/ElectronForConstruct/template/${config.project.branch}/template/package.json`,
       json: true,
     }, (e, r, remotePkg) => {
       resolve(remotePkg);
     });
   });
 
-  const remotePkg = await prom();
+  const remotePkg = await dl();
   const remoteVersion = remotePkg.version;
   // console.log('remoteVersion', remoteVersion);
 
-  if (fs.existsSync(path.join(process.cwd(), '.config', 'version'))) {
-    const localVersion = fs.readFileSync(path.join(process.cwd(), '.config', 'version'), 'utf8');
+  if (fs.existsSync(path.join(process.cwd(), 'package.json'))) {
+    const { version: localVersion } = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'));
     // console.log('localVersion', localVersion);
 
     if (semver.lt(localVersion, remoteVersion)) {
