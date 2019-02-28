@@ -13,14 +13,28 @@ export default class extends Command {
   }
 
   async run() {
-    console.log('Version: ', pkg.version);
-    console.log('To get help, please refer to this link: https://electronforconstruct.armaldio.xyz');
+    console.log(`Version: ${pkg.version}\n`);
+
+    const options = this.modules.map(module => `  ${module.category} - ${module.name}: ${module.id} ${module.shortcut ? `(${module.shortcut})` : ''}`);
+
+    console.log(`
+Usage: 
+  
+  efc [id]
+  
+  id: the id of the command you want to execute directly
+      
+Available modules:
+  Category - name: id [(shortcut)]
+  
+${options.join('\n')}          
+    `);
 
     const answers = await prompt([
       {
         type: 'confirm',
         name: 'confirm',
-        message: 'Open browser ?',
+        message: 'Get more help in the browser ?',
       },
     ]);
     if (answers.confirm) {

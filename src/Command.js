@@ -20,6 +20,9 @@ export default class Command {
 
     this.category = 'Other';
     this.config = {};
+
+    /** @type {Array<Command>} */
+    this.modules = [];
   }
 
   /**
@@ -36,6 +39,14 @@ export default class Command {
    */
   setConfig(config) {
     this.config = config;
+  }
+
+  /**
+   * Set loaded modules
+   * @param modules
+   */
+  setModules(modules) {
+    this.modules = modules;
   }
 
   show() {

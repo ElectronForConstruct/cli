@@ -46,8 +46,11 @@ Please install them using ${chalk.underline('npm install')} or ${chalk.underline
       isElectron,
     };
 
-    await pm.loadDefaultCommands(config);
-    await pm.loadCustomCommands(config);
+    await pm.loadDefaultCommands();
+    await pm.loadCustomCommands();
+
+    await pm.setConfig(config);
+    await pm.setModules(pm.commands);
 
     const args = process.argv.slice(2);
     if (args.length === 1) {
