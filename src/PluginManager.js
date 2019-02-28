@@ -4,11 +4,10 @@ import path from 'path';
 export default class PluginManager {
   constructor() {
     /** @private */
-    console.log(path.resolve(__dirname));
     this.defaultCommandPath = path.join(__dirname, 'actions');
 
     /** @private */
-    this.defaultCustomCommandPath = path.join(process.cwd(), 'actions');
+    this.defaultCustomCommandPath = path.join(process.cwd(), 'plugins');
 
     /**
      *
@@ -16,6 +15,23 @@ export default class PluginManager {
      * @private
      */
     this._commands = [];
+  }
+
+  myImport(importPath) {
+    return new Promise((resolve) => {
+      try {
+        import(importPath).then((module) => {
+          resolve({
+            error: false,
+            module,
+          });
+        });
+      } catch (e) {
+        resolve({
+          error: e,
+        });
+      }
+    });
   }
 
   /**
@@ -29,13 +45,19 @@ export default class PluginManager {
     let promises = [];
     const files = fs.readdirSync(commandsPath).filter(f => path.extname(f) !== 'js');
 
-    files.forEach(async (key) => {
-      if (key === './app.js') return;
-      // eslint-disable-next-line
-      promises.push(import(path.join(commandsPath, key)));
+    files.forEach((key) => {
+      promises.push(this.myImport(path.join(commandsPath, key)));
     });
 
-    const commands = await Promise.all(promises);
+    let commands = [];
+    try {
+      commands = await Promise.all(promises);
+    } catch (e) {
+      console.log(e);
+    }
+
+    if (commands.length === 0) return;
+
 
     // ---
 
@@ -45,15 +67,15 @@ export default class PluginManager {
         new Promise(async (resolve) => {
           /** @type Command */
           // eslint-disable-next-line
-          const newClass = new x.default();
+          const newClass = new x.module.default();
           if (Object.getPrototypeOf(newClass.constructor).name === 'Command') {
             newClass.setConfig(config);
             await newClass.onLoad();
             this._commands.push(newClass);
-            resolve();
           } else {
             console.log(`Plugin ${newClass.name} (${newClass.id}) is not a valid module. You must inherit from the Command class`);
           }
+          resolve();
         }),
       );
     });

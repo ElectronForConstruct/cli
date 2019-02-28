@@ -50,8 +50,8 @@ export default async (pm) => {
       },
     ];
 
-    return orders.find(o => o.name === choiceb.name).order
-             - orders.find(o => o.name === choicea.name).order;
+    return (orders.find(o => o.name === choiceb.name)?.order || 0)
+             - (orders.find(o => o.name === choicea.name)?.order || 0);
   });
 
   // Add invisible separator after each category

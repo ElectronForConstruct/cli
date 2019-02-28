@@ -47,7 +47,7 @@ Please install them using ${chalk.underline('npm install')} or ${chalk.underline
     };
 
     await pm.loadDefaultCommands(config);
-    // pm.loadCustomCommands(config);
+    await pm.loadCustomCommands(config);
 
     const args = process.argv.slice(2);
     if (args.length === 1) {
@@ -61,6 +61,6 @@ Please install them using ${chalk.underline('npm install')} or ${chalk.underline
   })
   .catch((e) => {
     console.error(
-      `Failed to check for updates: ${e}`,
+      'Failed to check for updates:', e,
     );
   });
