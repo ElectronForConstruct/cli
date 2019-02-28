@@ -14,7 +14,7 @@ export default class Command {
     if (this.shortcut) {
       const index = this.name.toLowerCase().indexOf(this.shortcut);
       if (index !== -1) {
-        this.name = this.name.replace(new RegExp(this.name[index], 'igm'), chalk.underline(this.name[index]));
+        this.name = this.name.replace(new RegExp(this.name[index], 'igm'), `${chalk.underline('$&')}`);
       }
     }
 

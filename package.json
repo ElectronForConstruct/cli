@@ -9,7 +9,8 @@
   "main": "./lib.js",
   "preferGlobal": true,
   "bin": {
-    "e4c": "index.js"
+    "e4c": "index.js",
+    "efc": "index.js"
   },
   "author": "Armaldio <armaldio@gmail.com>",
   "license": "MIT",
