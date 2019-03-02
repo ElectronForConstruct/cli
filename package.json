@@ -1,6 +1,6 @@
 {
   "name": "@electronforconstruct/cli",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A small utility to manage your Construct Electron projects",
   "scripts": {
     "start": "cross-env NODE_ENV=dev babel-node src/app.js",
@@ -17,16 +17,16 @@
   "author": "Armaldio <armaldio@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@babel/polyfill": "^7.2.5",
-    "@babel/register": "^7.0.0",
+    "@babel/cli": "^7.2.3",
     "@babel/core": "^7.3.4",
-	"@babel/cli": "^7.2.3",
     "@babel/node": "^7.2.2",
     "@babel/plugin-proposal-class-properties": "^7.3.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.3.1",
     "@babel/plugin-proposal-optional-chaining": "^7.2.0",
     "@babel/plugin-transform-runtime": "^7.2.0",
+    "@babel/polyfill": "^7.2.5",
     "@babel/preset-env": "^7.3.1",
+    "@babel/register": "^7.0.0",
     "@babel/types": "^7.3.4",
     "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.5",
