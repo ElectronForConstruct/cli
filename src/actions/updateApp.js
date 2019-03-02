@@ -3,7 +3,6 @@ import fs from 'fs';
 import zip from 'zip-a-folder';
 import install from 'install-packages';
 import { prompt } from 'enquirer';
-import { Prompt } from '../../lib';
 import Command from '../Command';
 import downloadPreview from '../utils/downloadPreview';
 import { isNewTemplateVersionAvailable } from '../updateCheck';

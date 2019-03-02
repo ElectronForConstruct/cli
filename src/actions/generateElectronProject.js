@@ -3,7 +3,6 @@ import { prompt } from 'enquirer';
 import fs from 'fs';
 import ora from 'ora';
 import path from 'path';
-import process from 'process';
 import downloadTemplate from '../utils/downloadTemplate';
 import Command from '../Command';
 
@@ -18,11 +17,7 @@ export default class extends Command {
   }
 
   async run(originPath) {
-    let config = {};
-    // eslint-disable-next-line
-    if (fs.existsSync(path.join(process.cwd(), 'config.js'))) config = await import(path.join(process.cwd(), 'config.js'));
-
-    const branch = (config && config.project && config.project.branch) || 'master';
+    const { branch } = this.config.settings.project;
 
     let answers = {};
     const dir = process.cwd();

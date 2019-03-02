@@ -18,8 +18,7 @@ export default class extends Command {
     } else {
       try {
         // eslint-disable-next-line
-        const config = require(path.join(process.cwd(), 'config.js'));
-        const result = await eb.build({ config: config.build });
+        const result = await eb.build({ config: this.config.settings.build });
         console.log(result);
       } catch (e) {
         console.log('There was an error building your project:', e);

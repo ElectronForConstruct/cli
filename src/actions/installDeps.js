@@ -1,8 +1,6 @@
-import { spawn } from 'child_process';
 import ora from 'ora';
-import { npm } from '../utils';
-import Command from '../Command';
 import install from 'install-packages';
+import Command from '../Command';
 
 export default class extends Command {
   constructor() {

@@ -16,6 +16,9 @@ export default {
   },
   project: {
     name: 'My name',
+    description: 'My description',
+    author: 'Me',
+    branch: 'master',
   },
   type: 'construct3',
   switches: [],
@@ -54,13 +57,5 @@ export default {
       allowToChangeInstallationDirectory: true,
       perMachine: true,
     },
-    linux: {
-      target: [
-        'AppImage',
-      ],
-    },
-    publish: [
-      'github',
-    ],
   },
 };

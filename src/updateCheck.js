@@ -3,6 +3,9 @@ import semver from 'semver';
 import path from 'path';
 import fs from 'fs';
 import pkg from '../package.json';
+import ConfigLoader from './ConfigLoader';
+
+const configLoader = new ConfigLoader();
 
 // check CLI
 export const checkForUpdate = () => new Promise((resolve, reject) => {
@@ -17,8 +20,8 @@ export const checkForUpdate = () => new Promise((resolve, reject) => {
 
 // check template
 export const isNewTemplateVersionAvailable = async () => {
-  // eslint-disable-next-line
-  const config = require(path.join(process.cwd(), 'config.js'));
+  const config = await configLoader.load();
+
   const dl = () => new Promise((resolve) => {
     request.get({
       url: `https://raw.githubusercontent.com/ElectronForConstruct/template/${config.project.branch}/template/package.json`,

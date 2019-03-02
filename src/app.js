@@ -1,13 +1,18 @@
 import chalk from 'chalk';
 import fs from 'fs';
 import path from 'path';
+import Raven from 'raven';
 import box from './box';
 import { checkForUpdate } from './updateCheck';
 import isDev from './isDev';
 import actions from './prompt';
 import PluginManager from './PluginManager';
+import ConfigLoader from './ConfigLoader';
 
 const pm = new PluginManager();
+const configLoader = new ConfigLoader();
+
+Raven.config('https://847cb74dd8964d4f81501ed1d29b18f6@sentry.io/1406240').install();
 
 if (isDev) {
   console.log('Running in developement mode');
@@ -30,13 +35,11 @@ checkForUpdate()
 
     // check configuration
 
-    let settings = {};
     if (fs.existsSync(path.join(process.cwd(), 'config.js'))) {
       isElectron = true;
-
-      // eslint-disable-next-line
-      settings = await import(path.join(process.cwd(), 'config.js'));
     }
+
+    const settings = await configLoader.load();
 
     // check node_modules
     if (isElectron && !fs.existsSync(path.join(process.cwd(), 'node_modules', '@electronforconstruct', 'cli'))) {
