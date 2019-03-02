@@ -1,12 +1,14 @@
 {
   "name": "@electronforconstruct/cli",
-  "version": "1.1.3",
+  "version": "1.2.0",
   "description": "A small utility to manage your Construct Electron projects",
   "scripts": {
     "start": "cross-env NODE_ENV=dev babel-node src/app.js",
+    "compileLibs": "rollup -c",
+    "prerelease": "yarn run compileLibs",
     "release": "yarn publish --access public"
   },
-  "main": "./lib.js",
+  "main": "./dist/index.js",
   "preferGlobal": true,
   "bin": {
     "e4c": "index.js",
@@ -19,12 +21,14 @@
     "@babel/register": "^7.0.0",
     "boxen": "^2.1.0",
     "chalk": "^2.4.2",
+    "deepmerge": "^3.2.0",
     "electron-builder": "^20.38.5",
     "enquirer": "^2.3.0",
     "github-download": "^0.5.0",
     "install-packages": "^0.2.5",
     "opn": "^5.4.0",
     "ora": "^3.0.0",
+    "raven": "^2.6.4",
     "request": "^2.88.0",
     "semver": "^5.6.0",
     "shelljs": "^0.8.3",
@@ -50,6 +54,9 @@
     "eslint-plugin-import": "^2.15.0",
     "eslint-plugin-jsx-a11y": "^6.1.2",
     "eslint-plugin-react": "^7.12.4",
-    "np": "^4.0.1"
+    "np": "^4.0.1",
+    "rollup": "^1.4.0",
+    "rollup-plugin-babel": "^4.3.2",
+    "rollup-plugin-node-resolve": "^4.0.1"
   }
 }
