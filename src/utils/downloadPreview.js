@@ -1,9 +1,9 @@
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
-import request from 'request';
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const request = require('request');
 
-export default async fullPath => new Promise((resolve) => {
+module.exports = async fullPath => new Promise((resolve) => {
   request({
     url: 'https://api.github.com/repos/ElectronForConstruct/preview/releases/latest',
     headers: {

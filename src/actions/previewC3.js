@@ -1,9 +1,9 @@
-import { prompt } from 'enquirer';
-import startPreview from '../utils/startPreview';
+const { prompt } = require('enquirer');
+const startPreview = require('../utils/startPreview');
 
-import Command from '../Command';
+const Command = require('../Command');
 
-export default class extends Command {
+module.exports = class extends Command {
   constructor() {
     super('preview-c3', 'Construct 3', '3');
     this.setCategory('Preview');
@@ -28,4 +28,4 @@ export default class extends Command {
     ]);
     await startPreview(answers.url);
   }
-}
+};

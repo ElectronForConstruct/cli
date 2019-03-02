@@ -1,10 +1,13 @@
-import fs from 'fs';
-import path from 'path';
+const fs = require('fs');
+const path = require('path');
+const isDev = require('./isDev');
 
-export default class PluginManager {
+module.exports = class PluginManager {
   constructor() {
     /** @private */
-    this.defaultCommandPath = path.join(__dirname, 'actions');
+
+    if (isDev) this.defaultCommandPath = path.join(__dirname, 'actions');
+    else this.defaultCommandPath = path.join(__dirname, '..', 'src', 'actions');
 
     /** @private */
     this.defaultCustomCommandPath = path.join(process.cwd(), 'plugins');
@@ -18,29 +21,6 @@ export default class PluginManager {
   }
 
   /**
-   * Import a path asynchronously
-   * @private
-   * @param importPath
-   * @returns {Promise<any>}
-   */
-  myImport(importPath) {
-    return new Promise((resolve) => {
-      try {
-        import(importPath).then((module) => {
-          resolve({
-            error: false,
-            module,
-          });
-        });
-      } catch (e) {
-        resolve({
-          error: e,
-        });
-      }
-    });
-  }
-
-  /**
    *
    * @param {string} commandsPath
    * @returns void
@@ -51,7 +31,7 @@ export default class PluginManager {
     const files = fs.readdirSync(commandsPath).filter(f => path.extname(f) !== 'js');
 
     files.forEach((key) => {
-      promises.push(this.myImport(path.join(commandsPath, key)));
+      promises.push(require(path.join(commandsPath, key)));
     });
 
     let commands = [];
@@ -71,7 +51,7 @@ export default class PluginManager {
         new Promise(async (resolve) => {
           /** @type Command */
           // eslint-disable-next-line
-          const newClass = new x.module.default();
+          const newClass = new x();
           newClass.setConfig(config);
           if (!newClass.show()) {
             resolve(undefined);
@@ -148,4 +128,4 @@ export default class PluginManager {
   get commands() {
     return this._commands;
   }
-}
+};

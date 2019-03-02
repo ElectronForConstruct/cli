@@ -1,13 +1,13 @@
-import chalk from 'chalk';
-import fs from 'fs';
-import path from 'path';
-import Raven from 'raven';
-import box from './box';
-import { checkForUpdate } from './updateCheck';
-import isDev from './isDev';
-import actions from './prompt';
-import PluginManager from './PluginManager';
-import ConfigLoader from './ConfigLoader';
+const chalk = require('chalk');
+const fs = require('fs');
+const path = require('path');
+const Raven = require('raven');
+const box = require('./box');
+const { checkForUpdate } = require('./updateCheck');
+const isDev = require('./isDev');
+const actions = require('./prompt');
+const PluginManager = require('./PluginManager');
+const ConfigLoader = require('./ConfigLoader');
 
 const pm = new PluginManager();
 const configLoader = new ConfigLoader();

@@ -1,14 +1,14 @@
-import request from 'request';
-import semver from 'semver';
-import path from 'path';
-import fs from 'fs';
-import pkg from '../package.json';
-import ConfigLoader from './ConfigLoader';
+const request = require('request');
+const semver = require('semver');
+const path = require('path');
+const fs = require('fs');
+const pkg = require('../package.json');
+const ConfigLoader = require('./ConfigLoader');
 
 const configLoader = new ConfigLoader();
 
 // check CLI
-export const checkForUpdate = () => new Promise((resolve, reject) => {
+const checkForUpdate = () => new Promise((resolve, reject) => {
   request('https://api.npms.io/v2/package/@electronforconstruct%2fcli', { json: true }, (error, response, body) => {
     if (error) reject(error);
 
@@ -19,7 +19,7 @@ export const checkForUpdate = () => new Promise((resolve, reject) => {
 });
 
 // check template
-export const isNewTemplateVersionAvailable = async () => {
+const isNewTemplateVersionAvailable = async () => {
   const config = await configLoader.load();
 
   const dl = () => new Promise((resolve) => {
@@ -48,4 +48,9 @@ export const isNewTemplateVersionAvailable = async () => {
     }
   }
   return null;
+};
+
+module.exports = {
+  checkForUpdate,
+  isNewTemplateVersionAvailable,
 };

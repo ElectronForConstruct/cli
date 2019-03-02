@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   window: {
     width: 800,
     height: 600,
@@ -8,6 +8,7 @@ export default {
     toolbar: true,
     alwaysOnTop: false,
   },
+  dependencies: [],
   developer: {
     showConstructDevTools: true,
     autoClose: true,

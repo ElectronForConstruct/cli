@@ -1,12 +1,12 @@
-import { Select } from 'enquirer';
-import box from './box';
+const { Select } = require('enquirer');
+const box = require('./box');
 
 /**
  * @param {PluginManager} pm
  * @returns {Promise<boolean>}
  */
 // eslint-disable-next-line
-export default async (pm) => {
+module.exports = async (pm) => {
   let choices = [];
 
   pm.commands.forEach((command) => {
@@ -48,8 +48,10 @@ export default async (pm) => {
       },
     ];
 
-    return (orders.find(o => o.name === choiceb.name)?.order || 0)
-           - (orders.find(o => o.name === choicea.name)?.order || 0);
+    const oa = orders.find(o => o.name === choicea.name);
+    const ob = orders.find(o => o.name === choiceb.name);
+
+    return (ob ? ob.order : 0) - (oa ? oa.order : 0);
   });
 
   // Add invisible separator after each category

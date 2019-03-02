@@ -1,6 +1,6 @@
-import Command from '../Command';
+const Command = require('../Command');
 
-export default class extends Command {
+module.exports = class extends Command {
   constructor() {
     super('quit', 'Quit', 'q');
   }
@@ -12,4 +12,4 @@ export default class extends Command {
   async run() {
     // do nothing
   }
-}
+};

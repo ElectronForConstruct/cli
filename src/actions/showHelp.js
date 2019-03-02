@@ -1,9 +1,9 @@
-import { prompt } from 'enquirer';
-import opn from 'opn';
-import pkg from '../../package.json';
-import Command from '../Command';
+const { prompt } = require('enquirer');
+const opn = require('opn');
+const pkg = require('../../package.json');
+const Command = require('../Command');
 
-export default class extends Command {
+module.exports = class extends Command {
   constructor() {
     super('help', 'Help', 'h');
   }
@@ -41,4 +41,4 @@ ${options.join('\n')}
       opn('https://electronforconstruct.armaldio.xyz');
     }
   }
-}
+};

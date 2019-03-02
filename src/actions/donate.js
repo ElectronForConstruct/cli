@@ -1,7 +1,7 @@
-import opn from 'opn';
-import Command from '../Command';
+const opn = require('opn');
+const Command = require('../Command');
 
-export default class extends Command {
+module.exports = class extends Command {
   constructor() {
     super('donate', 'Donate');
   }
@@ -13,4 +13,4 @@ export default class extends Command {
   async run() {
     opn('https://armaldio.xyz/#/donations');
   }
-}
+};

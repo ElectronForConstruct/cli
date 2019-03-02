@@ -1,12 +1,12 @@
-import chalk from 'chalk';
-import { prompt } from 'enquirer';
-import fs from 'fs';
-import ora from 'ora';
-import path from 'path';
-import downloadTemplate from '../utils/downloadTemplate';
-import Command from '../Command';
+const chalk = require('chalk');
+const { prompt } = require('enquirer');
+const fs = require('fs');
+const ora = require('ora');
+const path = require('path');
+const downloadTemplate = require('../utils/downloadTemplate');
+const Command = require('../Command');
 
-export default class extends Command {
+module.exports = class extends Command {
   constructor() {
     super('new-project', 'Create a new project', 'n');
     this.setCategory('Toolchain');
@@ -58,4 +58,4 @@ export default class extends Command {
       console.error('Aborted:', e);
     }
   }
-}
+};

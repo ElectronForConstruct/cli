@@ -1,8 +1,8 @@
-import ora from 'ora';
-import install from 'install-packages';
-import Command from '../Command';
+const ora = require('ora');
+const install = require('install-packages');
+const Command = require('../Command');
 
-export default class extends Command {
+module.exports = class extends Command {
   constructor() {
     super('install-deps', 'Install dependencies', 'd');
     this.setCategory('Utility');
@@ -17,4 +17,4 @@ export default class extends Command {
     await install();
     spinner.succeed('Dependencies successfully installed');
   }
-}
+};

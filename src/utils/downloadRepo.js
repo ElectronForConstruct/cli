@@ -1,6 +1,6 @@
-import ghdownload from 'github-download';
+const ghdownload = require('github-download');
 
-export default (user, repo, branch, outputDir) => new Promise((resolve, reject) => {
+module.exports = (user, repo, branch, outputDir) => new Promise((resolve, reject) => {
   ghdownload({
     user,
     repo,

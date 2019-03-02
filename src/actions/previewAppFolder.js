@@ -1,7 +1,7 @@
-import startPreview from '../utils/startPreview';
-import Command from '../Command';
+const startPreview = require('../utils/startPreview');
+const Command = require('../Command');
 
-export default class extends Command {
+module.exports = class extends Command {
   constructor() {
     super('preview-folder', 'App Folder', 'a');
     this.setCategory('Preview');
@@ -10,4 +10,4 @@ export default class extends Command {
   async run() {
     await startPreview();
   }
-}
+};

@@ -1,9 +1,9 @@
-import fs from 'fs';
-import path from 'path';
-import * as deepmerge from 'deepmerge';
-import defaultConfig from './DefaultConfig';
+const fs = require('fs');
+const path = require('path');
+const deepmerge = require('deepmerge');
+const defaultConfig = require('./DefaultConfig');
 
-export default class ConfigLoader {
+module.exports = class ConfigLoader {
   /**
    * Load and merge config files
    * @async
@@ -17,6 +17,6 @@ export default class ConfigLoader {
     }
 
     const overwriteMerge = (destinationArray, sourceArray) => sourceArray;
-    return deepmerge.default(defaultConfig, customConfig, { arrayMerge: overwriteMerge });
+    return deepmerge(defaultConfig, customConfig, { arrayMerge: overwriteMerge });
   }
-}
+};

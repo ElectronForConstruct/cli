@@ -1,10 +1,10 @@
-import * as eb from 'electron-builder';
-import fs from 'fs';
-import path from 'path';
-import process from 'process';
-import Command from '../Command';
+const eb = require('electron-builder');
+const fs = require('fs');
+const path = require('path');
+const process = require('process');
+const Command = require('../Command');
 
-export default class extends Command {
+module.exports = class extends Command {
   constructor() {
     super('build', 'Build', 'b');
     this.setCategory('Toolchain');
@@ -25,4 +25,4 @@ export default class extends Command {
       }
     }
   }
-}
+};

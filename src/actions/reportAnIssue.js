@@ -1,8 +1,8 @@
-import opn from 'opn';
-import os from 'os';
-import Command from '../Command';
+const opn = require('opn');
+const os = require('os');
+const Command = require('../Command');
 
-export default class extends Command {
+module.exports = class extends Command {
   constructor() {
     super('report-issue', 'Report an issue');
   }
@@ -23,4 +23,4 @@ Steps to reproduce:
 
     opn(`https://github.com/ElectronForConstruct/preview/issues/new?body=${encodeURI(msg)}`);
   }
-}
+};

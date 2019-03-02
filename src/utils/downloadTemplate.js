@@ -1,9 +1,9 @@
-import fs from 'fs';
-import shelljs from 'shelljs';
-import downloadPreview from './downloadPreview';
-import downloadRepo from './downloadRepo';
+const fs = require('fs');
+const shelljs = require('shelljs');
+const downloadPreview = require('./downloadPreview');
+const downloadRepo = require('./downloadRepo');
 
-export default async (fullPath, branch) => {
+module.exports = async (fullPath, branch) => {
   await downloadRepo('ElectronForConstruct', 'template', branch, `${fullPath}.tmp`);
   if (!fs.existsSync(fullPath)) shelljs.mkdir(fullPath);
   shelljs.cp('-R', `${fullPath}.tmp/template/*`, fullPath);

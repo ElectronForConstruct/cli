@@ -1,13 +1,13 @@
-import request from 'request';
-import fs from 'fs';
-import zip from 'zip-a-folder';
-import install from 'install-packages';
-import { prompt } from 'enquirer';
-import Command from '../Command';
-import downloadPreview from '../utils/downloadPreview';
-import { isNewTemplateVersionAvailable } from '../updateCheck';
+const request = require('request');
+const fs = require('fs');
+const zip = require('zip-a-folder');
+const install = require('install-packages');
+const { prompt } = require('enquirer');
+const Command = require('../Command');
+const downloadPreview = require('../utils/downloadPreview');
+const { isNewTemplateVersionAvailable } = require('../updateCheck');
 
-export default class extends Command {
+module.exports = class extends Command {
   constructor() {
     super('update', 'Update current template', 'u');
     this.setCategory('Utility');
@@ -75,11 +75,14 @@ export default class extends Command {
 
     // install deps
 
-    console.log(`Restoring packages: ${this.config.settings.dependencies.join(', ')}`);
 
     await install();
-    await install({ packages: this.config.settings.dependencies });
+
+    if (this.config.settings.dependencies.length > 0) {
+      console.log(`Restoring packages: ${this.config.settings.dependencies.join(', ')}`);
+      await install({ packages: this.config.settings.dependencies });
+    }
 
     // profit
   }
-}
+};

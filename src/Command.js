@@ -1,6 +1,6 @@
-import chalk from 'chalk';
+const chalk = require('chalk');
 
-export default class Command {
+module.exports = class Command {
   /**
    * @param {string} id
    * @param {string} name
@@ -68,4 +68,4 @@ export default class Command {
   async run() {
     throw new Error('You must define an async run command!');
   }
-}
+};

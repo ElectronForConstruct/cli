@@ -1,8 +1,8 @@
-import { exec } from 'child_process';
-import process from 'process';
-import { npm } from '../utils';
+const { exec } = require('child_process');
+const process = require('process');
+const { npm } = require('../utils');
 
-export default url => new Promise((resolve) => {
+module.exports = url => new Promise((resolve) => {
   console.log(`Starting preview ${url ? `on "${url}"` : ''}`);
 
   let command;
