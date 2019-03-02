@@ -75,12 +75,14 @@ module.exports = class extends Command {
 
     // install deps
 
-
     await install();
 
     if (this.config.settings.dependencies.length > 0) {
       console.log(`Restoring packages: ${this.config.settings.dependencies.join(', ')}`);
-      await install({ packages: this.config.settings.dependencies });
+      await install({
+        packages: this.config.settings.dependencies,
+        saveDev: false,
+      });
     }
 
     // profit

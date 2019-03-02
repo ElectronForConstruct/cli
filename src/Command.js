@@ -1,5 +1,7 @@
 const chalk = require('chalk');
-
+/**
+ * @type {module.Command}
+ */
 module.exports = class Command {
   /**
    * @param {string} id

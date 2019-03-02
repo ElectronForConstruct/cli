@@ -16,7 +16,6 @@ module.exports = class ConfigLoader {
       customConfig = require(path.join(process.cwd(), 'config.js'));
     }
 
-    const overwriteMerge = (destinationArray, sourceArray) => sourceArray;
-    return deepmerge(defaultConfig, customConfig, { arrayMerge: overwriteMerge });
+    return deepmerge(defaultConfig, customConfig);
   }
 };

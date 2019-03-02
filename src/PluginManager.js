@@ -1,20 +1,18 @@
 const fs = require('fs');
 const path = require('path');
-const isDev = require('./isDev');
 
 module.exports = class PluginManager {
   constructor() {
     /** @private */
 
-    if (isDev) this.defaultCommandPath = path.join(__dirname, 'actions');
-    else this.defaultCommandPath = path.join(__dirname, '..', 'src', 'actions');
+    this.defaultCommandPath = path.join(__dirname, 'actions');
 
     /** @private */
     this.defaultCustomCommandPath = path.join(process.cwd(), 'plugins');
 
     /**
      *
-     * @type {Array<Command>}
+     * @type {Array<module.Command>}
      * @private
      */
     this._commands = [];
@@ -23,48 +21,30 @@ module.exports = class PluginManager {
   /**
    *
    * @param {string} commandsPath
+   * @param {Object} config
    * @returns void
    * @private
    */
   async loadCommands(commandsPath, config) {
-    let promises = [];
     const files = fs.readdirSync(commandsPath).filter(f => path.extname(f) !== 'js');
+    const commands = [];
 
     files.forEach((key) => {
-      promises.push(require(path.join(commandsPath, key)));
+      try {
+        // eslint-disable-next-line
+        commands.push(require(path.join(commandsPath, key)));
+      } catch (e) {
+        console.error(`Unable to load module ${key}`);
+      }
     });
-
-    let commands = [];
-    try {
-      commands = await Promise.all(promises);
-    } catch (e) {
-      console.log(e);
-    }
 
     if (commands.length === 0) return;
 
     // ---
 
-    promises = [];
-    commands.forEach(async (x) => {
-      promises.push(
-        new Promise(async (resolve) => {
-          /** @type Command */
-          // eslint-disable-next-line
-          const newClass = new x();
-          newClass.setConfig(config);
-          if (!newClass.show()) {
-            resolve(undefined);
-          } else if (Object.getPrototypeOf(newClass.constructor).name === 'Command') {
-            await newClass.onLoad();
-            this._commands.push(newClass);
-            resolve(newClass);
-          } else {
-            console.log(`Plugin ${newClass.name} (${newClass.id}) is not a valid module. You must inherit from the Command class`);
-            resolve(undefined);
-          }
-        }),
-      );
+    const promises = [];
+    commands.forEach(async (Command) => {
+      promises.push(this.loadCommand(config, Command));
     });
 
     await Promise.all(promises);
@@ -83,9 +63,26 @@ module.exports = class PluginManager {
    * @returns {Promise<void>}
    */
   async loadCustomCommands(config = {}) {
+    /** @type Array<string> */
+    const { plugins } = config.settings;
+
+    // Load local plugins (files and folders)
     if (fs.existsSync(this.defaultCustomCommandPath)) {
       await this.loadCommands(this.defaultCustomCommandPath, config);
     }
+
+    // load from node_modules
+    const nodeModules = path.join(process.cwd(), 'node_modules');
+    const proms = [];
+    plugins.forEach((plugin) => {
+      if (fs.existsSync(path.join(nodeModules, '@electronforconstruct', `plugin-efc-${plugin}`))) {
+        // eslint-disable-next-line
+        const Command = require(path.join(nodeModules, '@electronforconstruct', `plugin-efc-${plugin}`));
+        proms.push(this.loadCommand(config, Command));
+      }
+    });
+
+    await Promise.all(proms);
   }
 
   /**
@@ -99,7 +96,7 @@ module.exports = class PluginManager {
 
   /**
    * Set modules friends to be accesible from any module
-   * @param {Array<Command>} modules
+   * @param {Array<module.Command>} modules
    * @returns {Promise<void>}
    */
   async setModules(modules) {
@@ -114,7 +111,7 @@ module.exports = class PluginManager {
 
   /**
    *
-   * @returns {Command} command
+   * @returns {module.Command} command
    * @param {String} id
    */
   get(id) {
@@ -123,9 +120,37 @@ module.exports = class PluginManager {
 
   /**
    * Return a list of all available commands
-   * @returns {Array<Command>}
+   * @returns {Array<module.Command>}
    */
   get commands() {
     return this._commands;
+  }
+
+  /**
+   * @param {Object} config
+   * @param {module.Command} Command
+   * @returns {undefined}
+   */
+  async loadCommand(config, Command) {
+    const { plugins } = config.settings;
+
+    return new Promise(async (resolve) => {
+      const newCommand = new Command();
+      newCommand.setConfig(config);
+
+      if (!newCommand.show()) {
+        resolve(undefined);
+      } else if (Object.getPrototypeOf(newCommand.constructor).name === 'Command') {
+        if (plugins.includes(newCommand.id)) {
+          await newCommand.onLoad();
+          this._commands.push(newCommand);
+          resolve(newCommand);
+        }
+        resolve(undefined);
+      } else {
+        console.log(`Plugin ${newCommand.name} (${newCommand.id}) is not a valid module. You must inherit from the Command class`);
+        resolve(undefined);
+      }
+    });
   }
 };
