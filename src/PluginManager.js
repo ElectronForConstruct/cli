@@ -108,7 +108,7 @@ module.exports = class PluginManager {
   async mergeDefaultConfig() {
     this.commands.forEach((m) => {
       const commandDefaultConfig = m.defaultConfiguration;
-      this.config = deepmerge(this.config, commandDefaultConfig);
+      this.config = deepmerge(commandDefaultConfig, this.config);
     });
     await this.setConfig(this.config);
   }
