@@ -9,11 +9,11 @@ module.exports = class ConfigLoader {
    * @async
    * @returns {Promise<Object>}
    */
-  async load() {
+  async load(configPath = process.cwd()) {
     let customConfig = {};
 
     const search = [
-      path.join(process.cwd(), 'config.js'),
+      path.join(configPath, 'config.js'),
       path.join(__dirname, 'config.js'),
     ];
 

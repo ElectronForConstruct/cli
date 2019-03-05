@@ -51,8 +51,5 @@ module.exports = {
       buildResources: 'build',
       output: 'dist',
     },
-    extraFiles: [
-      'config.js',
-    ],
   },
 };
