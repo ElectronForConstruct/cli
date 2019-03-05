@@ -99,6 +99,4 @@ module.exports = async (pm) => {
   } catch (e) {
     if (e) console.log('Aborted:', e);
   }
-
-  console.log(box('Happy with ElectronForConstruct ? ► Donate: https://armaldio.xyz/#/donations ♥'));
 };
