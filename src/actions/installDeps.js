@@ -1,5 +1,5 @@
 const ora = require('ora');
-const install = require('install-packages');
+const installAllDeps = require('../utils/installAllDeps');
 const Command = require('../Command');
 
 module.exports = class extends Command {
@@ -9,12 +9,14 @@ module.exports = class extends Command {
   }
 
   show() {
-    return !this.config.isReady && this.config.isElectron;
+    return this.config.isElectron;
   }
 
   async run() {
+    const { settings } = this.config;
+
     const spinner = ora('Installing dependencies... This may take a while, relax and take a coffee').start();
-    await install();
+    await installAllDeps(settings)
     spinner.succeed('Dependencies successfully installed');
   }
 };

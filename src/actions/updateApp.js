@@ -1,9 +1,9 @@
 const request = require('request');
 const fs = require('fs');
 const zip = require('zip-a-folder');
-const install = require('install-packages');
 const { prompt } = require('enquirer');
 const Command = require('../Command');
+const installAllDeps = require('../utils/installAllDeps');
 const downloadPreview = require('../utils/downloadPreview');
 const { isNewTemplateVersionAvailable } = require('../updateCheck');
 
@@ -24,6 +24,7 @@ module.exports = class extends Command {
   }
 
   async run() {
+    const { settings } = this.config;
     const fullDirectoryPath = process.cwd();
     const backupName = `${fullDirectoryPath}-${Date.now().toString()}.zip`;
     // const folderName = path.basename(process.cwd());
@@ -49,7 +50,7 @@ module.exports = class extends Command {
 
     const prom = file => new Promise((resolve) => {
       request.get({
-        url: `https://raw.githubusercontent.com/ElectronForConstruct/template/${this.config.settings.project.branch}/template/${file}`,
+        url: `https://raw.githubusercontent.com/ElectronForConstruct/template/${settings.project.branch}/template/${file}`,
         json: false,
       }, (e, r, content) => {
         resolve({
@@ -75,15 +76,7 @@ module.exports = class extends Command {
 
     // install deps
 
-    await install();
-
-    if (this.config.settings.dependencies.length > 0) {
-      console.log(`Restoring packages: ${this.config.settings.dependencies.join(', ')}`);
-      await install({
-        packages: this.config.settings.dependencies,
-        saveDev: false,
-      });
-    }
+    await installAllDeps(settings);
 
     // profit
   }

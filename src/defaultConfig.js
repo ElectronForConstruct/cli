@@ -1,3 +1,5 @@
+const { version, name } = require('../package');
+
 module.exports = {
   window: {
     width: 800,
@@ -8,7 +10,12 @@ module.exports = {
     toolbar: true,
     alwaysOnTop: false,
   },
-  dependencies: [],
+  debug: {
+    showConfig: false,
+  },
+  dependencies: [
+    `${name}@${version}`, // always latest cli
+  ],
   plugins: [
     'build',
     'preview-c2',
@@ -44,32 +51,8 @@ module.exports = {
       buildResources: 'build',
       output: 'dist',
     },
-    mac: {
-      category: 'public.app-category.developer-tools (see: http://lnk.armaldio.xyz/AppleCategoryList)',
-      target: 'default',
-    },
-    win: {
-      target: [
-        {
-          target: 'nsis',
-          arch: [
-            'x64',
-            'ia32',
-          ],
-        },
-        {
-          target: 'portable',
-          arch: [
-            'x64',
-            'ia32',
-          ],
-        },
-      ],
-    },
-    nsis: {
-      oneClick: false,
-      allowToChangeInstallationDirectory: true,
-      perMachine: true,
-    },
+    extraFiles: [
+      'config.js',
+    ],
   },
 };

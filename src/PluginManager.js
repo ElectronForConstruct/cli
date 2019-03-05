@@ -79,6 +79,10 @@ module.exports = class PluginManager {
         // eslint-disable-next-line
         const Command = require(path.join(nodeModules, '@electronforconstruct', `plugin-efc-${plugin}`));
         proms.push(this.loadCommand(config, Command));
+      } else if (fs.existsSync(path.join(nodeModules, `plugin-efc-${plugin}`))) {
+        // eslint-disable-next-line
+        const Command = require(path.join(nodeModules, `plugin-efc-${plugin}`));
+        proms.push(this.loadCommand(config, Command));
       }
     });
 
