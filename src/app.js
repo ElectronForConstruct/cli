@@ -55,20 +55,25 @@ Please install them using ${chalk.underline('npm install')} or ${chalk.underline
       isElectron,
     };
 
-    await pm.loadDefaultCommands(config);
-    if (isReady) await pm.loadCustomCommands(config);
+    pm.setManagerConfig(config);
+
+    await pm.loadDefaultCommands();
+    if (isReady) await pm.loadCustomCommands();
 
     await pm.setModules(pm.commands);
+
+    await pm.mergeDefaultConfig();
 
     const args = process.argv.slice(2);
     if (args.length === 1) {
       const command = pm.commands.find(c => c.id === args[0]);
       if (command) await command.run();
       else console.log('The command was not found');
-      return;
+    } else {
+      await actions(pm);
     }
 
-    await actions(pm);
+    console.log(box('Happy with ElectronForConstruct ? ► Donate: https://armaldio.xyz/#/donations ♥'));
   })
   .catch((e) => {
     console.error(

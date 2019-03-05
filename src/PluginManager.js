@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const deepmerge = require('deepmerge');
 
 module.exports = class PluginManager {
   constructor() {
@@ -16,6 +17,12 @@ module.exports = class PluginManager {
      * @private
      */
     this._commands = [];
+
+    this.config = {};
+  }
+
+  setManagerConfig(config) {
+    this.config = config;
   }
 
   /**
@@ -25,7 +32,7 @@ module.exports = class PluginManager {
    * @returns void
    * @private
    */
-  async loadCommands(commandsPath, config) {
+  async loadCommands(commandsPath) {
     const files = fs.readdirSync(commandsPath).filter(f => path.extname(f) !== 'js');
     const commands = [];
 
@@ -44,7 +51,7 @@ module.exports = class PluginManager {
 
     const promises = [];
     commands.forEach(async (Command) => {
-      promises.push(this.loadCommand(config, Command));
+      promises.push(this.loadCommand(Command));
     });
 
     await Promise.all(promises);
@@ -54,21 +61,21 @@ module.exports = class PluginManager {
    * Load default commands
    * @returns {Promise<void>}
    */
-  async loadDefaultCommands(config = {}) {
-    await this.loadCommands(this.defaultCommandPath, config);
+  async loadDefaultCommands() {
+    await this.loadCommands(this.defaultCommandPath);
   }
 
   /**
    * Load commands from a cutom path
    * @returns {Promise<void>}
    */
-  async loadCustomCommands(config = {}) {
+  async loadCustomCommands() {
     /** @type Array<string> */
-    const { plugins } = config.settings;
+    const { plugins } = this.config.settings;
 
     // Load local plugins (files and folders)
     if (fs.existsSync(this.defaultCustomCommandPath)) {
-      await this.loadCommands(this.defaultCustomCommandPath, config);
+      await this.loadCommands(this.defaultCustomCommandPath);
     }
 
     // load from node_modules
@@ -78,11 +85,11 @@ module.exports = class PluginManager {
       if (fs.existsSync(path.join(nodeModules, '@electronforconstruct', `plugin-efc-${plugin}`))) {
         // eslint-disable-next-line
         const Command = require(path.join(nodeModules, '@electronforconstruct', `plugin-efc-${plugin}`));
-        proms.push(this.loadCommand(config, Command));
+        proms.push(this.loadCommand(Command));
       } else if (fs.existsSync(path.join(nodeModules, `plugin-efc-${plugin}`))) {
         // eslint-disable-next-line
         const Command = require(path.join(nodeModules, `plugin-efc-${plugin}`));
-        proms.push(this.loadCommand(config, Command));
+        proms.push(this.loadCommand(Command));
       }
     });
 
@@ -98,19 +105,28 @@ module.exports = class PluginManager {
     this.commands.map(m => m.setConfig(config));
   }
 
+  async mergeDefaultConfig() {
+    this.commands.forEach((m) => {
+      const commandDefaultConfig = m.defaultConfiguration;
+      this.config = deepmerge(this.config, commandDefaultConfig);
+    });
+    await this.setConfig(this.config);
+  }
+
   /**
    * Set modules friends to be accesible from any module
    * @param {Array<module.Command>} modules
    * @returns {Promise<void>}
    */
   async setModules(modules) {
-    const newModules = modules.map((m) => {
+    /* const newModules = modules.map((m) => {
       const newModule = Object.assign({}, m);
       delete newModule.config; // circular references
       delete newModule.modules; // circular references
       return newModule;
-    });
     this.commands.map(m => m.setModules(newModules));
+    }); */
+    this.commands.map(m => m.setModules(modules));
   }
 
   /**
@@ -131,16 +147,15 @@ module.exports = class PluginManager {
   }
 
   /**
-   * @param {Object} config
    * @param {module.Command} Command
    * @returns {undefined}
    */
-  async loadCommand(config, Command) {
-    const { plugins } = config.settings;
+  async loadCommand(Command) {
+    const { plugins } = this.config.settings;
 
     return new Promise(async (resolve) => {
       const newCommand = new Command();
-      newCommand.setConfig(config);
+      newCommand.setConfig(this.config);
 
       if (!newCommand.show()) {
         resolve(undefined);

@@ -51,5 +51,9 @@ module.exports = {
       buildResources: 'build',
       output: 'dist',
     },
+    files: [
+      '!preview.exe',
+      '!preview',
+    ],
   },
 };

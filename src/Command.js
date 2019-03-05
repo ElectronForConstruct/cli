@@ -1,4 +1,6 @@
 const chalk = require('chalk');
+const deepmerge = require('deepmerge');
+
 /**
  * @type {module.Command}
  */
@@ -22,9 +24,26 @@ module.exports = class Command {
 
     this.category = 'Other';
     this.config = {};
+    this.defaultConfiguration = {};
 
     /** @type {Array<Command>} */
     this.modules = [];
+  }
+
+  /**
+   * Hook executed before the build task
+   * @abstract
+   */
+  onPreBuild() {
+    // :)
+  }
+
+  /**
+   * Hook executed after the build task
+   * @abstract
+   */
+  onPostBuild() {
+    // :)
   }
 
   /**
@@ -51,23 +70,57 @@ module.exports = class Command {
     this.modules = modules;
   }
 
+  /**
+   * Set the default configuration for the plugin
+   * @param {Object} config
+   */
+  setDefaultConfiguration(config) {
+    this.defaultConfiguration = {
+      settings: config,
+    };
+  }
+
+  /**
+   * Override configuration on command execution
+   * @param config
+   * @abstract
+   */
+  overrideConfiguration(config) {
+    return config;
+  }
+
   show() {
     return this.config.isReady && this.config.isElectron;
   }
 
+  /**
+   * @abstract
+   */
   onLoad() {
     // do nothing
+  }
+
+  get settings() {
+    const { settings } = this.config;
+    const customSettings = this.overrideConfiguration(settings);
+
+    return deepmerge(settings, customSettings);
   }
 
   /**
    * Used to determine if the class is valid when loading commands
    * @returns {boolean}
+   * @abstract
    */
   isValid() {
     return true;
   }
 
+  /**
+   * @abstract
+   * @returns {Promise<void>}
+   */
   async run() {
-    throw new Error('You must define an async run command!');
+    // :)
   }
 };

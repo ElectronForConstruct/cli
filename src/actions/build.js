@@ -1,7 +1,6 @@
 const eb = require('electron-builder');
 const fs = require('fs');
 const path = require('path');
-const process = require('process');
 const Command = require('../Command');
 
 module.exports = class extends Command {
@@ -11,6 +10,15 @@ module.exports = class extends Command {
   }
 
   async run() {
+    for (let i = 0; i < this.modules.length; i += 1) {
+      const module = this.modules[i];
+
+      if (typeof module.onPreBuild === 'function') {
+        // eslint-disable-next-line
+        await module.onPreBuild();
+      }
+    }
+
     if (
       !fs.existsSync(path.join(process.cwd(), 'app', 'data.js'))
       && !fs.existsSync(path.join(process.cwd(), 'app', 'data.json'))) {
