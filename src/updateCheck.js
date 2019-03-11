@@ -16,7 +16,6 @@ const checkForUpdate = () => new Promise((resolve, reject) => {
 
 
     const { latest } = body['dist-tags'];
-    console.log(latest);
 
     if (semver.lt(pkg.version, latest)) resolve(latest);
     resolve(false);

@@ -35,6 +35,7 @@ module.exports = {
     'help',
     'update',
     'config',
+    'debug',
   ],
   developer: {
     showConstructDevTools: true,
