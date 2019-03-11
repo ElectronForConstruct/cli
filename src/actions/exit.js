@@ -1,11 +1,11 @@
-const Command = require('../Command');
+const Command = require('../classes/Command');
 
 module.exports = class extends Command {
   constructor() {
     super('quit', 'Quit', 'q');
   }
 
-  show() {
+  isVisible() {
     return true;
   }
 

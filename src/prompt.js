@@ -1,15 +1,14 @@
 const { Select } = require('enquirer');
-const box = require('./box');
 
 /**
- * @param {PluginManager} pm
+ * @param {module.PluginManager} pm
  * @returns {Promise<boolean>}
  */
 // eslint-disable-next-line
 module.exports = async (pm) => {
   let choices = [];
 
-  pm.commands.forEach((command) => {
+  pm.getCommands().forEach((command) => {
     if (!choices.find(c => c.name === command.category)) {
       choices.push({
         name: command.category,
@@ -22,7 +21,6 @@ module.exports = async (pm) => {
       {
         name: command.name,
         value: command.id,
-        hint: command.hint,
         shortcut: command.shortcut,
       },
     );

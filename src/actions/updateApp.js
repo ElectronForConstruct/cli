@@ -2,7 +2,7 @@ const request = require('request');
 const fs = require('fs');
 const zip = require('zip-a-folder');
 const { prompt } = require('enquirer');
-const Command = require('../Command');
+const Command = require('../classes/Command');
 const installAllDeps = require('../utils/installAllDeps');
 const downloadPreview = require('../utils/downloadPreview');
 const { isNewTemplateVersionAvailable } = require('../updateCheck');
@@ -13,18 +13,18 @@ module.exports = class extends Command {
     this.setCategory('Utility');
   }
 
-  show() {
+  isVisible() {
     return this.config.isReady && this.config.isElectron;
   }
 
   async onLoad() {
-    const newVersion = await isNewTemplateVersionAvailable();
+    const newVersion = await isNewTemplateVersionAvailable(this.settings);
 
     if (newVersion) this.name += ` (${newVersion.local} -> ${newVersion.remote})`;
   }
 
   async run() {
-    const { settings } = this.config;
+    const { settings } = this;
     const fullDirectoryPath = process.cwd();
     const backupName = `${fullDirectoryPath}-${Date.now().toString()}.zip`;
     // const folderName = path.basename(process.cwd());

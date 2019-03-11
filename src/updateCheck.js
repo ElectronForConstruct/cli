@@ -1,30 +1,33 @@
 const request = require('request');
 const semver = require('semver');
-const path = require('path');
 const fs = require('fs');
+const { USER_PACKAGE_JSON } = require('./utils/ComonPaths');
 const pkg = require('../package.json');
-const ConfigLoader = require('./ConfigLoader');
-
-const configLoader = new ConfigLoader();
 
 // check CLI
 const checkForUpdate = () => new Promise((resolve, reject) => {
-  request('https://api.npms.io/v2/package/@electronforconstruct%2fcli', { json: true }, (error, response, body) => {
+  request('https://registry.npmjs.org/%40efc%2Fcli', { json: true }, (error, response, body) => {
     if (error) reject(error);
 
-    const { metadata } = body.collected;
-    if (semver.lt(pkg.version, metadata.version)) resolve(metadata);
+    if (!body || !body['dist-tags'] || !body['dist-tags'].latest) {
+      console.error('Unable to check updates');
+      resolve(false);
+    }
+
+
+    const { latest } = body['dist-tags'];
+    console.log(latest);
+
+    if (semver.lt(pkg.version, latest)) resolve(latest);
     resolve(false);
   });
 });
 
 // check template
-const isNewTemplateVersionAvailable = async () => {
-  const config = await configLoader.load();
-
+const isNewTemplateVersionAvailable = async (settings) => {
   const dl = () => new Promise((resolve) => {
     request.get({
-      url: `https://raw.githubusercontent.com/ElectronForConstruct/template/${config.project.branch}/template/package.json`,
+      url: `https://raw.githubusercontent.com/ElectronForConstruct/template/${settings.project.branch}/template/package.json`,
       json: true,
     }, (e, r, remotePkg) => {
       resolve(remotePkg);
@@ -35,8 +38,8 @@ const isNewTemplateVersionAvailable = async () => {
   const remoteVersion = remotePkg.version;
   // console.log('remoteVersion', remoteVersion);
 
-  if (fs.existsSync(path.join(process.cwd(), 'package.json'))) {
-    const { version: localVersion } = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'));
+  if (fs.existsSync(USER_PACKAGE_JSON)) {
+    const { version: localVersion } = JSON.parse(fs.readFileSync(USER_PACKAGE_JSON, 'utf8'));
     // console.log('localVersion', localVersion);
 
     if (semver.lt(localVersion, remoteVersion)) {

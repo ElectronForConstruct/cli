@@ -1,13 +1,13 @@
 const opn = require('opn');
 const os = require('os');
-const Command = require('../Command');
+const Command = require('../classes/Command');
 
 module.exports = class extends Command {
   constructor() {
     super('report-issue', 'Report an issue');
   }
 
-  show() {
+  isVisible() {
     return true;
   }
 

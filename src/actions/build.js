@@ -1,7 +1,7 @@
 const eb = require('electron-builder');
 const fs = require('fs');
 const path = require('path');
-const Command = require('../Command');
+const Command = require('../classes/Command');
 
 module.exports = class extends Command {
   constructor() {
@@ -10,6 +10,8 @@ module.exports = class extends Command {
   }
 
   async run() {
+    const { settings } = this;
+
     for (let i = 0; i < this.modules.length; i += 1) {
       const module = this.modules[i];
 
@@ -26,7 +28,7 @@ module.exports = class extends Command {
     } else {
       try {
         // eslint-disable-next-line
-        const result = await eb.build({ config: this.config.settings.build });
+        const result = await eb.build({ config: settings.build });
         console.log(result);
       } catch (e) {
         console.log('There was an error building your project:', e);

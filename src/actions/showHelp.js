@@ -1,14 +1,14 @@
 const { prompt } = require('enquirer');
 const opn = require('opn');
 const pkg = require('../../package.json');
-const Command = require('../Command');
+const Command = require('../classes/Command');
 
 module.exports = class extends Command {
   constructor() {
     super('help', 'Help', 'h');
   }
 
-  show() {
+  isVisible() {
     return true;
   }
 

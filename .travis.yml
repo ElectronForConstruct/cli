@@ -2,22 +2,5 @@ language: node_js
 node_js:
   - "10"
 
-before_script:
-  - npm install -g pkg
-  -
 script:
-  - npm run build
-
-deploy:
-  provider: releases
-  api_key: $GITHUB_TOKEN
-  file:
-  - "bin/preview-win.exe"
-  - "bin/preview-macos"
-  - "bin/preview-linux"
-  skip_cleanup: true
-  overwrite: true
-  draft: true
-  on:
-    branche: master
-    tags: true
+  - npm run test

@@ -1,5 +1,5 @@
 const opn = require('opn');
-const Command = require('../Command');
+const Command = require('../classes/Command');
 
 module.exports = class extends Command {
   constructor() {

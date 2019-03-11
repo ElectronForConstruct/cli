@@ -1,5 +1,8 @@
 const { version, name } = require('../package');
 
+// Config order:
+// Default config < Plugin Configuration < Plugin Runtime configuration < User config
+
 module.exports = {
   window: {
     width: 800,
@@ -15,6 +18,9 @@ module.exports = {
   },
   dependencies: [
     `${name}@${version}`, // always latest cli
+    'electron-is-dev',
+    'fs-extra',
+    'serve-handler',
   ],
   plugins: [
     'build',
@@ -23,11 +29,12 @@ module.exports = {
     'preview-folder',
     'quit',
     'donate',
-    'new-project',
+    'new',
     'install-deps',
     'report-issue',
     'help',
     'update',
+    'config',
   ],
   developer: {
     showConstructDevTools: true,

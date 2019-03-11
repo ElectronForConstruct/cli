@@ -1,5 +1,5 @@
 const startPreview = require('../utils/startPreview');
-const Command = require('../Command');
+const Command = require('../classes/Command');
 
 module.exports = class extends Command {
   constructor() {

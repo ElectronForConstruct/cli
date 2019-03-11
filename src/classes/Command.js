@@ -24,7 +24,6 @@ module.exports = class Command {
 
     this.category = 'Other';
     this.config = {};
-    this.defaultConfiguration = {};
 
     /** @type {Array<Command>} */
     this.modules = [];
@@ -71,16 +70,6 @@ module.exports = class Command {
   }
 
   /**
-   * Set the default configuration for the plugin
-   * @param {Object} config
-   */
-  setDefaultConfiguration(config) {
-    this.defaultConfiguration = {
-      settings: config,
-    };
-  }
-
-  /**
    * Override configuration on command execution
    * @param config
    * @abstract
@@ -89,7 +78,7 @@ module.exports = class Command {
     return config;
   }
 
-  show() {
+  isVisible() {
     return this.config.isReady && this.config.isElectron;
   }
 
@@ -101,14 +90,14 @@ module.exports = class Command {
   }
 
   get settings() {
-    const { settings } = this.config;
-    const customSettings = this.overrideConfiguration(settings);
+    const { mixed, user } = this.config; // mixed settings
+    const customSettings = this.overrideConfiguration(mixed); // runtime plugin settings
 
-    return deepmerge(settings, customSettings);
+    return deepmerge(mixed, customSettings, user);
   }
 
   /**
-   * Used to determine if the class is valid when loading commands
+   * Used to determine if the class is valid when loading getCommands
    * @returns {boolean}
    * @abstract
    */
