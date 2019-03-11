@@ -2,6 +2,7 @@ const chalk = require('chalk');
 const fs = require('fs');
 const path = require('path');
 const Raven = require('raven');
+const deepmerge = require('deepmerge');
 const os = require('os');
 const { USER_CONFIG, USER_PACKAGE_JSON } = require('./utils/ComonPaths');
 const pkg = require('../package');
@@ -66,10 +67,27 @@ Please install them using ${chalk.underline('efc config')}`));
         isElectron,
       };
 
+      /**
+       * -----------------------------------------------------------------------
+       */
+
       pm.setDefaultConfig(config); // already mixed config
 
       await pm.loadDefaultCommands();
       if (isReady) await pm.loadCustomCommands();
+
+      let mixedConfig = config.base;
+      pm.getCommands().forEach((command) => {
+        mixedConfig = deepmerge(mixedConfig, command.defaultConfiguration);
+      });
+
+      config.mixed = deepmerge(mixedConfig, config.user);
+
+      pm.setDefaultConfig(config);
+
+      /**
+       * -----------------------------------------------------------------------
+       */
 
       const args = process.argv.slice(2);
       if (args.length === 1) {

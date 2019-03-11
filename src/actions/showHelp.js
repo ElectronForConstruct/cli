@@ -15,6 +15,7 @@ module.exports = class extends Command {
   async run() {
     console.log(`Version: ${pkg.version}\n`);
 
+    // TODO fix modules
     const options = this.modules.map(module => `  ${module.category} - ${module.name}: ${module.id} ${module.shortcut ? `(${module.shortcut})` : ''}`);
 
     console.log(`
