@@ -24,6 +24,7 @@
     "chalk": "^2.4.2",
     "deepmerge": "^3.2.0",
     "electron-builder": "^20.38.5",
+    "electron-packager": "^13.1.1",
     "enquirer": "^2.3.0",
     "github-download": "^0.5.0",
     "install-packages": "^0.2.5",

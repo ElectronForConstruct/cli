@@ -1,7 +1,6 @@
 const { version, name } = require('../package');
 
-// Config order:
-// Default config < Plugin Configuration < Plugin Runtime configuration < User config
+const isDev = require('./utils/isDev');
 
 module.exports = {
   window: {
@@ -23,25 +22,24 @@ module.exports = {
     'serve-handler',
   ],
   plugins: [
-    'build',
     'preview-c2',
     'preview-c3',
     'preview-folder',
     'quit',
     'donate',
     'new',
-    'install-deps',
     'report-issue',
     'help',
     'update',
     'config',
     'debug',
+    'packager',
   ],
   developer: {
-    showConstructDevTools: true,
-    autoClose: true,
-    autoReload: true,
-    showChromeDevTools: true,
+    showConstructDevTools: isDev,
+    autoClose: isDev,
+    autoReload: isDev,
+    showChromeDevTools: isDev,
   },
   project: {
     name: 'My name',
@@ -62,6 +60,19 @@ module.exports = {
     files: [
       '!preview.exe',
       '!preview',
+      '!node_modules/greenworks/!**',
+      '!node_modules/app-builder-bin/!**',
+      '!node_modules/app-builder-lib/!**',
     ],
+  },
+  greenworks: {
+    steamId: 480,
+    sdkPath: 'steam_sdk',
+    useLocalBuild: false,
+  },
+  packager: {
+    dir: '.',
+    asar: true,
+    out: 'packaged',
   },
 };
