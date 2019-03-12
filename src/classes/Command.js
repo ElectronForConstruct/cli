@@ -1,5 +1,4 @@
 const chalk = require('chalk');
-const deepmerge = require('deepmerge');
 
 /**
  * @type {module.Command}
@@ -12,8 +11,11 @@ module.exports = class Command {
    */
   constructor(id, name, shortcut) {
     this.name = name;
+    this.rawName = name;
+    this.name = name;
     this.id = id;
     this.shortcut = shortcut;
+    this.desciption = '';
 
     if (this.shortcut) {
       const index = this.name.toLowerCase().indexOf(this.shortcut);
@@ -52,6 +54,10 @@ module.exports = class Command {
    */
   setCategory(category) {
     this.category = category;
+  }
+
+  setDescription(description) {
+    this.description = description;
   }
 
   /**
@@ -108,7 +114,9 @@ module.exports = class Command {
    * @abstract
    * @returns {Promise<void>}
    */
-  async run() {
+  // eslint-disable-next-line
+  async run(args = []) {
     // :)
+    console.log('This plugin does not implement any methods!');
   }
 };

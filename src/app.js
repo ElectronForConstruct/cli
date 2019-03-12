@@ -84,16 +84,17 @@ Please install them using ${chalk.underline('efc config')}`));
       config.mixed = deepmerge(mixedConfig, config.user);
 
       pm.setDefaultConfig(config);
+      pm.setModules();
 
       /**
        * -----------------------------------------------------------------------
        */
 
       const args = process.argv.slice(2);
-      if (args.length === 1) {
+      if (args.length >= 1) {
         const command = pm.getCommands().find(c => c.id === args[0]);
 
-        if (command) await command.run();
+        if (command) await command.run({ ...args.slice(1) });
         else {
           console.log('The command was not found');
           await pm.get('help').run();

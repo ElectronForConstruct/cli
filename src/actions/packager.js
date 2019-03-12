@@ -6,6 +6,7 @@ module.exports = class extends Command {
     super('packager', 'Package app', 'p');
 
     this.setCategory('Toolchain');
+    this.setDescription('Allow you to cross-compile your project to different OS');
   }
 
   deepCheck(target, path, value) {
@@ -22,7 +23,7 @@ module.exports = class extends Command {
         return false;
       }
       // eslint-disable-next-line
-      target = target[property];
+      target = target[ property ];
     }
 
     if (value) {

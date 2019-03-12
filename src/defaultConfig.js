@@ -46,8 +46,8 @@ module.exports = {
     description: 'My description',
     author: 'Me',
     branch: 'master',
+    version: '0.0.0',
   },
-  type: 'construct3',
   switches: [],
   build: {
     appId: 'com.you.yourapp',

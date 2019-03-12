@@ -36,7 +36,6 @@ module.exports = class PluginManager {
       })());
     });
 
-
     const commands = await Promise.all(fcts);
     return commands;
   }
@@ -59,12 +58,6 @@ module.exports = class PluginManager {
     /** @type Array<string> */
     const { plugins } = this.config.mixed;
     const commands = [];
-
-    // Load local plugins (files and folders)
-    if (fs.existsSync(this.defaultCustomCommandPath)) {
-      const cmds = await this._loadFolder(this.defaultCustomCommandPath);
-      commands.push(...cmds);
-    }
 
     // load from node_modules
     const nodeModules = path.join(process.cwd(), 'node_modules');
@@ -93,6 +86,16 @@ module.exports = class PluginManager {
 
     this._commands.push(...commands);
     this._commands = this._commands.filter(Boolean);
+  }
+
+  setModules() {
+    const newModules = this._commands.map((m) => {
+      const newModule = Object.assign({}, m);
+      delete newModule.config; // circular references
+      delete newModule.modules; // circular references
+      return newModule;
+    });
+    this._commands.map(m => m.setModules(newModules));
   }
 
   /**
