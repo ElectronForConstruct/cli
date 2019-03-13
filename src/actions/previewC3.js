@@ -1,7 +1,7 @@
 const { prompt } = require('enquirer');
+const { Command } = require('@efc/core');
 const startPreview = require('../utils/startPreview');
 
-const Command = require('../classes/Command');
 
 module.exports = class extends Command {
   constructor() {

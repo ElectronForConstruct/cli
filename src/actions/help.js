@@ -1,7 +1,7 @@
 const { prompt } = require('enquirer');
 const opn = require('opn');
 const pkg = require('../../package.json');
-const Command = require('../classes/Command');
+const { Command } = require('@efc/core');
 
 module.exports = class extends Command {
   constructor() {

@@ -3,8 +3,9 @@ const { prompt } = require('enquirer');
 const fs = require('fs');
 const ora = require('ora');
 const path = require('path');
+const { Command } = require('@efc/core');
 const downloadTemplate = require('../utils/downloadTemplate');
-const Command = require('../classes/Command');
+const downloadPreview = require('../utils/downloadPreview');
 const installDeps = require('../utils/installAllDeps');
 
 module.exports = class extends Command {
@@ -17,56 +18,54 @@ module.exports = class extends Command {
     return !this.config.isElectron;
   }
 
-  async run(originPath) {
+  async run() {
     const { settings } = this;
     const { branch } = settings.project;
 
     let answers = {};
     const dir = process.cwd();
-    let name = '';
-    let useGit = false;
-    let install = true;
-
     try {
-      if (!originPath) {
-        const questions = [
-          {
-            type: 'input',
-            name: 'name',
-            message: 'What is the name of your project?',
-            initial: () => 'MyGame',
-            format: typedName => path.join(dir, typedName),
-            validate: (typedName) => {
-              if (fs.existsSync(path.join(dir, typedName))) {
-                return 'This path already exist!';
-              }
-              return true;
-            },
+      const questions = [
+        {
+          type: 'input',
+          name: 'name',
+          message: 'What is the name of your project?',
+          initial: () => 'MyGame',
+          format: typedName => path.join(dir, typedName),
+          validate: (typedName) => {
+            if (fs.existsSync(path.join(dir, typedName))) {
+              return 'This path already exist!';
+            }
+            return true;
           },
-          {
-            type: 'confirm',
-            name: 'useGit',
-            message: 'Use Git',
-            initial: false,
-          },
-          {
-            type: 'confirm',
-            name: 'install',
-            message: 'Automatically install dependencies',
-            initial: true,
-          },
-        ];
-        answers = await prompt(questions);
-        // todo clean here v
-        ({
-          name,
-          useGit,
-          install,
-        } = answers);
-      }
+        },
+        {
+          type: 'confirm',
+          name: 'useGit',
+          message: 'Use Git',
+          initial: false,
+        },
+        {
+          type: 'confirm',
+          name: 'preview',
+          message: 'Include standalone preview tool',
+          initial: false,
+        },
+        {
+          type: 'confirm',
+          name: 'install',
+          message: 'Automatically install dependencies',
+          initial: true,
+        },
+      ];
+      answers = await prompt(questions);
 
-      // eslint-disable-next-line
-      if (!name) name = originPath;
+      const {
+        name,
+        useGit,
+        install,
+        preview,
+      } = answers;
 
       const fullPath = path.join(dir, name);
 
@@ -75,12 +74,17 @@ module.exports = class extends Command {
       if (!useGit && fs.existsSync(path.join(fullPath, '.gitignore'))) {
         fs.unlinkSync(path.join(fullPath, '.gitignore'));
       }
+      if (preview) await downloadPreview(fullPath);
       spinner.succeed('Downloaded');
 
+      let stringEnd = '';
       if (install) {
         process.chdir(fullPath);
         await installDeps(settings);
-      } else if (!originPath) console.log(`\nYou can now go to your project by using ${chalk.underline(`cd ${name}`)} and install dependencies with either ${chalk.underline('npm install')} or ${chalk.underline('yarn install')}`);
+      } else {
+        stringEnd = `and install dependencies with ${chalk.underline('efc config')}`;
+      }
+      console.log(`\nYou can now go to your project by using ${chalk.underline(`cd ${name}`)} ${stringEnd}`);
     } catch (e) {
       console.error('Aborted:', e);
     }

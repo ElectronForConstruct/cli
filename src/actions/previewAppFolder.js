@@ -1,5 +1,5 @@
 const startPreview = require('../utils/startPreview');
-const Command = require('../classes/Command');
+const { Command } = require('@efc/core');
 
 module.exports = class extends Command {
   constructor() {

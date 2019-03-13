@@ -1,5 +1,5 @@
 const chalk = require('chalk');
-const Command = require('../classes/Command');
+const { Command } = require('@efc/core');
 
 module.exports = class extends Command {
   constructor() {

@@ -10,5 +10,6 @@ module.exports = {
     'class-methods-use-this': 0,
     'import/no-dynamic-require': 0,
     'global-require': 0,
+    'no-await-in-loop': 0,
   },
 };

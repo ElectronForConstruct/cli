@@ -1,6 +1,6 @@
 const ora = require('ora');
 const installAllDeps = require('../utils/installAllDeps');
-const Command = require('../classes/Command');
+const { Command } = require('@efc/core');
 
 module.exports = class extends Command {
   constructor() {

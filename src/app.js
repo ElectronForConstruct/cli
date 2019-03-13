@@ -3,23 +3,24 @@ const fs = require('fs');
 const path = require('path');
 const Raven = require('raven');
 const deepmerge = require('deepmerge');
+const { PluginManager, ConfigLoader, isDev } = require('@efc/core');
 const os = require('os');
 const { USER_CONFIG, USER_PACKAGE_JSON } = require('./utils/ComonPaths');
 const pkg = require('../package');
 const box = require('./box');
 const { checkForUpdate } = require('./updateCheck');
-const isDev = require('./utils/isDev');
 const actions = require('./prompt');
-const PluginManager = require('./classes/PluginManager');
-const ConfigLoader = require('./classes/ConfigLoader');
 
 const pm = new PluginManager();
 const configLoader = new ConfigLoader();
 
-Raven.config('https://847cb74dd8964d4f81501ed1d29b18f6@sentry.io/1406240').install();
+// 24.9Mb currently
+
 
 if (isDev) {
   console.log('Running in developement mode');
+} else {
+  Raven.config('https://847cb74dd8964d4f81501ed1d29b18f6@sentry.io/1406240').install();
 }
 
 checkForUpdate()
