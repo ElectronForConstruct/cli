@@ -1,5 +1,7 @@
 const { prompt } = require('enquirer');
 const { Command } = require('@efc/core');
+const install = require('install-packages');
+const path = require('path');
 const startPreview = require('../utils/startPreview');
 
 module.exports = class extends Command {
@@ -9,12 +11,13 @@ module.exports = class extends Command {
   }
 
   async run(args) {
+    const { settings } = this;
     const argsLength = Object.keys(args).length;
 
     let previewUrl = '';
 
     // eslint-disable-next-line
-    if (argsLength > 0) previewUrl = args[0];
+    if (argsLength > 0) previewUrl = args[ 0 ];
     else {
       console.log('\nTo preview your Construct project in Electron, you need a valid subscription.');
       console.log('\t• Construct 3: Go to the preview menu, hit "Remote preview" and paste the link that appear here');
@@ -38,6 +41,14 @@ module.exports = class extends Command {
       ]);
       previewUrl = answers.url;
     }
+
+    const templateFolder = path.join(__dirname, '../..', 'template');
+    await install({
+      packages: [`electron@${settings.electron}`],
+      saveDev: true,
+      cwd: templateFolder,
+    });
+
     await startPreview(previewUrl);
   }
 };

@@ -1,7 +1,7 @@
 const { exec } = require('child_process');
-const electron = require('electron');
 const path = require('path');
 const install = require('install-packages');
+// const electron = require('electron');
 
 module.exports = url => new Promise(async (resolve) => {
   if (url === '') url = process.cwd();
@@ -9,9 +9,13 @@ module.exports = url => new Promise(async (resolve) => {
 
   const templateFolder = path.join(__dirname, '../..', 'template');
 
+  process.chdir(templateFolder);
+
   await install({
     cwd: templateFolder,
   });
+
+  const electron = path.join(templateFolder, 'node_modules', 'electron', 'dist', 'electron.exe');
 
   const command = `${electron} ${templateFolder} ${url}`;
 

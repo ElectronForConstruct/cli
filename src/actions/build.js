@@ -1,12 +1,40 @@
-const eb = require('electron-builder');
-const fs = require('fs');
+const packager = require('electron-packager');
 const path = require('path');
+const shelljs = require('shelljs');
 const { Command } = require('@efc/core');
+const install = require('install-packages');
+const fs = require('fs');
+const tmp = require('tmp');
 
 module.exports = class extends Command {
   constructor() {
-    super('build', 'Build', 'b');
+    super('build', 'Package app', 'k');
+
     this.setCategory('Toolchain');
+    this.setDescription('Allow you to cross-compile your project to different OS');
+  }
+
+  deepCheck(target, p, value) {
+    if (typeof target !== 'object' || target === null) {
+      return false;
+    }
+
+    const parts = p.split('.');
+
+    while (parts.length) {
+      const property = parts.shift();
+      // eslint-disable-next-line
+      if (!(target.hasOwnProperty(property))) {
+        return false;
+      }
+      // eslint-disable-next-line
+      target = target[ property ];
+    }
+
+    if (value) {
+      return target === value;
+    }
+    return true;
   }
 
   async run() {
@@ -21,19 +49,56 @@ module.exports = class extends Command {
       }
     }
 
+    if (!settings.build) {
+      console.error('It looks like your "build" configuration is empty');
+      return;
+    }
+
+    const packOptions = settings.build;
+
+    tmp.setGracefulCleanup();
+    const tmpDir = tmp.dirSync({
+      prefix: 'efc_',
+    });
+
+    console.log('Preparing...');
+
+    packOptions.dir = tmpDir.name;
+
+    if (!path.isAbsolute(packOptions.out)) {
+      packOptions.out = path.join(process.cwd(), packOptions.out);
+    }
+
+    shelljs.cp(path.join(__dirname, '../../', 'template', 'main.js'), tmpDir.name);
+    shelljs.cp(path.join(__dirname, '../../', 'template', 'preload.js'), tmpDir.name);
+    shelljs.cp(path.join(__dirname, '../../', 'template', 'package.json'), tmpDir.name);
+    shelljs.rm('-rf', packOptions.out);
+    shelljs.cp('-R', path.join(process.cwd(), '*'), tmpDir.name);
+
+    // editing package.json
+    const pkg = fs.readFileSync(path.join(tmpDir.name, 'package.json'));
+    const pkgJson = JSON.parse(pkg);
+    pkgJson.devDependencies.electron = settings.electron;
+    fs.writeFileSync(path.join(tmpDir.name, 'package.json'), JSON.stringify(pkgJson, null, '\t'), 'utf8');
+
     if (
-      !fs.existsSync(path.join(process.cwd(), 'index.html'))
-      && !fs.existsSync(path.join(process.cwd(), 'data.js'))
-      && !fs.existsSync(path.join(process.cwd(), 'data.json'))) {
-      console.warn('It seems that there isn\'t any Construct game inside this folder. You must be currently inside a folder containing an HTML5 export of a Construct game');
-    } else {
-      try {
-        // eslint-disable-next-line
-        const result = await eb.build({ config: settings.build });
-        console.log(result);
-      } catch (e) {
-        console.log('There was an error building your project:', e);
-      }
+      !packOptions.appVersion
+      && this.deepCheck(settings, 'project.version')
+    ) packOptions.appVersion = settings.project.version;
+
+    if (!packOptions.name && this.deepCheck(settings, 'project.name')) packOptions.name = settings.project.name;
+
+    try {
+      await install({
+        cwd: tmpDir.name,
+      });
+      const appPaths = await packager(packOptions);
+
+      console.log('Files packages successfuly!');
+      console.log(...appPaths);
+    } catch (e) {
+      console.error('An error occured while packaging your apps');
+      console.log(e);
     }
   }
 };
