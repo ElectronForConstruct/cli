@@ -23,10 +23,10 @@
     esutils "^2.0.2"
     js-tokens "^4.0.0"
 
-"@efc/core@^0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@efc/core/-/core-0.0.3.tgz#e527870e0805a3c3c55327bac5539376f6a593d4"
-  integrity sha512-8PxOuYV4dKgZKdKQqcUXk3VGRTy+7CR2dHeZ1VxWyQfIC1c1NQ/iIrMrEer8XKzYnoUbrXx7SuSVl44rBUwuGQ==
+"@efc/core@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@efc/core/-/core-0.0.4.tgz#d2bd3ecd153a37810339cbe74b6a0c6dabd383a4"
+  integrity sha512-zq88Qzfm7p7sYaeCciXvAs7PcQdayDrdKegg5gU7tub+xQz5dWFO6hllEPokcH9IPfEch4nhLv7+xu0/mHUmPQ==
   dependencies:
     deepmerge "^3.2.0"
     electron-is-dev "^1.0.1"
