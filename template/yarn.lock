@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@efc/core@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@efc/core/-/core-0.0.1.tgz#b9f51d574c78c60b8e14a3c3a64e017c06726e18"
-  integrity sha512-FRNYK2EiIlwagOXp/NxHnmBuu8F60ObKGHsTPV9owlz+m3Y2ZQejozO+qKcjVHQm/6GnzXudfwwb+wLRRTZ8Tw==
+"@efc/core@latest":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@efc/core/-/core-0.0.2.tgz#12a83f6d71014d8dcb5378cf632f3a83c8c6e513"
+  integrity sha512-WcCWRQzbCY2EVRNL4Y4TESeQWvQP/VuYbbf5c1Mn27iHDU/4DjgcF6eVXsWf1MkRmYYqZUPszDR4sYu4pCOxTQ==
   dependencies:
     deepmerge "^3.2.0"
 
