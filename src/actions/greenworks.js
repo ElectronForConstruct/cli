@@ -8,7 +8,6 @@ const nodeAbi = require('node-abi');
 const fs = require('fs');
 const request = require('request');
 const ora = require('ora');
-const { USER_PACKAGE_JSON } = require('../utils/ComonPaths');
 
 module.exports = class extends Command {
   constructor() {
@@ -55,9 +54,9 @@ module.exports = class extends Command {
   }
 
   async run() {
-    const spinner = ora('Initializing greenworks ...').start();
+    let spinner = ora('Initializing greenworks ...').start();
 
-    const pkg = require(USER_PACKAGE_JSON);
+    const pkg = require('../../template/package.json');
 
     const { settings } = this;
 
@@ -141,19 +140,24 @@ module.exports = class extends Command {
       for (let i = 0; i < platforms.length; i += 1) {
         const p = platforms[i];
 
-        const res = content.assets.find(asset => asset.name === `greenworks-v0.14.0-electron-v${abi}-${p}-x64.tar.gz`).browser_download_url;
+        const assetName = `greenworks-v0.14.0-electron-v${abi}-${p}-x64.tar.gz`;
+        try {
+          const res = content.assets.find(asset => asset.name === assetName).browser_download_url;
 
-        const tempFolder = path.join(process.cwd(), 'temp');
-        shelljs.mkdir('-p', tempFolder);
-        const tarFile = path.join(tempFolder, 'file.tar.gz');
-        await this.downloadFile(res, tarFile);
-        await decompress(tarFile, tempFolder, {
-          plugins: [
-            decompressTargz(),
-          ],
-        });
-        shelljs.cp('-R', path.join(tempFolder, 'build', 'Release/*'), greenworksLibsDir);
-        shelljs.rm('-rf', tempFolder);
+          const tempFolder = path.join(process.cwd(), 'temp');
+          shelljs.mkdir('-p', tempFolder);
+          const tarFile = path.join(tempFolder, 'file.tar.gz');
+          await this.downloadFile(res, tarFile);
+          await decompress(tarFile, tempFolder, {
+            plugins: [
+              decompressTargz(),
+            ],
+          });
+          shelljs.cp('-R', path.join(tempFolder, 'build', 'Release/*'), greenworksLibsDir);
+          shelljs.rm('-rf', tempFolder);
+        } catch (e) {
+          spinner = spinner.fail(`The target ${assetName} seems not to be available currently. Build it yourself, or change Electron version.`);
+        }
       }
       shelljs.rm('-rf', path.join(greenworksLibsDir, 'obj.target'));
     }

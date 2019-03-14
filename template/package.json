@@ -8,7 +8,7 @@
   "license": "UNLICENSED",
   "private": true,
   "devDependencies": {
-    "electron": "^4.1.0"
+    "electron": "4.0.0"
   },
   "dependencies": {
     "@efc/core": "latest",
