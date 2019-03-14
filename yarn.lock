@@ -49,6 +49,11 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
+"@types/node@^10.12.18":
+  version "10.14.1"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.14.1.tgz#8701cd760acc20beba5ffe0b7a1b879f39cb8c41"
+  integrity sha512-Rymt08vh1GaW4vYB6QP61/5m/CFLGnFZP++bJpWbiNxceNa6RBipDmb413jvtSf/R1gg5a/jQVl2jY4XVRscEA==
+
 acorn-jsx@^5.0.0:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/acorn-jsx/-/acorn-jsx-5.0.1.tgz#32a064fd925429216a09b141102bfdd185fae40e"
@@ -1067,7 +1072,7 @@ electron-builder@^20.38.5:
     update-notifier "^2.5.0"
     yargs "^12.0.5"
 
-electron-download@^4.1.1:
+electron-download@^4.1.0, electron-download@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/electron-download/-/electron-download-4.1.1.tgz#02e69556705cc456e520f9e035556ed5a015ebe8"
   integrity sha512-FjEWG9Jb/ppK/2zToP+U5dds114fM1ZOJqMAR4aXXL5CvyPE9fiqBK/9YcwC9poIFQTEJk/EM/zyRwziziRZrg==
@@ -1137,6 +1142,15 @@ electron-publish@20.38.5:
     fs-extra-p "^7.0.0"
     lazy-val "^1.0.3"
     mime "^2.4.0"
+
+electron@^4.0.8:
+  version "4.0.8"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-4.0.8.tgz#b7998b16543d2094f081757a0c5afdb8875ea510"
+  integrity sha512-FOBJIHkuv8wc15N+ZyqwDzPavYVu5CHMBEf14jHDWv7QW2vkEIpJjVK+PIT31kfZfvjsIP0j2wvA/FBsiqB7pw==
+  dependencies:
+    "@types/node" "^10.12.18"
+    electron-download "^4.1.0"
+    extract-zip "^1.0.3"
 
 elegant-spinner@^1.0.1:
   version "1.0.1"

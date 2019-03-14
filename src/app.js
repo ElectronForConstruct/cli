@@ -5,13 +5,13 @@ const Raven = require('raven');
 const deepmerge = require('deepmerge');
 const { PluginManager, ConfigLoader, isDev } = require('@efc/core');
 const os = require('os');
-const { USER_CONFIG, USER_PACKAGE_JSON } = require('./utils/ComonPaths');
-const pkg = require('../package');
+const { USER_CONFIG } = require('./utils/ComonPaths');
+const pkg = require('../package.json');
 const box = require('./box');
 const { checkForUpdate } = require('./updateCheck');
 const actions = require('./prompt');
 
-const pm = new PluginManager();
+const pm = new PluginManager(path.join(__dirname, 'actions'));
 const configLoader = new ConfigLoader();
 
 // 24.9Mb currently
@@ -34,11 +34,10 @@ checkForUpdate()
     }
 
     try {
-      let isReady = false;
-      let isElectron = false;
+      let isProject = false;
 
       if (fs.existsSync(USER_CONFIG)) {
-        isElectron = true;
+        isProject = true;
       }
 
       const { mixed, base, user } = await configLoader.load();
@@ -49,23 +48,13 @@ checkForUpdate()
         hostname: os.hostname(),
         config: mixed,
         cliVersion: pkg.version,
-        templateVersion: (isReady && isElectron) ? require(USER_PACKAGE_JSON).version : 'No version foud',
       });
-
-      // check node_modules
-      if (isElectron && !fs.existsSync(path.join(process.cwd(), 'node_modules', '@efc', 'cli'))) {
-        console.log(box(`${chalk.yellow('Whoops! Dependencies are not installed!')}
-Please install them using ${chalk.underline('efc config')}`));
-      } else {
-        isReady = true;
-      }
 
       const config = {
         mixed,
         base,
         user,
-        isReady,
-        isElectron,
+        isProject,
       };
 
       /**
@@ -75,7 +64,7 @@ Please install them using ${chalk.underline('efc config')}`));
       pm.setDefaultConfig(config); // already mixed config
 
       await pm.loadDefaultCommands();
-      if (isReady) await pm.loadCustomCommands();
+      // if (isReady) await pm.loadCustomCommands();
 
       let mixedConfig = config.base;
       pm.getCommands().forEach((command) => {

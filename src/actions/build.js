@@ -22,9 +22,10 @@ module.exports = class extends Command {
     }
 
     if (
-      !fs.existsSync(path.join(process.cwd(), 'app', 'data.js'))
-      && !fs.existsSync(path.join(process.cwd(), 'app', 'data.json'))) {
-      console.warn('It seems that there isn\'t any Construct game inside the app folder. Did you forgot to export ?');
+      !fs.existsSync(path.join(process.cwd(), 'index.html'))
+      && !fs.existsSync(path.join(process.cwd(), 'data.js'))
+      && !fs.existsSync(path.join(process.cwd(), 'data.json'))) {
+      console.warn('It seems that there isn\'t any Construct game inside this folder. You must be currently inside a folder containing an HTML5 export of a Construct game');
     } else {
       try {
         // eslint-disable-next-line

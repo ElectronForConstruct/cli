@@ -1,20 +1,21 @@
 const { exec } = require('child_process');
-const process = require('process');
-const { npm } = require('../utils');
+const electron = require('electron');
+const path = require('path');
+const install = require('install-packages');
 
-module.exports = url => new Promise((resolve) => {
+module.exports = url => new Promise(async (resolve) => {
+  if (url === '') url = process.cwd();
   console.log(`Starting preview ${url ? `on "${url}"` : ''}`);
 
-  let command;
-  if (url) {
-    command = `${npm} run start -- ${url}`;
-  } else {
-    command = `${npm} run start`;
-  }
+  const templateFolder = path.join(__dirname, '../..', 'template');
 
-  const npmstart = exec(command, {
-    cwd: process.cwd(),
+  await install({
+    cwd: templateFolder,
   });
+
+  const command = `${electron} ${templateFolder} ${url}`;
+
+  const npmstart = exec(command);
 
   npmstart.stdout.on('data', (data) => {
     console.log(data.toString());

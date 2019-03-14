@@ -4,6 +4,9 @@ module.exports = {
   ],
   'globals': {
     'fetch': false,
+    'document': false,
+    'window': false,
+    'Vue': false,
   },
   'rules'  : {
     'no-underscore-dangle'  : 0,

@@ -3,14 +3,12 @@ const path = require('path');
 const decompress = require('decompress');
 const decompressTargz = require('decompress-targz');
 // const os = require('os');
+const { Command } = require('@efc/core');
 const nodeAbi = require('node-abi');
 const fs = require('fs');
 const request = require('request');
 const ora = require('ora');
 const { USER_PACKAGE_JSON } = require('../utils/ComonPaths');
-const { Command } = require('@efc/core');
-
-const pkg = require(USER_PACKAGE_JSON);
 
 module.exports = class extends Command {
   constructor() {
@@ -58,6 +56,8 @@ module.exports = class extends Command {
 
   async run() {
     const spinner = ora('Initializing greenworks ...').start();
+
+    const pkg = require(USER_PACKAGE_JSON);
 
     const { settings } = this;
 

@@ -15,7 +15,7 @@ module.exports = class extends Command {
   }
 
   isVisible() {
-    return !this.config.isElectron;
+    return !this.config.isProject;
   }
 
   async run() {
