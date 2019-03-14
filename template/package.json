@@ -8,11 +8,10 @@
   "license": "UNLICENSED",
   "private": true,
   "devDependencies": {
-    "electron": "^3.0.2"
+    "electron": "^4.1.0"
   },
   "dependencies": {
     "@efc/core": "latest",
-    "electron-is-dev": "^1.0.1",
     "fs-extra": "^7.0.1",
     "serve-handler": "^5.0.8"
   }
