@@ -4,9 +4,8 @@ const fs = require('fs');
 const ora = require('ora');
 const path = require('path');
 const { Command } = require('@efc/core');
-const downloadTemplate = require('../utils/downloadTemplate');
+const shelljs = require('shelljs');
 const downloadPreview = require('../utils/downloadPreview');
-const installDeps = require('../utils/installAllDeps');
 
 module.exports = class extends Command {
   constructor() {
@@ -19,9 +18,6 @@ module.exports = class extends Command {
   }
 
   async run() {
-    const { settings } = this;
-    const { branch } = settings.project;
-
     let answers = {};
     const dir = process.cwd();
     try {
@@ -51,40 +47,30 @@ module.exports = class extends Command {
           message: 'Include standalone preview tool',
           initial: false,
         },
-        {
-          type: 'confirm',
-          name: 'install',
-          message: 'Automatically install dependencies',
-          initial: true,
-        },
       ];
       answers = await prompt(questions);
 
       const {
         name,
         useGit,
-        install,
         preview,
       } = answers;
 
       const fullPath = path.join(dir, name);
 
-      const spinner = ora(`Downloading template from ${branch} channel...`).start();
-      await downloadTemplate(fullPath, branch);
+      const spinner = ora('Bootstrapping project...').start();
+
+      shelljs.mkdir('-p', fullPath);
+      shelljs.cp('-R', path.join(__dirname, '../../', 'new-project-template', '*'), fullPath);
+
       if (!useGit && fs.existsSync(path.join(fullPath, '.gitignore'))) {
         fs.unlinkSync(path.join(fullPath, '.gitignore'));
       }
-      if (preview) await downloadPreview(fullPath);
-      spinner.succeed('Downloaded');
 
-      let stringEnd = '';
-      if (install) {
-        process.chdir(fullPath);
-        await installDeps(settings);
-      } else {
-        stringEnd = `and install dependencies with ${chalk.underline('efc config')}`;
-      }
-      console.log(`\nYou can now go to your project by using ${chalk.underline(`cd ${name}`)} ${stringEnd}`);
+      if (preview) await downloadPreview(fullPath);
+
+      spinner.succeed('Downloaded');
+      console.log(`\nYou can now go to your project by using ${chalk.underline(`cd ${name}`)}`);
     } catch (e) {
       console.error('Aborted:', e);
     }

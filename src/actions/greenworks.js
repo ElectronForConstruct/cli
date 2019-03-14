@@ -80,49 +80,48 @@ module.exports = class extends Command {
       return;
     }
 
-    const { steamId } = greenworks;
+    const { steamId, localBuildPath } = greenworks;
     fs.writeFileSync(path.join(process.cwd(), 'steam_appid.txt'), steamId, 'utf8');
 
     // Download latest greenworks init
     const greenworksFileRemoteContent = await this.githubFileDownload('https://raw.githubusercontent.com/greenheartgames/greenworks/master/greenworks.js');
     fs.writeFileSync(path.join(greenworksDir, 'greenworks.js'), greenworksFileRemoteContent, 'utf8');
 
-    // download prebuilt or use the one built many if useLocalBuild set to true
-    const localBuildPath = path.join('node_modules', 'greenworks', 'lib');
-    if (greenworks.useLocalBuild && fs.existsSync(localBuildPath)) {
-      if (!greenworks.sdkPath) {
-        spinner.fail('Please specify a path to your steam sdk in the configuration file');
-        return;
-      }
+    // download prebuilt or use the one built many if localBuildPath set to true
+    if (!greenworks.sdkPath) {
+      spinner.fail('Please specify a path to your steam sdk in the configuration file');
+      return;
+    }
 
-      // copy needed files
-      const { sdkPath } = greenworks;
+    // copy needed files
+    const { sdkPath } = greenworks;
 
-      if (!fs.existsSync(sdkPath)) {
-        spinner.fail(`${sdkPath} does not exist!`);
-        return;
-      }
+    if (!fs.existsSync(sdkPath)) {
+      spinner.fail(`${sdkPath} does not exist!`);
+      return;
+    }
 
-      try {
-        shelljs.cp(path.join(sdkPath, 'redistributable_bin', 'linux64', 'libsteam_api.so'), greenworksLibsDir);
+    try {
+      shelljs.cp(path.join(sdkPath, 'redistributable_bin', 'linux64', 'libsteam_api.so'), greenworksLibsDir);
 
-        shelljs.cp(path.join(sdkPath, 'redistributable_bin', 'osx32', 'libsteam_api.dylib'), greenworksLibsDir);
+      shelljs.cp(path.join(sdkPath, 'redistributable_bin', 'osx32', 'libsteam_api.dylib'), greenworksLibsDir);
 
-        shelljs.cp(path.join(sdkPath, 'redistributable_bin', 'win64', 'steam_api64.dll'), greenworksLibsDir);
-        shelljs.cp(path.join(sdkPath, 'redistributable_bin', 'steam_api.dll'), greenworksLibsDir);
+      shelljs.cp(path.join(sdkPath, 'redistributable_bin', 'win64', 'steam_api64.dll'), greenworksLibsDir);
+      shelljs.cp(path.join(sdkPath, 'redistributable_bin', 'steam_api.dll'), greenworksLibsDir);
 
-        // - - -
+      // - - -
 
-        shelljs.cp(path.join(sdkPath, 'public', 'steam', 'lib', 'linux64', 'libsdkencryptedappticket.so'), greenworksLibsDir);
+      shelljs.cp(path.join(sdkPath, 'public', 'steam', 'lib', 'linux64', 'libsdkencryptedappticket.so'), greenworksLibsDir);
 
-        shelljs.cp(path.join(sdkPath, 'public', 'steam', 'lib', 'osx32', 'libsdkencryptedappticket.dylib'), greenworksLibsDir);
+      shelljs.cp(path.join(sdkPath, 'public', 'steam', 'lib', 'osx32', 'libsdkencryptedappticket.dylib'), greenworksLibsDir);
 
-        shelljs.cp(path.join(sdkPath, 'public', 'steam', 'lib', 'win32', 'sdkencryptedappticket.dll'), greenworksLibsDir);
-        shelljs.cp(path.join(sdkPath, 'public', 'steam', 'lib', 'win64', 'sdkencryptedappticket64.dll'), greenworksLibsDir);
-      } catch (e) {
-        console.error('There was an error copying files, are you sure steam sdk path is valid ?');
-      }
+      shelljs.cp(path.join(sdkPath, 'public', 'steam', 'lib', 'win32', 'sdkencryptedappticket.dll'), greenworksLibsDir);
+      shelljs.cp(path.join(sdkPath, 'public', 'steam', 'lib', 'win64', 'sdkencryptedappticket64.dll'), greenworksLibsDir);
+    } catch (e) {
+      console.error('There was an error copying files, are you sure steam sdk path is valid ?');
+    }
 
+    if (localBuildPath && fs.existsSync(localBuildPath)) {
       const files = fs.readdirSync(localBuildPath);
       files.forEach((file) => {
         if (path.extname(file) === '.node') shelljs.cp(path.join(localBuildPath, file), greenworksLibsDir);
