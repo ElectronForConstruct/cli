@@ -30,7 +30,7 @@ const _appendScript = src => new Promise((resolve) => {
  */
 
 // Load default config and local config and merge them
-loader.load().then((conf) => {
+loader.load(__dirname).then((conf) => {
   const settings = conf.mixed;
 
   if (settings.debug.showConfig) console.log(settings);

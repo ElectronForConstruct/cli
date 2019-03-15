@@ -25,7 +25,7 @@ let mainWindow;
 const args = process.argv;
 global.args = args;
 
-loader.load().then((conf) => {
+loader.load(__dirname).then((conf) => {
   const settings = conf.mixed;
 
   if (settings && settings.debug && settings.debug.showConfig) console.log(settings);
@@ -83,7 +83,7 @@ loader.load().then((conf) => {
       });
     }
 
-    if (settings && settings.developer && settings.developer.showChromeDevTools) {
+    if (settings.developer.showChromeDevTools) {
       mainWindow.webContents.openDevTools();
     }
 
