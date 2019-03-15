@@ -14,6 +14,8 @@ module.exports = class extends Command {
     const { settings } = this;
     const argsLength = Object.keys(args).length;
 
+    // TODO check arg url against regex
+
     let previewUrl = '';
 
     // eslint-disable-next-line
@@ -43,11 +45,14 @@ module.exports = class extends Command {
     }
 
     const templateFolder = path.join(__dirname, '../..', 'template');
-    await install({
-      packages: [`electron@${settings.electron}`],
-      saveDev: true,
-      cwd: templateFolder,
-    });
+    const pkg = require(path.join(templateFolder, 'package.json'));
+    if (pkg.devDependencies.electron !== settings.electron) {
+      await install({
+        packages: [`electron@${settings.electron}`],
+        saveDev: true,
+        cwd: templateFolder,
+      });
+    }
 
     await startPreview(previewUrl);
   }

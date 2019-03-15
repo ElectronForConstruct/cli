@@ -4,11 +4,10 @@ const electron = require('electron');
 const { app, BrowserWindow } = electron;
 // const fs = require('fs');
 const path = require('path');
-const isDev = require('electron-is-dev');
 const handler = require('serve-handler');
 const http = require('http');
 
-const { ConfigLoader } = require('@efc/core');
+const { ConfigLoader, isDev } = require('@efc/core');
 
 const loader = new ConfigLoader();
 
@@ -25,10 +24,19 @@ let mainWindow;
 const args = process.argv;
 global.args = args;
 
-loader.load(__dirname).then((conf) => {
+const urlArg = args.find(arg => arg.includes('--url='));
+const wdArg = args.find(arg => arg.includes('--wd='));
+
+const url = urlArg ? urlArg.replace('--url=', '') : null;
+const wd = wdArg ? wdArg.replace('--wd=', '') : __dirname;
+
+console.log('url', url);
+console.log('wd', wd);
+
+loader.load(wd).then((conf) => {
   const settings = conf.mixed;
 
-  if (settings && settings.debug && settings.debug.showConfig) console.log(settings);
+  if (settings.debug.showConfig) console.log(settings);
 
   /* Switches */
   try {
@@ -48,6 +56,7 @@ loader.load(__dirname).then((conf) => {
     const defaultConfig = {
       webPreferences: {
         webSecurity: false,
+        additionalArguments: [`--wd=${wd}`],
         preload: path.join(__dirname, 'preload.js'),
       },
     };
@@ -63,16 +72,12 @@ loader.load(__dirname).then((conf) => {
       // callback
     });
 
-    if (args[2] && args[2].match('http')) {
-      console.log('Preview development version');
-      mainWindow.loadURL(args[2]);
+    if (url) {
+      mainWindow.loadURL(url);
     } else {
-      if (args[2]) console.log('Preview local version');
-      else console.log('Running prod version');
-
       const server = http.createServer((request, response) => {
         handler(request, response, {
-          public: args[2] ? args[2] : __dirname,
+          public: wd,
         });
       });
 

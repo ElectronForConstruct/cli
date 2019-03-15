@@ -3,8 +3,15 @@ const path = require('path');
 const install = require('install-packages');
 // const electron = require('electron');
 
-module.exports = url => new Promise(async (resolve) => {
-  if (url === '') url = process.cwd();
+module.exports = _url => new Promise(async (resolve) => {
+  let wd = process.cwd();
+  let url = _url;
+
+  if (url === '.') {
+    wd = path.resolve(url);
+    url = null;
+  }
+
   console.log(`Starting preview ${url ? `on "${url}"` : ''}`);
 
   const templateFolder = path.join(__dirname, '../..', 'template');
@@ -15,9 +22,10 @@ module.exports = url => new Promise(async (resolve) => {
     cwd: templateFolder,
   });
 
+
   const electron = path.join(templateFolder, 'node_modules', 'electron', 'dist', 'electron.exe');
 
-  const command = `${electron} ${templateFolder} ${url}`;
+  const command = `${electron} ${templateFolder} ${url ? `--url=${url}` : ''} --wd=${wd}`;
 
   const npmstart = exec(command);
 

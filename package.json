@@ -10,7 +10,6 @@
   },
   "preferGlobal": true,
   "bin": {
-    "e4c": "./index.js",
     "efc": "./index.js"
   },
   "engines": {
@@ -19,7 +18,7 @@
   "author": "Armaldio <armaldio@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@efc/core": "^0.0.6",
+    "@efc/core": "^0.0.7",
     "boxen": "^3.0.0",
     "chalk": "^2.4.2",
     "decompress": "^4.2.0",
