@@ -1,7 +1,5 @@
 const request = require('request');
 const semver = require('semver');
-const fs = require('fs');
-const { USER_PACKAGE_JSON } = require('./utils/ComonPaths');
 const pkg = require('../package.json');
 
 // check CLI
@@ -22,37 +20,6 @@ const checkForUpdate = () => new Promise((resolve, reject) => {
   });
 });
 
-// check template
-const isNewTemplateVersionAvailable = async (settings) => {
-  const dl = () => new Promise((resolve) => {
-    request.get({
-      url: `https://raw.githubusercontent.com/ElectronForConstruct/template/${settings.project.branch}/template/package.json`,
-      json: true,
-    }, (e, r, remotePkg) => {
-      resolve(remotePkg);
-    });
-  });
-
-  const remotePkg = await dl();
-  const remoteVersion = remotePkg.version;
-  // console.log('remoteVersion', remoteVersion);
-
-  if (fs.existsSync(USER_PACKAGE_JSON)) {
-    const { version: localVersion } = JSON.parse(fs.readFileSync(USER_PACKAGE_JSON, 'utf8'));
-    // console.log('localVersion', localVersion);
-
-    if (semver.lt(localVersion, remoteVersion)) {
-      // console.log('An update is available');
-      return {
-        local: localVersion,
-        remote: remoteVersion,
-      };
-    }
-  }
-  return null;
-};
-
 module.exports = {
   checkForUpdate,
-  isNewTemplateVersionAvailable,
 };

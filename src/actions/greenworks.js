@@ -116,7 +116,7 @@ module.exports = class extends Command {
       shelljs.cp(path.join(sdkPath, 'public', 'steam', 'lib', 'win32', 'sdkencryptedappticket.dll'), greenworksLibsDir);
       shelljs.cp(path.join(sdkPath, 'public', 'steam', 'lib', 'win64', 'sdkencryptedappticket64.dll'), greenworksLibsDir);
     } catch (e) {
-      console.error('There was an error copying files, are you sure steam sdk path is valid ?');
+      spinner.fail('There was an error copying files, are you sure steam sdk path is valid ?');
     }
 
     const localLibPath = path.join(localGreenworksPath, 'node_modules', 'greenworks', 'lib');

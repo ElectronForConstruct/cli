@@ -5,10 +5,11 @@ const { Command } = require('@efc/core');
 const install = require('install-packages');
 const fs = require('fs');
 const tmp = require('tmp');
+const ora = require('ora');
 
 module.exports = class extends Command {
   constructor() {
-    super('build', 'Package app', 'k');
+    super('build', 'Package app', 'b');
 
     this.setCategory('Toolchain');
     this.setDescription('Allow you to cross-compile your project to different OS');
@@ -40,17 +41,20 @@ module.exports = class extends Command {
   async run() {
     const { settings } = this;
 
+    let spinner = ora('Building...').start();
+    spinner.text = 'Running pre-build hooks...';
+
+    // Prebuild hooks
     for (let i = 0; i < this.modules.length; i += 1) {
       const module = this.modules[i];
-
-      if (typeof module.onPreBuild === 'function') {
-        // eslint-disable-next-line
-        await module.onPreBuild();
-      }
+      spinner.text = `Running pre-build hooks ${i}/${this.modules.length} ...`;
+      spinner = spinner.stop();
+      // eslint-disable-next-line
+      await module.onPreBuild();
     }
 
     if (!settings.build) {
-      console.error('It looks like your "build" configuration is empty');
+      spinner.fail('It looks like your "build" configuration is empty');
       return;
     }
 
@@ -61,7 +65,7 @@ module.exports = class extends Command {
       prefix: 'efc_',
     });
 
-    console.log('Preparing...');
+    spinner.text = 'Preparing directories...';
 
     packOptions.dir = tmpDir.name;
 
@@ -88,17 +92,26 @@ module.exports = class extends Command {
 
     if (!packOptions.name && this.deepCheck(settings, 'project.name')) packOptions.name = settings.project.name;
 
+    spinner = spinner.stop();
+
     try {
       await install({
         cwd: tmpDir.name,
       });
       const appPaths = await packager(packOptions);
 
-      console.log('Files packages successfuly!');
-      console.log(...appPaths);
+      spinner.succeed('Files packages successfuly!');
+      console.log('Available files:', ...appPaths);
     } catch (e) {
-      console.error('An error occured while packaging your apps');
+      spinner.fail('An error occured while packaging your apps');
       console.log(e);
+    }
+
+    // postBuild hook
+    for (let i = 0; i < this.modules.length; i += 1) {
+      const module = this.modules[i];
+      // eslint-disable-next-line
+      await module.onPostBuild();
     }
   }
 };

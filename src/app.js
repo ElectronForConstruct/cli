@@ -14,12 +14,7 @@ const actions = require('./prompt');
 const pm = new PluginManager(path.join(__dirname, 'actions'));
 const configLoader = new ConfigLoader();
 
-// 24.9Mb currently
-
-
-if (isDev) {
-  console.log('Running in developement mode');
-} else {
+if (!isDev) {
   Raven.config('https://847cb74dd8964d4f81501ed1d29b18f6@sentry.io/1406240').install();
 }
 
