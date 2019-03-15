@@ -119,13 +119,19 @@ module.exports = class extends Command {
       spinner.fail('There was an error copying files, are you sure steam sdk path is valid ?');
     }
 
-    const localLibPath = path.join(localGreenworksPath, 'node_modules', 'greenworks', 'lib');
-    if (localGreenworksPath && fs.existsSync(localLibPath)) {
-      const files = fs.readdirSync(localLibPath);
-      files.forEach((file) => {
-        if (path.extname(file) === '.node') shelljs.cp(path.join(localLibPath, file), greenworksLibsDir);
-      });
+    if (localGreenworksPath) {
+      const localLibPath = path.join(localGreenworksPath, 'node_modules', 'greenworks', 'lib');
+      if (fs.existsSync(localLibPath)) {
+        spinner = spinner.succeed(`Using local build from ${localLibPath}`).start();
+        const files = fs.readdirSync(localLibPath);
+        files.forEach((file) => {
+          if (path.extname(file) === '.node') shelljs.cp(path.join(localLibPath, file), greenworksLibsDir);
+        });
+      } else {
+        spinner.fail(`${localLibPath} can not be found!`);
+      }
     } else {
+      spinner = spinner.succeed('Using prebuilds').start();
       const url = 'https://api.github.com/repos/ElectronForConstruct/greenworks-prebuilds/releases/latest';
       const content = await this.githubFileDownload(url, true);
 
