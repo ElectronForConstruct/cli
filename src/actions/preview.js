@@ -10,7 +10,7 @@ module.exports = class extends Command {
     this.setCategory('Developement');
   }
 
-  async run(args) {
+  async run(args = {}) {
     const { settings } = this;
     const argsLength = Object.keys(args).length;
 

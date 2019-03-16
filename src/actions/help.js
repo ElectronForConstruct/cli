@@ -12,7 +12,7 @@ module.exports = class extends Command {
     return true;
   }
 
-  async run(args) {
+  async run(args = {}) {
     const argsLength = Object.keys(args).length;
 
     console.log(`\n  Version: ${pkg.version}\n`);
