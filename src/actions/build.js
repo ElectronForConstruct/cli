@@ -42,16 +42,6 @@ module.exports = class extends Command {
     const { settings } = this;
 
     let spinner = ora('Building...').start();
-    spinner.text = 'Running pre-build hooks...';
-
-    // Prebuild hooks
-    for (let i = 0; i < this.modules.length; i += 1) {
-      const module = this.modules[i];
-      spinner.text = `Running pre-build hooks ${i}/${this.modules.length} ...`;
-      spinner = spinner.stop();
-      // eslint-disable-next-line
-      await module.onPreBuild();
-    }
 
     if (!settings.build) {
       spinner.fail('It looks like your "build" configuration is empty');
@@ -77,6 +67,8 @@ module.exports = class extends Command {
     shelljs.cp(path.join(__dirname, '../../', 'template', 'preload.js'), tmpDir.name);
     shelljs.cp(path.join(__dirname, '../../', 'template', 'package.json'), tmpDir.name);
     shelljs.rm('-rf', packOptions.out);
+
+    // TODO add ignored files/folder (build, )
     shelljs.cp('-R', path.join(process.cwd(), '*'), tmpDir.name);
 
     // editing package.json
@@ -84,6 +76,17 @@ module.exports = class extends Command {
     const pkgJson = JSON.parse(pkg);
     pkgJson.devDependencies.electron = settings.electron;
     fs.writeFileSync(path.join(tmpDir.name, 'package.json'), JSON.stringify(pkgJson, null, '\t'), 'utf8');
+
+    spinner.text = 'Running pre-build hooks...';
+
+    // Prebuild hooks
+    for (let i = 0; i < this.modules.length; i += 1) {
+      const module = this.modules[i];
+      spinner.text = `Running pre-build hooks ${i}/${this.modules.length} ...`;
+      spinner = spinner.stop();
+      // eslint-disable-next-line
+      await module.onPreBuild(tmpDir.name);
+    }
 
     if (
       !packOptions.appVersion
@@ -111,7 +114,7 @@ module.exports = class extends Command {
     for (let i = 0; i < this.modules.length; i += 1) {
       const module = this.modules[i];
       // eslint-disable-next-line
-      await module.onPostBuild();
+      await module.onPostBuild(tmpDir.name);
     }
   }
 };

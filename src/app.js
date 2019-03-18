@@ -1,9 +1,14 @@
+const path = require('path');
+
+require('dotenv').config({
+  path: path.resolve(__dirname, '.env'),
+});
+
 const chalk = require('chalk');
 const fs = require('fs');
-const path = require('path');
-const Raven = require('raven');
+const Sentry = require('@sentry/node');
 const deepmerge = require('deepmerge');
-const { PluginManager, ConfigLoader, isDev } = require('@efc/core');
+const { PluginManager, ConfigLoader } = require('@efc/core');
 const os = require('os');
 const { USER_CONFIG } = require('./utils/ComonPaths');
 const pkg = require('../package.json');
@@ -14,9 +19,24 @@ const actions = require('./prompt');
 const pm = new PluginManager(path.join(__dirname, 'actions'));
 const configLoader = new ConfigLoader();
 
-if (!isDev) {
-  Raven.config('https://847cb74dd8964d4f81501ed1d29b18f6@sentry.io/1406240').install();
+const isDev = process.env.NODE_ENV === 'development' || false;
+
+if (isDev) {
+  console.log('Running in development');
+} else {
+  Sentry.init({
+    dsn: 'https://847cb74dd8964d4f81501ed1d29b18f6@sentry.io/1406240',
+  });
+
+  Sentry.configureScope((scope) => {
+    scope.setExtra('os', os.platform());
+    scope.setExtra('arch', os.arch());
+    scope.setExtra('hostname', os.hostname());
+    scope.setExtra('cliVersion', pkg.version);
+  });
 }
+
+let errorReporting = !isDev;
 
 checkForUpdate()
   .then(async (update) => {
@@ -37,13 +57,13 @@ checkForUpdate()
 
       const { mixed, base, user } = await configLoader.load();
 
-      Raven.setContext({
-        os: os.platform(),
-        arch: os.arch(),
-        hostname: os.hostname(),
-        config: mixed,
-        cliVersion: pkg.version,
-      });
+      errorReporting = mixed.errorLogging;
+
+      if (!isDev) {
+        Sentry.configureScope((scope) => {
+          scope.setExtra('config', mixed);
+        });
+      }
 
       const config = {
         mixed,
@@ -90,11 +110,18 @@ checkForUpdate()
 
       console.log(box('Happy with ElectronForConstruct ? ► Donate: https://armaldio.xyz/#/donations ♥'));
     } catch (e) {
-      console.error('An error occured', e);
-      Raven.captureException(e);
+      let lastEventId;
+      if (errorReporting) {
+        lastEventId = Sentry.captureException(e);
+        console.log('There was an error performing the current task.');
+        console.log(`Please, open an issue and specify the following error code in your message: ${lastEventId}`);
+      }
+
+      console.log();
+
+      console.log(e);
     }
-  })
-  .catch((e) => {
+  }).catch((e) => {
     console.error(
       'Failed to check for updates:', e,
     );

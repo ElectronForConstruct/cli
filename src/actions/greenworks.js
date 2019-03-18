@@ -2,12 +2,13 @@ const shelljs = require('shelljs');
 const path = require('path');
 const decompress = require('decompress');
 const decompressTargz = require('decompress-targz');
-// const os = require('os');
+const enquirer = require('enquirer');
 const { Command } = require('@efc/core');
 const nodeAbi = require('node-abi');
 const fs = require('fs');
 const request = require('request');
 const ora = require('ora');
+const semver = require('semver');
 
 module.exports = class extends Command {
   constructor() {
@@ -68,6 +69,11 @@ module.exports = class extends Command {
     const greenworksDir = path.join(process.cwd(), 'greenworks');
     const greenworksLibsDir = path.join(process.cwd(), 'greenworks', 'lib');
 
+    if (fs.existsSync(greenworksDir) && !greenworks.forceClean) {
+      spinner.info('"greenworks" folder detected. Skipping.');
+      return;
+    }
+
     // Create greenworks directory
     if (!fs.existsSync(greenworksDir)) shelljs.mkdir(greenworksDir);
     if (!fs.existsSync(greenworksLibsDir)) shelljs.mkdir(greenworksLibsDir);
@@ -78,12 +84,15 @@ module.exports = class extends Command {
       return;
     }
 
-    const { steamId, localGreenworksPath } = greenworks;
-    fs.writeFileSync(path.join(process.cwd(), 'steam_appid.txt'), steamId, 'utf8');
+    const { steamId, localGreenworksPath, forceClean } = greenworks;
+
+    const steamAppIdPath = path.join(process.cwd(), 'steam_appid.txt');
+    fs.writeFileSync(steamAppIdPath, steamId, 'utf8');
 
     // Download latest greenworks init
+    const greenworksjsPath = path.join(greenworksDir, 'greenworks.js');
     const greenworksFileRemoteContent = await this.githubFileDownload('https://raw.githubusercontent.com/greenheartgames/greenworks/master/greenworks.js');
-    fs.writeFileSync(path.join(greenworksDir, 'greenworks.js'), greenworksFileRemoteContent, 'utf8');
+    fs.writeFileSync(greenworksjsPath, greenworksFileRemoteContent, 'utf8');
 
     // download prebuilt or use the one built many if localGreenworksPath set to true
     if (!greenworks.sdkPath) {
@@ -95,29 +104,28 @@ module.exports = class extends Command {
     const { sdkPath } = greenworks;
 
     if (!fs.existsSync(sdkPath)) {
-      spinner.fail(`${sdkPath} does not exist!`);
+      spinner.fail(`${sdkPath} does not exist! Please, specify a valid path to your steam sdk.`);
       return;
     }
 
-    try {
-      shelljs.cp(path.join(sdkPath, 'redistributable_bin', 'linux64', 'libsteam_api.so'), greenworksLibsDir);
+    const toCopy = [
+      path.join(sdkPath, 'redistributable_bin', 'linux64', 'libsteam_api.so'),
+      path.join(sdkPath, 'redistributable_bin', 'osx32', 'libsteam_api.dylib'),
+      path.join(sdkPath, 'redistributable_bin', 'win64', 'steam_api64.dll'),
+      path.join(sdkPath, 'redistributable_bin', 'steam_api.dll'),
+      path.join(sdkPath, 'public', 'steam', 'lib', 'linux64', 'libsdkencryptedappticket.so'),
+      path.join(sdkPath, 'public', 'steam', 'lib', 'osx32', 'libsdkencryptedappticket.dylib'),
+      path.join(sdkPath, 'public', 'steam', 'lib', 'win32', 'sdkencryptedappticket.dll'),
+      path.join(sdkPath, 'public', 'steam', 'lib', 'win64', 'sdkencryptedappticket64.dll'),
+    ];
 
-      shelljs.cp(path.join(sdkPath, 'redistributable_bin', 'osx32', 'libsteam_api.dylib'), greenworksLibsDir);
-
-      shelljs.cp(path.join(sdkPath, 'redistributable_bin', 'win64', 'steam_api64.dll'), greenworksLibsDir);
-      shelljs.cp(path.join(sdkPath, 'redistributable_bin', 'steam_api.dll'), greenworksLibsDir);
-
-      // - - -
-
-      shelljs.cp(path.join(sdkPath, 'public', 'steam', 'lib', 'linux64', 'libsdkencryptedappticket.so'), greenworksLibsDir);
-
-      shelljs.cp(path.join(sdkPath, 'public', 'steam', 'lib', 'osx32', 'libsdkencryptedappticket.dylib'), greenworksLibsDir);
-
-      shelljs.cp(path.join(sdkPath, 'public', 'steam', 'lib', 'win32', 'sdkencryptedappticket.dll'), greenworksLibsDir);
-      shelljs.cp(path.join(sdkPath, 'public', 'steam', 'lib', 'win64', 'sdkencryptedappticket64.dll'), greenworksLibsDir);
-    } catch (e) {
-      spinner.fail('There was an error copying files, are you sure steam sdk path is valid ?');
-    }
+    toCopy.forEach((file) => {
+      try {
+        if (!fs.existsSync(file) || forceClean) shelljs.cp(file, greenworksLibsDir);
+      } catch (e) {
+        spinner.fail(`There was an error copying ${file}, are you sure steam sdk path is valid ?`);
+      }
+    });
 
     if (localGreenworksPath) {
       const localLibPath = path.join(localGreenworksPath, 'node_modules', 'greenworks', 'lib');
@@ -131,11 +139,28 @@ module.exports = class extends Command {
         spinner.fail(`${localLibPath} can not be found!`);
       }
     } else {
-      spinner = spinner.succeed('Using prebuilds').start();
+      spinner = spinner.info('Using prebuilds').start();
+      const version = electron;
+
+      if (semver.satisfies(version, '4.0.0 - 4.1.0')) {
+        spinner = spinner.stop();
+        console.log('Some people have reported errors using prebuilds of electron from 4.0.0 to 4.1.0.');
+        const answers = await enquirer.prompt({
+          type: 'confirm',
+          message: 'Are ou sure you want to continue',
+          name: 'continue',
+        });
+
+        if (!answers.continue) {
+          shelljs.rm('-rf', greenworksDir);
+          return;
+        }
+        spinner = spinner.start();
+      }
+
       const url = 'https://api.github.com/repos/ElectronForConstruct/greenworks-prebuilds/releases/latest';
       const content = await this.githubFileDownload(url, true);
 
-      const version = electron;
       const abi = nodeAbi.getAbi(version, 'electron');
       // const platform = os.platform();
 
