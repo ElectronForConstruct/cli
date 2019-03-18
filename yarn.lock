@@ -124,10 +124,10 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
-"@efc/core@^0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@efc/core/-/core-0.0.8.tgz#e1e3b7f1e092acf8a3667d3f34527fcb6ad3c3b4"
-  integrity sha512-4kFSzPQN2jQvcW9aZ/ws/6liaKCsFbg1bEXO6Xsx+lI9x3o9XQnVSEu+2M/JEQY5M7f4rIZrs1BaXTuDevl1mA==
+"@efc/core@^0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@efc/core/-/core-0.0.9.tgz#472215ee92563e76becbd05eac1c70ccdb5483e7"
+  integrity sha512-YQZLC8D4P6skpftqzU3EJBfGm0kCvhSc6CL6qF0tSWEuXysOeYyDSBlHkkY/WeaSD3VyU4xa2PjWRBSlU7eHKw==
   dependencies:
     deepmerge "^3.2.0"
     electron-is-dev "^1.0.1"
