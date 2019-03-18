@@ -2,10 +2,8 @@ const packager = require('electron-packager');
 const path = require('path');
 const shelljs = require('shelljs');
 const { Command } = require('@efc/core');
-const install = require('install-packages');
-const fs = require('fs');
-const tmp = require('tmp');
 const ora = require('ora');
+const setupDir = require('../utils/setupDir');
 
 module.exports = class extends Command {
   constructor() {
@@ -50,32 +48,17 @@ module.exports = class extends Command {
 
     const packOptions = settings.build;
 
-    tmp.setGracefulCleanup();
-    const tmpDir = tmp.dirSync({
-      prefix: 'efc_',
-    });
-
-    spinner.text = 'Preparing directories...';
-
-    packOptions.dir = tmpDir.name;
-
+    // resolve out directory and delete it
     if (!path.isAbsolute(packOptions.out)) {
       packOptions.out = path.join(process.cwd(), packOptions.out);
     }
-
-    shelljs.cp(path.join(__dirname, '../../', 'template', 'main.js'), tmpDir.name);
-    shelljs.cp(path.join(__dirname, '../../', 'template', 'preload.js'), tmpDir.name);
-    shelljs.cp(path.join(__dirname, '../../', 'template', 'package.json'), tmpDir.name);
     shelljs.rm('-rf', packOptions.out);
 
-    // TODO add ignored files/folder (build, )
-    shelljs.cp('-R', path.join(process.cwd(), '*'), tmpDir.name);
+    // setup directories
+    const tempDir = await setupDir(settings);
 
-    // editing package.json
-    const pkg = fs.readFileSync(path.join(tmpDir.name, 'package.json'));
-    const pkgJson = JSON.parse(pkg);
-    pkgJson.devDependencies.electron = settings.electron;
-    fs.writeFileSync(path.join(tmpDir.name, 'package.json'), JSON.stringify(pkgJson, null, '\t'), 'utf8');
+    // set src dir to tmpdir
+    packOptions.dir = tempDir;
 
     spinner.text = 'Running pre-build hooks...';
 
@@ -85,7 +68,7 @@ module.exports = class extends Command {
       spinner.text = `Running pre-build hooks ${i}/${this.modules.length} ...`;
       spinner = spinner.stop();
       // eslint-disable-next-line
-      await module.onPreBuild(tmpDir.name);
+      await module.onPreBuild(tempDir);
     }
 
     if (
@@ -98,9 +81,6 @@ module.exports = class extends Command {
     spinner = spinner.stop();
 
     try {
-      await install({
-        cwd: tmpDir.name,
-      });
       const appPaths = await packager(packOptions);
 
       spinner.succeed('Files packages successfuly!');
@@ -114,7 +94,7 @@ module.exports = class extends Command {
     for (let i = 0; i < this.modules.length; i += 1) {
       const module = this.modules[i];
       // eslint-disable-next-line
-      await module.onPostBuild(tmpDir.name);
+      await module.onPostBuild(tempDir);
     }
   }
 };

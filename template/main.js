@@ -31,9 +31,6 @@ const wdArg = args.find(arg => arg.includes('--wd='));
 const url = urlArg ? urlArg.replace('--url=', '') : null;
 const wd = wdArg ? wdArg.replace('--wd=', '') : __dirname;
 
-console.log('url', url);
-console.log('wd', wd);
-
 loader.load(wd).then((conf) => {
   const settings = conf.mixed;
   if (settings.debug.showConfig) console.log(settings);

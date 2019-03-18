@@ -2,9 +2,6 @@
   "name": "electron-for-construct",
   "version": "0.0.0",
   "main": "main.js",
-  "scripts": {
-    "start": "electron ."
-  },
   "license": "UNLICENSED",
   "private": true,
   "devDependencies": {

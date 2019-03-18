@@ -29,7 +29,7 @@ module.exports = async (pm) => {
   choices = choices.sort((choicea, choiceb) => {
     const orders = [
       {
-        name: 'Preview',
+        name: 'Developement',
         order: 4,
       },
       {

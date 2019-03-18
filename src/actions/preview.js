@@ -1,7 +1,6 @@
 const { prompt } = require('enquirer');
 const { Command } = require('@efc/core');
-const install = require('install-packages');
-const path = require('path');
+const setupDir = require('../utils/setupDir');
 const startPreview = require('../utils/startPreview');
 
 module.exports = class extends Command {
@@ -44,16 +43,8 @@ module.exports = class extends Command {
       previewUrl = answers.url;
     }
 
-    const templateFolder = path.join(__dirname, '../..', 'template');
-    const pkg = require(path.join(templateFolder, 'package.json'));
-    if (pkg.devDependencies.electron !== settings.electron) {
-      await install({
-        packages: [`electron@${settings.electron}`],
-        saveDev: true,
-        cwd: templateFolder,
-      });
-    }
+    const tempDir = await setupDir(settings);
 
-    await startPreview(previewUrl);
+    await startPreview(previewUrl, tempDir);
   }
 };
