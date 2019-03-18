@@ -18,7 +18,7 @@
   "author": "Armaldio <armaldio@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@efc/core": "^0.0.7",
+    "@efc/core": "^0.0.8",
     "@sentry/node": "4.6.4",
     "babel-minify": "^0.5.0",
     "boxen": "^3.0.0",
