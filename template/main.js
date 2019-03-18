@@ -6,6 +6,7 @@ const { app, BrowserWindow } = electron;
 const path = require('path');
 const handler = require('serve-handler');
 const http = require('http');
+const getPort = require('get-port');
 
 const { ConfigLoader, isDev } = require('@efc/core');
 
@@ -35,8 +36,10 @@ console.log('wd', wd);
 
 loader.load(wd).then((conf) => {
   const settings = conf.mixed;
-
   if (settings.debug.showConfig) console.log(settings);
+
+  const gotTheLock = app.requestSingleInstanceLock();
+  if (settings.singleInstance && !gotTheLock) app.quit();
 
   /* Switches */
   try {
@@ -81,10 +84,12 @@ loader.load(wd).then((conf) => {
         });
       });
 
-      server.listen(1212, () => {
-        console.log('Running at http://localhost:1212');
+      getPort({ port: 1212 }).then((port) => {
+        server.listen(port, () => {
+          console.log(`Running at http://localhost:${port}`);
 
-        mainWindow.loadURL('http://localhost:1212');
+          mainWindow.loadURL(`http://localhost:${port}`);
+        });
       });
     }
 
@@ -145,6 +150,14 @@ loader.load(wd).then((conf) => {
       });
     });
     */
+
+    app.on('second-instance', () => {
+      // Someone tried to run a second instance, we should focus our window.
+      if (mainWindow) {
+        if (mainWindow.isMinimized()) mainWindow.restore();
+        mainWindow.focus();
+      }
+    });
 
     mainWindow.on('closed', () => {
       mainWindow = null;
