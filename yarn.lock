@@ -124,14 +124,6 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
-"@efc/core@^0.0.9":
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/@efc/core/-/core-0.0.9.tgz#472215ee92563e76becbd05eac1c70ccdb5483e7"
-  integrity sha512-YQZLC8D4P6skpftqzU3EJBfGm0kCvhSc6CL6qF0tSWEuXysOeYyDSBlHkkY/WeaSD3VyU4xa2PjWRBSlU7eHKw==
-  dependencies:
-    deepmerge "^3.2.0"
-    electron-is-dev "^1.0.1"
-
 "@samverschueren/stream-to-observable@^0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@samverschueren/stream-to-observable/-/stream-to-observable-0.3.0.tgz#ecdf48d532c58ea477acfcab80348424f8d0662f"
@@ -1461,11 +1453,6 @@ electron-download@^4.1.1:
     rc "^1.2.1"
     semver "^5.4.1"
     sumchecker "^2.0.2"
-
-electron-is-dev@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/electron-is-dev/-/electron-is-dev-1.0.1.tgz#6e0a184736fe7aea77d18210b0b0f6a02402c4bc"
-  integrity sha512-iwM3EotA9HTXqMGpQRkR/kT8OZqBbdfHTnlwcxsjSLYqY8svvsq0MuujsWCn3/vtgRmDv/PC/gKUUpoZvi5C1w==
 
 electron-notarize@^0.0.5:
   version "0.0.5"
