@@ -1,0 +1,20 @@
+{
+  "name": "@efc/core",
+  "version": "0.0.9",
+  "description": "The runtime core functionnalities of efc",
+  "main": "index.js",
+  "repository": "https://github.com/ElectronForConstruct/core",
+  "author": "Armaldio <armaldio@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "release": "np",
+    "up": "yarn upgrade-interactive && syncyarnlock -s -k"
+  },
+  "dependencies": {
+    "deepmerge": "^3.2.0",
+    "electron-is-dev": "^1.0.1"
+  },
+  "devDependencies": {
+    "np": "^4.0.2"
+  }
+}
