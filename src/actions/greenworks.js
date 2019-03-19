@@ -50,8 +50,19 @@ module.exports = class extends Command {
    * Command
    */
 
-  async onPreBuild() {
+  async onPreBuild(tmpdir) {
     await this.run();
+    shelljs.mkdir('-p', path.join(tmpdir, 'greenworks'));
+    shelljs.cp('-R', path.join(process.cwd(), 'greenworks', '*'), path.join(tmpdir, 'greenworks'));
+  }
+
+  async onPostBuild(out) {
+    const folders = fs.readdirSync(out);
+
+    const steamAppIdTxt = path.join(process.cwd(), 'greenworks', 'steam_appid.txt');
+    folders.forEach((folder) => {
+      shelljs.cp(steamAppIdTxt, path.join(out, folder, 'steam_appid.txt'));
+    });
   }
 
   async run() {
@@ -86,7 +97,7 @@ module.exports = class extends Command {
 
     const { steamId, localGreenworksPath, forceClean } = greenworks;
 
-    const steamAppIdPath = path.join(process.cwd(), 'steam_appid.txt');
+    const steamAppIdPath = path.join(greenworksDir, 'steam_appid.txt');
     fs.writeFileSync(steamAppIdPath, steamId, 'utf8');
 
     // Download latest greenworks init
@@ -121,7 +132,9 @@ module.exports = class extends Command {
 
     toCopy.forEach((file) => {
       try {
-        if (!fs.existsSync(file) || forceClean) shelljs.cp(file, greenworksLibsDir);
+        if (!fs.existsSync(path.join(greenworksLibsDir, path.basename(file))) || forceClean) {
+          shelljs.cp(file, greenworksLibsDir);
+        }
       } catch (e) {
         spinner.fail(`There was an error copying ${file}, are you sure steam sdk path is valid ?`);
       }
@@ -173,6 +186,7 @@ module.exports = class extends Command {
         try {
           const res = content.assets.find(asset => asset.name === assetName).browser_download_url;
 
+          // TODO use proper temp directory
           const tempFolder = path.join(process.cwd(), 'temp');
           shelljs.mkdir('-p', tempFolder);
           const tarFile = path.join(tempFolder, 'file.tar.gz');

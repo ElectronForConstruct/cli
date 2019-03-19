@@ -54,7 +54,7 @@ module.exports = class extends Command {
     if (!path.isAbsolute(packOptions.out)) {
       packOptions.out = path.join(process.cwd(), packOptions.out);
     }
-    shelljs.rm('-rf', packOptions.out);
+    // shelljs.rm('-rf', packOptions.out);
 
     // setup directories
     let zipFile = null;
@@ -98,7 +98,7 @@ module.exports = class extends Command {
     for (let i = 0; i < this.modules.length; i += 1) {
       const module = this.modules[i];
       // eslint-disable-next-line
-      await module.onPostBuild(tempDir);
+      await module.onPostBuild(packOptions.out);
     }
   }
 };
