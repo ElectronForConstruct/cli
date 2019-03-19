@@ -1,7 +1,7 @@
 const eb = require('electron-builder');
 const fs = require('fs');
 const path = require('path');
-const { Command } = require('@efc/core');
+const { Command } = require('../core');
 
 module.exports = class extends Command {
   constructor() {

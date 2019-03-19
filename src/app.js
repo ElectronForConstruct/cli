@@ -8,13 +8,13 @@ const chalk = require('chalk');
 const fs = require('fs');
 const Sentry = require('@sentry/node');
 const deepmerge = require('deepmerge');
-const { PluginManager, ConfigLoader } = require('@efc/core');
 const os = require('os');
 const { USER_CONFIG } = require('./utils/ComonPaths');
 const pkg = require('../package.json');
 const box = require('./box');
 const { checkForUpdate } = require('./updateCheck');
 const actions = require('./prompt');
+const { PluginManager, ConfigLoader } = require('./core');
 
 const pm = new PluginManager(path.join(__dirname, 'actions'));
 const configLoader = new ConfigLoader();

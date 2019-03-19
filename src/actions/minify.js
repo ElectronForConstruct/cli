@@ -1,9 +1,9 @@
-const { Command } = require('@efc/core');
 const minify = require('babel-minify');
 const recursive = require('recursive-readdir');
 const path = require('path');
 const fs = require('fs');
 const ora = require('ora');
+const { Command } = require('../core');
 
 module.exports = class extends Command {
   constructor() {

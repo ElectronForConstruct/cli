@@ -2,14 +2,22 @@ const fs = require('fs');
 const tmp = require('tmp');
 const path = require('path');
 const shelljs = require('shelljs');
+const extract = require('extract-zip');
 const install = require('install-packages');
+
+const extractZip = async (from, to) => new Promise((resolve, reject) => {
+  extract(from, { dir: to }, (err) => {
+    if (err) reject(err);
+    resolve(to);
+  });
+});
 
 /**
  * Prepare a sandboxed environment in tmp
  * @param settings
  * @returns {Promise<string>}
  */
-module.exports = async (settings) => {
+module.exports = async (settings, zipFile = null) => {
   const { electron } = settings;
 
   // create temporary directory
@@ -19,16 +27,19 @@ module.exports = async (settings) => {
     unsafeCleanup: true,
   });
 
-  console.log(tmpDir.name);
-
   // copy local files from template to tmpdir
   shelljs.cp(path.join(__dirname, '../../', 'template', 'main.js'), tmpDir.name);
   shelljs.cp(path.join(__dirname, '../../', 'template', 'preload.js'), tmpDir.name);
   shelljs.cp(path.join(__dirname, '../../', 'template', 'package.json'), tmpDir.name);
 
   // TODO add ignored files/folder (build, )
-  // copy app/* to root of temp dir
-  shelljs.cp('-R', path.join(process.cwd(), 'app', '*'), tmpDir.name);
+
+  if (zipFile) {
+    await extractZip(zipFile, tmpDir.name);
+  } else {
+    // copy app/* to root of temp dir
+    shelljs.cp('-R', path.join(process.cwd(), 'app', '*'), tmpDir.name);
+  }
 
   if (fs.existsSync(path.join(process.cwd(), 'greenworks'))) {
     shelljs.cp('-R', path.join(process.cwd(), 'greenworks'), path.join(tmpDir.name, 'greenworks'));

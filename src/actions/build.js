@@ -1,8 +1,8 @@
 const packager = require('electron-packager');
 const path = require('path');
 const shelljs = require('shelljs');
-const { Command } = require('@efc/core');
 const ora = require('ora');
+const { Command } = require('../core');
 const setupDir = require('../utils/setupDir');
 
 module.exports = class extends Command {
@@ -36,7 +36,9 @@ module.exports = class extends Command {
     return true;
   }
 
-  async run() {
+  async run(args = {}) {
+    const argsLenth = Object.keys(args).length;
+
     const { settings } = this;
 
     let spinner = ora('Building...').start();
@@ -55,7 +57,9 @@ module.exports = class extends Command {
     shelljs.rm('-rf', packOptions.out);
 
     // setup directories
-    const tempDir = await setupDir(settings);
+    let zipFile = null;
+    if (argsLenth === 1) zipFile = args[0];
+    const tempDir = await setupDir(settings, zipFile);
 
     // set src dir to tmpdir
     packOptions.dir = tempDir;

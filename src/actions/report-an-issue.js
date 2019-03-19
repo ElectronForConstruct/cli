@@ -1,6 +1,6 @@
 const opn = require('opn');
 const os = require('os');
-const { Command } = require('@efc/core');
+const { Command } = require('../core');
 
 module.exports = class extends Command {
   constructor() {

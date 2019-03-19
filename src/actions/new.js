@@ -3,8 +3,8 @@ const { prompt } = require('enquirer');
 const fs = require('fs');
 const ora = require('ora');
 const path = require('path');
-const { Command } = require('@efc/core');
 const shelljs = require('shelljs');
+const { Command } = require('../core');
 const downloadPreview = require('../utils/downloadPreview');
 
 module.exports = class extends Command {

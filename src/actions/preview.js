@@ -1,5 +1,6 @@
 const { prompt } = require('enquirer');
-const { Command } = require('@efc/core');
+const path = require('path');
+const { Command } = require('../core');
 const setupDir = require('../utils/setupDir');
 const startPreview = require('../utils/startPreview');
 
@@ -17,9 +18,10 @@ module.exports = class extends Command {
 
     let previewUrl = '';
 
-    // eslint-disable-next-line
-    if (argsLength > 0) previewUrl = args[ 0 ];
-    else {
+    if (argsLength > 0) {
+      // eslint-disable-next-line
+      previewUrl = args[ 0 ];
+    } else {
       console.log('\nTo preview your Construct project in Electron, you need a valid subscription.');
       console.log('\t• Construct 3: Go to the preview menu, hit "Remote preview" and paste the link that appear here');
       console.log('\t• Construct 2: Start a regular browser preview and paste the link here');
@@ -43,7 +45,13 @@ module.exports = class extends Command {
       previewUrl = answers.url;
     }
 
-    const tempDir = await setupDir(settings);
+    let zipFile = null;
+    if (path.extname(previewUrl) === '.zip') {
+      zipFile = previewUrl;
+      previewUrl = '.';
+    }
+
+    const tempDir = await setupDir(settings, zipFile);
 
     await startPreview(previewUrl, tempDir);
   }
