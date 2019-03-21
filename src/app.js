@@ -44,7 +44,7 @@ checkForUpdate()
       console.log(box(`
   ${chalk.redBright('You are using an outdated version of this tool')}
       
-  The latest version is ${chalk.yellow.bold.underline(update.version)}.
+  The latest version is ${chalk.yellow.bold.underline(update)}.
   Update using ${chalk.reset.bold.underline(`npm i -g ${pkg.name}`)}`));
     }
 

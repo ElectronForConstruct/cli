@@ -82,7 +82,7 @@ loader.load(workingDir).then((conf) => {
       })
       .then(() => {
         const dt = document.createElement('construct-devtool');
-        dt.style.position = 'fixed';
+        // dt.style.position = 'fixed';
         document.body.append(dt);
         console.log('adding devtool');
       });

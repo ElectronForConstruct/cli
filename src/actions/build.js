@@ -4,6 +4,7 @@ const fs = require('fs');
 const ws = require('windows-shortcuts');
 const { Command } = require('../core');
 const setupDir = require('../utils/setupDir');
+const semver = require('semver');
 
 module.exports = class extends Command {
   constructor() {
@@ -113,34 +114,34 @@ module.exports = class extends Command {
 
     const folders = fs.readdirSync(packOptions.out);
 
-    const switchesAsString = settings.switches.map((flag) => {
-      let f = Array.isArray(flag) ? flag[0] : flag;
+    if (settings.switches.length > 0 && semver.satisfies(settings.electron, '>= 4')) {
+      const switchesAsString = settings.switches.map((flag) => {
+        let f = Array.isArray(flag) ? flag[0] : flag;
 
-      if (Array.isArray(flag)) {
+        if (Array.isArray(flag)) {
+          if (f[0] !== '-' && f[1] !== '-') {
+            f = `--${f}`;
+          }
+          return `${f}=${flag[1]}`;
+        }
+
         if (f[0] !== '-' && f[1] !== '-') {
           f = `--${f}`;
         }
-        return `${f}=${flag[1]}`;
-      }
+        return f;
+      });
 
-      if (f[0] !== '-' && f[1] !== '-') {
-        f = `--${f}`;
-      }
-      return f;
-    });
-
-
-    // make a shortcut on windows
-    folders.forEach((folder) => {
-      const fullPath = path.join(packOptions.out, folder);
-      if (folder.includes('win32')) {
-        console.log(fullPath);
-        ws.create(fullPath, {
-          target: path.join(fullPath, `${packOptions.name}.exe`),
-          args: switchesAsString.join(' '),
-        });
-      }
-    });
+      // make a shortcut on windows
+      folders.forEach((folder) => {
+        const fullPath = path.join(packOptions.out, folder);
+        if (folder.includes('win32')) {
+          ws.create(fullPath, {
+            target: path.join(fullPath, `${packOptions.name}.exe`),
+            args: switchesAsString.join(' '),
+          });
+        }
+      });
+    }
 
     // postBuild hook
     console.log('Running post-build hooks...');

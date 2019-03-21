@@ -16,7 +16,7 @@ const checkForUpdate = () => new Promise((resolve) => {
 
       const { latest } = body['dist-tags'];
 
-      if (semver.lt(pkg.version, latest)) resolve(latest);
+      if (semver.lt(pkg.version, latest)) { resolve(latest); }
       resolve(false);
     } catch (e) {
       console.log('Unable to check for updates... Please check your connection and try again');
