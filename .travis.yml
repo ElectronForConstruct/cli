@@ -2,5 +2,8 @@ language: node_js
 node_js:
   - "10"
 
+notifications:
+  email: false
+
 script:
   - npm run test
