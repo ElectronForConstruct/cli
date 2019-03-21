@@ -1,6 +1,5 @@
 const packager = require('electron-packager');
 const path = require('path');
-const ora = require('ora');
 const { Command } = require('../core');
 const setupDir = require('../utils/setupDir');
 
@@ -40,15 +39,17 @@ module.exports = class extends Command {
 
     const { settings } = this;
 
-    let spinner = ora('Building...').start();
+    console.log('Build started...');
 
     if (!settings.build) {
-      spinner.fail('It looks like your "build" configuration is empty');
+      console.error('It looks like your "build" configuration is empty');
       return;
     }
 
     const packOptions = settings.build;
-    if (settings.electron) packOptions.electronVersion = settings.electron;
+    if (settings.electron) {
+      packOptions.electronVersion = settings.electron;
+    }
 
     // resolve out directory and delete it
     if (!path.isAbsolute(packOptions.out)) {
@@ -58,47 +59,56 @@ module.exports = class extends Command {
 
     // setup directories
     let zipFile = null;
-    if (argsLenth === 1) zipFile = args[0];
+    if (argsLenth === 1) {
+      zipFile = args[0];
+    }
     const tempDir = await setupDir(settings, zipFile);
 
     // set src dir to tmpdir
     packOptions.dir = tempDir;
 
-    spinner.text = 'Running pre-build hooks...';
+    console.log('Running pre-build hooks...');
 
     // Prebuild hooks
     for (let i = 0; i < this.modules.length; i += 1) {
       const module = this.modules[i];
-      spinner.text = `Running pre-build hooks ${i}/${this.modules.length} ...`;
-      spinner = spinner.stop();
-      // eslint-disable-next-line
-      await module.onPreBuild(tempDir);
+      if (typeof module.onPostBuild === 'function') {
+        console.info(`\t${i}/${this.modules.length} (${module.rawName}) ...`);
+        // eslint-disable-next-line
+        await module.onPreBuild(tempDir);
+      }
     }
 
     if (
       !packOptions.appVersion
       && this.deepCheck(settings, 'project.version')
-    ) packOptions.appVersion = settings.project.version;
+    ) {
+      packOptions.appVersion = settings.project.version;
+    }
 
-    if (!packOptions.name && this.deepCheck(settings, 'project.name')) packOptions.name = settings.project.name;
-
-    spinner = spinner.stop();
+    if (!packOptions.name && this.deepCheck(settings, 'project.name')) {
+      packOptions.name = settings.project.name;
+    }
 
     try {
       const appPaths = await packager(packOptions);
 
-      spinner.succeed('Files packages successfuly!');
+      console.log('Files packages successfuly!');
       console.log('Available files:', ...appPaths);
     } catch (e) {
-      spinner.fail('An error occured while packaging your apps');
+      console.error('An error occured while packaging your apps');
       console.log(e);
     }
 
     // postBuild hook
+    console.log('Running post-build hooks...');
     for (let i = 0; i < this.modules.length; i += 1) {
       const module = this.modules[i];
-      // eslint-disable-next-line
-      await module.onPostBuild(packOptions.out);
+      if (typeof module.onPostBuild === 'function') {
+        console.info(`\t${i}/${this.modules.length} (${module.rawName}) ...`);
+        // eslint-disable-next-line
+        await module.onPostBuild(packOptions.out);
+      }
     }
   }
 };

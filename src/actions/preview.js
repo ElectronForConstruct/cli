@@ -55,14 +55,20 @@ module.exports = class extends Command {
 
     for (let i = 0; i < this.modules.length; i += 1) {
       const module = this.modules[i];
-      // eslint-disable-next-line
-      await module.onPreBuild(tempDir);
+      if (typeof module.onPostBuild === 'function') {
+        // eslint-disable-next-line
+        console.info(`\t${i}/${this.modules.length} (${module.rawName}) ...`);
+        await module.onPreBuild(tempDir);
+      }
     }
 
     for (let i = 0; i < this.modules.length; i += 1) {
       const module = this.modules[i];
-      // eslint-disable-next-line
-      await module.onPostBuild(tempDir);
+      if (typeof module.onPostBuild === 'function') {
+        // eslint-disable-next-line
+                console.info(`\t${i}/${this.modules.length} (${module.rawName}) ...`);
+        await module.onPostBuild(tempDir);
+      }
     }
 
     await startPreview(previewUrl, tempDir, settings.electron);

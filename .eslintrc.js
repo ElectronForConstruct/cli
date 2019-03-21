@@ -15,5 +15,6 @@ module.exports = {
     'global-require'           : 0,
     'no-await-in-loop'         : 0,
     'linebreak-style'          : 0,
+    'curly'                    : [2, 'all'],
   },
 };

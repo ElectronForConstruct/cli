@@ -36,24 +36,20 @@ module.exports = class Command {
    * @returns {string}
    */
   underline(text) {
-    return `\u001B[4m${text}\u001B[24m`
+    return `\u001B[4m${text}\u001B[24m`;
   }
 
   /**
    * Hook executed before the build task
    * @abstract
    */
-  onPreBuild() {
-    // :)
-  }
+  // onPreBuild() {}
 
   /**
    * Hook executed after the build task
    * @abstract
    */
-  onPostBuild() {
-    // :)
-  }
+  // onPostBuild() {}
 
   /**
    * Set the category of the plugin

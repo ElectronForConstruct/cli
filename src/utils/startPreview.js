@@ -35,8 +35,6 @@ module.exports = (_url, tmpDir) => new Promise(async (resolve) => {
 
   const command = `${electron} ${tmpDir} ${url ? `--url=${url}` : ''} --wd=${tmpDir}`;
 
-  console.log(command);
-
   const npmstart = exec(command);
 
   npmstart.stdout.on('data', (data) => {
