@@ -19,6 +19,7 @@
   "license": "MIT",
   "dependencies": {
     "@sentry/node": "4.6.4",
+    "adm-zip": "^0.4.13",
     "babel-minify": "^0.5.0",
     "boxen": "^3.0.0",
     "chalk": "^2.4.2",
@@ -27,6 +28,7 @@
     "deepmerge": "^3.2.0",
     "dotenv": "^7.0.0",
     "electron-builder": "^20.39.0",
+    "electron-download": "^4.1.1",
     "electron-packager": "^13.1.1",
     "enquirer": "^2.3.0",
     "extract-zip": "^1.6.7",
@@ -39,8 +41,7 @@
     "request": "^2.88.0",
     "semver": "^5.6.0",
     "shelljs": "^0.8.3",
-    "tmp": "^0.0.33",
-    "zip-a-folder": "^0.0.7"
+    "tmp": "^0.0.33"
   },
   "devDependencies": {
     "cross-env": "^5.2.0",

@@ -53,6 +53,18 @@ module.exports = class extends Command {
 
     const tempDir = await setupDir(settings, zipFile);
 
-    await startPreview(previewUrl, tempDir);
+    for (let i = 0; i < this.modules.length; i += 1) {
+      const module = this.modules[i];
+      // eslint-disable-next-line
+      await module.onPreBuild(tempDir);
+    }
+
+    for (let i = 0; i < this.modules.length; i += 1) {
+      const module = this.modules[i];
+      // eslint-disable-next-line
+      await module.onPostBuild(tempDir);
+    }
+
+    await startPreview(previewUrl, tempDir, settings.electron);
   }
 };

@@ -4,9 +4,7 @@
   "main": "main.js",
   "license": "UNLICENSED",
   "private": true,
-  "devDependencies": {
-    "electron": "3.1.6"
-  },
+  "devDependencies": {},
   "dependencies": {
     "@efc/core": "latest",
     "fs-extra": "^7.0.1",

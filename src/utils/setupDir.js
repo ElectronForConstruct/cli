@@ -1,6 +1,7 @@
 const fs = require('fs');
 const tmp = require('tmp');
 const path = require('path');
+// const AdmZip = require('adm-zip');
 const shelljs = require('shelljs');
 const extract = require('extract-zip');
 const install = require('install-packages');
@@ -41,14 +42,10 @@ module.exports = async (settings, zipFile = null) => {
     shelljs.cp('-R', path.join(process.cwd(), 'app', '*'), tmpDir.name);
   }
 
-  if (fs.existsSync(path.join(process.cwd(), 'greenworks'))) {
-    shelljs.cp('-R', path.join(process.cwd(), 'greenworks'), path.join(tmpDir.name, 'greenworks'));
-  }
-
   shelljs.cp(path.join(process.cwd(), 'config.js'), tmpDir.name);
 
   // editing package.json
-  const pkg = fs.readFileSync(path.join(tmpDir.name, 'package.json'));
+  const pkg = fs.readFileSync(path.join(tmpDir.name, 'package.json'), 'utf8');
   const pkgJson = JSON.parse(pkg);
   pkgJson.devDependencies.electron = electron;
   pkgJson.name = settings.project.name;

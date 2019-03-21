@@ -1,6 +1,5 @@
 const packager = require('electron-packager');
 const path = require('path');
-const shelljs = require('shelljs');
 const ora = require('ora');
 const { Command } = require('../core');
 const setupDir = require('../utils/setupDir');
@@ -49,6 +48,7 @@ module.exports = class extends Command {
     }
 
     const packOptions = settings.build;
+    if (settings.electron) packOptions.electronVersion = settings.electron;
 
     // resolve out directory and delete it
     if (!path.isAbsolute(packOptions.out)) {

@@ -55,7 +55,6 @@ loader.load(wd).then((conf) => {
 
     const defaultConfig = {
       webPreferences: {
-        webSecurity: false,
         additionalArguments: [`--wd=${wd}`],
         preload: path.join(__dirname, 'preload.js'),
       },
@@ -69,7 +68,7 @@ loader.load(wd).then((conf) => {
     ses.clearStorageData({
       storages: ['cachestorage', 'serviceworkers'],
     }, () => {
-      // callback
+      console.log('storage cleared');
     });
 
     if (url) {

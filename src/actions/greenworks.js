@@ -53,7 +53,9 @@ module.exports = class extends Command {
   async onPreBuild(tmpdir) {
     await this.run();
     shelljs.mkdir('-p', path.join(tmpdir, 'greenworks'));
-    shelljs.cp('-R', path.join(process.cwd(), 'greenworks', '*'), path.join(tmpdir, 'greenworks'));
+    if (fs.existsSync(path.join(process.cwd(), 'greenworks'))) {
+      shelljs.cp('-R', path.join(process.cwd(), 'greenworks', '*'), path.join(tmpdir, 'greenworks'));
+    }
   }
 
   async onPostBuild(out) {
