@@ -4440,6 +4440,11 @@ widest-line@^2.0.0:
   dependencies:
     string-width "^2.1.1"
 
+windows-shortcuts@^0.1.6:
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/windows-shortcuts/-/windows-shortcuts-0.1.6.tgz#27970c5c346ffd81821c3e12528c0babca0a5a99"
+  integrity sha1-J5cMXDRv/YGCHD4SUowLq8oKWpk=
+
 wordwrap@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/wordwrap/-/wordwrap-1.0.0.tgz#27584810891456a4171c8d0226441ade90cbcaeb"

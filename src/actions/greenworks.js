@@ -2,11 +2,9 @@ const shelljs = require('shelljs');
 const path = require('path');
 const decompress = require('decompress');
 const decompressTargz = require('decompress-targz');
-const enquirer = require('enquirer');
 const nodeAbi = require('node-abi');
 const fs = require('fs');
 const request = require('request');
-const semver = require('semver');
 const { Command } = require('../core');
 
 module.exports = class extends Command {
@@ -60,12 +58,8 @@ module.exports = class extends Command {
   }
 
   async onPostBuild(out) {
-    const folders = fs.readdirSync(out);
-
     const steamAppIdTxt = path.join(process.cwd(), 'greenworks', 'steam_appid.txt');
-    folders.forEach((folder) => {
-      shelljs.cp(steamAppIdTxt, path.join(out, folder, 'steam_appid.txt'));
-    });
+    shelljs.cp(steamAppIdTxt, path.join(out, 'steam_appid.txt'));
   }
 
   async run() {
@@ -163,20 +157,6 @@ module.exports = class extends Command {
     } else {
       console.log('Using prebuilds');
       const version = electron;
-
-      if (semver.satisfies(version, '4.0.0 - 4.1.0')) {
-        console.log('Some people have reported errors using prebuilds of electron from 4.0.0 to 4.1.0.');
-        const answers = await enquirer.prompt({
-          type: 'confirm',
-          message: 'Are ou sure you want to continue',
-          name: 'continue',
-        });
-
-        if (!answers.continue) {
-          shelljs.rm('-rf', greenworksDir);
-          return;
-        }
-      }
 
       const url = 'https://api.github.com/repos/ElectronForConstruct/greenworks-prebuilds/releases/latest';
       const content = await this.githubFileDownload(url, true);

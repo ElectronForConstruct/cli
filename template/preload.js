@@ -12,7 +12,6 @@ const loader = new ConfigLoader();
  *
  */
 
-/*
 const _appendScript = src => new Promise((resolve) => {
   const script = document.createElement('script');
   script.type = 'text/javascript';
@@ -23,7 +22,6 @@ const _appendScript = src => new Promise((resolve) => {
   script.src = src;
   document.getElementsByTagName('head')[0].appendChild(script);
 });
-*/
 
 /**
  *
@@ -37,7 +35,7 @@ const workingDir = process.argv.find(arg => arg.includes('--wd=')).replace('--wd
 loader.load(workingDir).then((conf) => {
   const settings = conf.mixed;
 
-  if (settings.debug.showConfig) console.log(settings);
+  if (settings.debug.showConfig) { console.log(settings); }
 
   document.addEventListener('DOMContentLoaded', () => {
     if (settings.developer.overlay) {
@@ -69,8 +67,7 @@ loader.load(workingDir).then((conf) => {
       document.body.append(parent);
     }
 
-    /*
-    if (!settings.developer.showConstructDevTools) return;
+    if (!settings.developer.showConstructDevTools) { return; }
 
     // enable devtool
     Promise.resolve()
@@ -89,7 +86,6 @@ loader.load(workingDir).then((conf) => {
         document.body.append(dt);
         console.log('adding devtool');
       });
-      */
   });
 
   document.addEventListener('reloadPage', () => {
@@ -105,10 +101,10 @@ loader.load(workingDir).then((conf) => {
     if (elem) {
       switch (elem.textContent) {
         case 'Host disconnected':
-          if (settings.developer.autoClose) electron.remote.getCurrentWindow().close();
+          if (settings.developer.autoClose) { electron.remote.getCurrentWindow().close(); }
           break;
         case 'Host updated project':
-          if (settings.developer.autoReload) electron.remote.getCurrentWindow().reload();
+          if (settings.developer.autoReload) { electron.remote.getCurrentWindow().reload(); }
           break;
         default:
           break;

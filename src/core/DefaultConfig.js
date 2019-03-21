@@ -81,5 +81,6 @@ module.exports = {
       'node_modules/app-builder-bin',
       'node_modules/app-builder-lib',
     ],
+    win32metadata: {},
   },
 };

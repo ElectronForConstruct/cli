@@ -1737,6 +1737,11 @@ widest-line@^2.0.0:
   dependencies:
     string-width "^2.1.1"
 
+windows-shortcuts@^0.1.6:
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/windows-shortcuts/-/windows-shortcuts-0.1.6.tgz#27970c5c346ffd81821c3e12528c0babca0a5a99"
+  integrity sha1-J5cMXDRv/YGCHD4SUowLq8oKWpk=
+
 wrap-ansi@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-3.0.1.tgz#288a04d87eda5c286e060dfe8f135ce8d007f8ba"

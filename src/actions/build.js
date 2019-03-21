@@ -1,5 +1,7 @@
 const packager = require('electron-packager');
 const path = require('path');
+const fs = require('fs');
+const ws = require('windows-shortcuts');
 const { Command } = require('../core');
 const setupDir = require('../utils/setupDir');
 
@@ -60,7 +62,8 @@ module.exports = class extends Command {
     // setup directories
     let zipFile = null;
     if (argsLenth === 1) {
-      zipFile = args[0];
+      // eslint-disable-next-line
+      zipFile = args[ 0 ];
     }
     const tempDir = await setupDir(settings, zipFile);
 
@@ -79,6 +82,8 @@ module.exports = class extends Command {
       }
     }
 
+    // Compute datas //////////////
+
     if (
       !packOptions.appVersion
       && this.deepCheck(settings, 'project.version')
@@ -90,6 +95,12 @@ module.exports = class extends Command {
       packOptions.name = settings.project.name;
     }
 
+    if (!this.deepCheck(packOptions, 'win32metadata.CompanyName') && this.deepCheck(settings, 'project.author')) {
+      packOptions.win32metadata.CompanyName = settings.project.author;
+    }
+
+    // ////////////////////////////
+
     try {
       const appPaths = await packager(packOptions);
 
@@ -100,14 +111,50 @@ module.exports = class extends Command {
       console.log(e);
     }
 
+    const folders = fs.readdirSync(packOptions.out);
+
+    const switchesAsString = settings.switches.map((flag) => {
+      let f = Array.isArray(flag) ? flag[0] : flag;
+
+      if (Array.isArray(flag)) {
+        if (f[0] !== '-' && f[1] !== '-') {
+          f = `--${f}`;
+        }
+        return `${f}=${flag[1]}`;
+      }
+
+      if (f[0] !== '-' && f[1] !== '-') {
+        f = `--${f}`;
+      }
+      return f;
+    });
+
+
+    // make a shortcut on windows
+    folders.forEach((folder) => {
+      const fullPath = path.join(packOptions.out, folder);
+      if (folder.includes('win32')) {
+        console.log(fullPath);
+        ws.create(fullPath, {
+          target: path.join(fullPath, `${packOptions.name}.exe`),
+          args: switchesAsString.join(' '),
+        });
+      }
+    });
+
     // postBuild hook
     console.log('Running post-build hooks...');
-    for (let i = 0; i < this.modules.length; i += 1) {
-      const module = this.modules[i];
-      if (typeof module.onPostBuild === 'function') {
-        console.info(`\t${i}/${this.modules.length} (${module.rawName}) ...`);
-        // eslint-disable-next-line
-        await module.onPostBuild(packOptions.out);
+
+    for (let i = 0; i < folders.length; i += 1) {
+      const folder = folders[i];
+
+      for (let j = 0; j < this.modules.length; j += 1) {
+        const module = this.modules[j];
+        if (typeof module.onPostBuild === 'function') {
+          console.info(`\t${j}/${this.modules.length} - ${folder} (${module.rawName}) ...`);
+          // eslint-disable-next-line
+          await module.onPostBuild(path.join(packOptions.out, folder));
+        }
       }
     }
   }
