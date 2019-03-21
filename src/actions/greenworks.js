@@ -60,7 +60,6 @@ module.exports = class extends Command {
   }
 
   async onPostBuild(out) {
-    console.log(out);
     const folders = fs.readdirSync(out);
 
     const steamAppIdTxt = path.join(process.cwd(), 'greenworks', 'steam_appid.txt');
