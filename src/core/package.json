@@ -1,6 +1,6 @@
 {
   "name": "@efc/core",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "The runtime core functionnalities of efc",
   "main": "index.js",
   "repository": "https://github.com/ElectronForConstruct/core",
