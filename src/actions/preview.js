@@ -32,7 +32,7 @@ module.exports = class extends Command {
           name: 'url',
           message: 'Enter your Construct URL: ',
           validate: (url) => {
-            if (url === '') return true;
+            if (url === '') { return true; }
             const regexC3 = /https:\/\/preview\.construct\.net\/#.{8}$/;
             const regexC2 = /^https?:\/\/(?:localhost|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}):\d*\/?$/;
             if (url.match(regexC2) || url.match(regexC3)) {
@@ -66,7 +66,7 @@ module.exports = class extends Command {
       const module = this.modules[i];
       if (typeof module.onPostBuild === 'function') {
         // eslint-disable-next-line
-                console.info(`\t${i}/${this.modules.length} (${module.rawName}) ...`);
+        console.info(`\t${i}/${this.modules.length} (${module.rawName}) ...`);
         await module.onPostBuild(tempDir);
       }
     }

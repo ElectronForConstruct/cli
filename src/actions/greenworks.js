@@ -6,7 +6,6 @@ const enquirer = require('enquirer');
 const nodeAbi = require('node-abi');
 const fs = require('fs');
 const request = require('request');
-const ora = require('ora');
 const semver = require('semver');
 const { Command } = require('../core');
 
@@ -30,7 +29,9 @@ module.exports = class extends Command {
         },
         json,
       }, (e, r, content) => {
-        if (e) reject(e);
+        if (e) {
+          reject(e);
+        }
         resolve(content);
       });
     });
@@ -59,6 +60,7 @@ module.exports = class extends Command {
   }
 
   async onPostBuild(out) {
+    console.log(out);
     const folders = fs.readdirSync(out);
 
     const steamAppIdTxt = path.join(process.cwd(), 'greenworks', 'steam_appid.txt');
@@ -68,12 +70,12 @@ module.exports = class extends Command {
   }
 
   async run() {
-    let spinner = ora('Initializing greenworks ...').start();
+    console.log('Initializing greenworks ...');
 
     const { settings } = this;
 
     if (!settings.greenworks) {
-      spinner.fail('"greenworks" key not found. You must specify your greenworks settings under this key.');
+      console.error('"greenworks" key not found. You must specify your greenworks settings under this key.');
       return;
     }
 
@@ -83,17 +85,21 @@ module.exports = class extends Command {
     const greenworksLibsDir = path.join(process.cwd(), 'greenworks', 'lib');
 
     if (fs.existsSync(greenworksDir) && !greenworks.forceClean) {
-      spinner.info('"greenworks" folder detected. Skipping.');
+      console.info('"greenworks" folder detected. Skipping.');
       return;
     }
 
     // Create greenworks directory
-    if (!fs.existsSync(greenworksDir)) shelljs.mkdir(greenworksDir);
-    if (!fs.existsSync(greenworksLibsDir)) shelljs.mkdir(greenworksLibsDir);
+    if (!fs.existsSync(greenworksDir)) {
+      shelljs.mkdir(greenworksDir);
+    }
+    if (!fs.existsSync(greenworksLibsDir)) {
+      shelljs.mkdir(greenworksLibsDir);
+    }
 
     // Generate steamId
     if (!greenworks.steamId) {
-      spinner.fail('Please specify a steam game id in the configuration file');
+      console.error('Please specify a steam game id in the configuration file');
       return;
     }
 
@@ -109,7 +115,7 @@ module.exports = class extends Command {
 
     // download prebuilt or use the one built many if localGreenworksPath set to true
     if (!greenworks.sdkPath) {
-      spinner.fail('Please specify a path to your steam sdk in the configuration file');
+      console.error('Please specify a path to your steam sdk in the configuration file');
       return;
     }
 
@@ -117,7 +123,7 @@ module.exports = class extends Command {
     const { sdkPath } = greenworks;
 
     if (!fs.existsSync(sdkPath)) {
-      spinner.fail(`${sdkPath} does not exist! Please, specify a valid path to your steam sdk.`);
+      console.error(`${sdkPath} does not exist! Please, specify a valid path to your steam sdk.`);
       return;
     }
 
@@ -138,27 +144,28 @@ module.exports = class extends Command {
           shelljs.cp(file, greenworksLibsDir);
         }
       } catch (e) {
-        spinner.fail(`There was an error copying ${file}, are you sure steam sdk path is valid ?`);
+        console.error(`There was an error copying ${file}, are you sure steam sdk path is valid ?`);
       }
     });
 
     if (localGreenworksPath) {
       const localLibPath = path.join(localGreenworksPath, 'node_modules', 'greenworks', 'lib');
       if (fs.existsSync(localLibPath)) {
-        spinner = spinner.succeed(`Using local build from ${localLibPath}`).start();
+        console.log(`Using local build from ${localLibPath}`);
         const files = fs.readdirSync(localLibPath);
         files.forEach((file) => {
-          if (path.extname(file) === '.node') shelljs.cp(path.join(localLibPath, file), greenworksLibsDir);
+          if (path.extname(file) === '.node') {
+            shelljs.cp(path.join(localLibPath, file), greenworksLibsDir);
+          }
         });
       } else {
-        spinner.fail(`${localLibPath} can not be found!`);
+        console.error(`${localLibPath} can not be found!`);
       }
     } else {
-      spinner = spinner.info('Using prebuilds').start();
+      console.log('Using prebuilds');
       const version = electron;
 
       if (semver.satisfies(version, '4.0.0 - 4.1.0')) {
-        spinner = spinner.stop();
         console.log('Some people have reported errors using prebuilds of electron from 4.0.0 to 4.1.0.');
         const answers = await enquirer.prompt({
           type: 'confirm',
@@ -170,7 +177,6 @@ module.exports = class extends Command {
           shelljs.rm('-rf', greenworksDir);
           return;
         }
-        spinner = spinner.start();
       }
 
       const url = 'https://api.github.com/repos/ElectronForConstruct/greenworks-prebuilds/releases/latest';
@@ -201,12 +207,12 @@ module.exports = class extends Command {
           shelljs.cp('-R', path.join(tempFolder, 'build', 'Release/*'), greenworksLibsDir);
           shelljs.rm('-rf', tempFolder);
         } catch (e) {
-          spinner = spinner.fail(`The target ${assetName} seems not to be available currently. Build it yourself, or change Electron version.`);
+          console.error(`The target ${assetName} seems not to be available currently. Build it yourself, or change Electron version.`);
         }
       }
       shelljs.rm('-rf', path.join(greenworksLibsDir, 'obj.target'));
     }
 
-    spinner.succeed('Greenworks initialization done!');
+    console.log('Greenworks initialization done!');
   }
 };
