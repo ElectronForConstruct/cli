@@ -4,7 +4,7 @@
   "description": "A command-line tool to manage your Construct Electron projects",
   "scripts": {
     "start": "cross-env NODE_ENV=dev node src/app.js",
-    "release": "np",
+    "release": "np --yolo",
     "up": "yarn upgrade-interactive --latest && syncyarnlock -s -k",
     "test": "echo 1"
   },

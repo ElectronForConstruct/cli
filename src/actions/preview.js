@@ -55,7 +55,7 @@ module.exports = class extends Command {
 
     for (let i = 0; i < this.modules.length; i += 1) {
       const module = this.modules[i];
-      if (typeof module.onPostBuild === 'function') {
+      if (typeof module.onPreBuild === 'function') {
         // eslint-disable-next-line
         console.info(`\t${i}/${this.modules.length} (${module.rawName}) ...`);
         await module.onPreBuild(tempDir);

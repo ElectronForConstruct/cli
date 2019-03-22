@@ -2,18 +2,17 @@ const minify = require('babel-minify');
 const recursive = require('recursive-readdir');
 const path = require('path');
 const fs = require('fs');
-const ora = require('ora');
 const { Command } = require('../core');
 
 module.exports = class extends Command {
   constructor() {
-    super('minify', 'Minify', 'm');
+    super('minifier', 'Minify');
   }
 
   async recursiveReadDir(dir) {
     return new Promise((resolve, reject) => {
       recursive(dir, (err, files) => {
-        if (err) reject(err);
+        if (err) { reject(err); }
         resolve(files);
       });
     });
@@ -22,14 +21,13 @@ module.exports = class extends Command {
   async minify(dir) {
     const { ignore } = this.settings.minify;
 
-    console.log(dir);
-    let spinner = ora('Minifying...').start();
+    console.log('Minifying...');
 
     const files = await this.recursiveReadDir(dir);
 
     files.forEach((file) => {
-      if (path.extname(file) === '.js' && !ignore.includes(path.basename(file))) {
-        spinner.text = `Minifying ${path.basename(file)}`;
+      if (path.extname(file) === '.js' && !ignore.includes(path.basename(file)) && !file.includes('node_modules')) {
+        // console.info(`Minifying ${path.basename(file)}`;
 
         try {
           const fileContent = fs.readFileSync(file, 'utf8');
@@ -37,14 +35,14 @@ module.exports = class extends Command {
           const { code } = minify(fileContent);
 
           fs.writeFileSync(file, code, 'utf8');
-          spinner = spinner.info(`Minified ${path.basename(file)}`).start();
+          console.info(`Minified ${path.basename(file)}`);
         } catch (e) {
-          spinner = spinner.fail(`Failed minifying ${path.basename(file)}`).start();
+          console.error(`Failed minifying ${path.basename(file)}`);
         }
       }
     });
 
-    spinner.succeed('All files minified successfuly');
+    console.log('All files minified successfuly');
   }
 
   async onPreBuild(dir) {
