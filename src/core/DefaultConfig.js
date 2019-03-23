@@ -1,5 +1,5 @@
-const isDev = require('./isDev');
 const path = require('path');
+const isDev = require('./isDev');
 
 module.exports = {
   electron: '3.1.6',
@@ -82,5 +82,8 @@ module.exports = {
       'node_modules/app-builder-lib',
     ],
     win32metadata: {},
+  },
+  'crash-reporter': {
+    enable: false,
   },
 };

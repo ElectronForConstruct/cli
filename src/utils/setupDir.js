@@ -8,7 +8,9 @@ const install = require('install-packages');
 
 const extractZip = async (from, to) => new Promise((resolve, reject) => {
   extract(from, { dir: to }, (err) => {
-    if (err) reject(err);
+    if (err) {
+      reject(err);
+    }
     resolve(to);
   });
 });
@@ -52,9 +54,16 @@ module.exports = async (settings, zipFile = null) => {
   pkgJson.version = settings.project.version;
   fs.writeFileSync(path.join(tmpDir.name, 'package.json'), JSON.stringify(pkgJson, null, '\t'), 'utf8');
 
-  await install({
-    cwd: tmpDir.name,
-  });
+  if (settings.dependencies && settings.dependencies.length > 0) {
+    await install({
+      cwd: tmpDir.name,
+      packages: settings.dependencies,
+    });
+  } else {
+    await install({
+      cwd: tmpDir.name,
+    });
+  }
 
   return tmpDir.name;
 };

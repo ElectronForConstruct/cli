@@ -33,18 +33,38 @@ const wd = wdArg ? wdArg.replace('--wd=', '') : __dirname;
 
 loader.load(wd).then((conf) => {
   const settings = conf.mixed;
-  if (settings.debug.showConfig) console.log(settings);
+  if (settings.debug.showConfig) {
+    console.log(settings);
+  }
 
+  // single instance
   const gotTheLock = app.requestSingleInstanceLock();
-  if (settings.singleInstance && !gotTheLock) app.quit();
+  if (settings.singleInstance && !gotTheLock) {
+    app.quit();
+  }
+
+  // crash reporter
+  if (settings['crash-reporter'].enable) {
+    if (!settings['crash-reporter'].companyName) {
+      if (settings.project.author) {
+        settings['crash-reporter'].companyName = settings.project.author;
+      } else {
+        settings['crash-reporter'].companyName = 'MyCompany';
+      }
+    }
+    electron.crashReporter.start(settings['crash-reporter']);
+  }
 
   /* Switches */
   try {
     const { switches } = settings;
 
     switches.forEach((flag) => {
-      if (Array.isArray(flag)) app.commandLine.appendSwitch(flag[0], flag[1]);
-      else app.commandLine.appendSwitch(flag);
+      if (Array.isArray(flag)) {
+        app.commandLine.appendSwitch(flag[0], flag[1]);
+      } else {
+        app.commandLine.appendSwitch(flag);
+      }
     });
   } catch (e) {
     console.log('No command line switches provided');
@@ -147,26 +167,28 @@ loader.load(wd).then((conf) => {
     });
     */
 
-    app.on('second-instance', () => {
-      // Someone tried to run a second instance, we should focus our window.
-      if (mainWindow) {
-        if (mainWindow.isMinimized()) mainWindow.restore();
-        mainWindow.focus();
-      }
-    });
-
     mainWindow.on('closed', () => {
       mainWindow = null;
     });
   }
 
+  app.on('second-instance', () => {
+    // Someone tried to run a second instance, we should focus our window.
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+      }
+      mainWindow.focus();
+    }
+  });
+
   app.on('ready', createWindow);
 
-  app.on('window-all-closed', app.quit);
-  /* app.on('before-quit', () => {
-    mainWindow.removeAllListeners('close');
-    mainWindow.close();
-  }); */
+  app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
+      app.quit();
+    }
+  });
 
   app.on('activate', () => {
     if (mainWindow === null) {
