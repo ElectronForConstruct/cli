@@ -3,7 +3,8 @@
 
 A complete guide is available [here](https://electronforconstruct.armaldio.xyz).
 
-Please, consider to support me: 
-<img src="http://img.shields.io/liberapay/patrons/Armaldio.svg?logo=liberapay">
-[![Donate](https://img.shields.io/badge/Support%20via-PayPal-green.svg)](https://www.paypal.me/armaldio)
+Please, consider to support me: \
+Regular donation: 
+<noscript><a target="_blank" href="https://liberapay.com/Armaldio/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a></noscript> (Patreon alternative) \
+Paypal: [![Donate](https://img.shields.io/badge/Support%20via-PayPal-green.svg)](https://www.paypal.me/armaldio)
 
