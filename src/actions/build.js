@@ -2,9 +2,9 @@ const packager = require('electron-packager');
 const path = require('path');
 const fs = require('fs');
 const ws = require('windows-shortcuts');
+const semver = require('semver');
 const { Command } = require('../core');
 const setupDir = require('../utils/setupDir');
-const semver = require('semver');
 
 module.exports = class extends Command {
   constructor() {
@@ -112,7 +112,11 @@ module.exports = class extends Command {
       console.log(e);
     }
 
-    const folders = fs.readdirSync(packOptions.out);
+    const isDirectory = source => fs.lstatSync(source).isDirectory()
+    const folders = fs
+      .readdirSync(packOptions.out)
+      .map(name => path.join(packOptions.out, name))
+      .filter(isDirectory);
 
     if (settings.switches.length > 0 && semver.satisfies(settings.electron, '>= 4')) {
       const switchesAsString = settings.switches.map((flag) => {
@@ -131,12 +135,13 @@ module.exports = class extends Command {
         return f;
       });
 
+      console.log(folders);
+
       // make a shortcut on windows
       folders.forEach((folder) => {
-        const fullPath = path.join(packOptions.out, folder);
         if (folder.includes('win32')) {
-          ws.create(fullPath, {
-            target: path.join(fullPath, `${packOptions.name}.exe`),
+          ws.create(folder, {
+            target: path.join(folder, `${packOptions.name}.exe`),
             args: switchesAsString.join(' '),
           });
         }
@@ -154,7 +159,7 @@ module.exports = class extends Command {
         if (typeof module.onPostBuild === 'function') {
           console.info(`\t${j}/${this.modules.length} - ${folder} (${module.rawName}) ...`);
           // eslint-disable-next-line
-          await module.onPostBuild(path.join(packOptions.out, folder));
+          await module.onPostBuild(folder);
         }
       }
     }
