@@ -75,6 +75,7 @@ loader.load(wd).then((conf) => {
 
     const defaultConfig = {
       webPreferences: {
+        nodeIntegration: true,
         additionalArguments: [`--wd=${wd}`],
         preload: path.join(__dirname, 'preload.js'),
       },
