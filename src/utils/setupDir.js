@@ -21,6 +21,7 @@ const extractZip = async (from, to) => new Promise((resolve, reject) => {
  * @returns {Promise<string>}
  */
 module.exports = async (settings, zipFile = null) => {
+  console.log(settings);
   const { electron } = settings;
 
   // create temporary directory
@@ -30,12 +31,24 @@ module.exports = async (settings, zipFile = null) => {
     unsafeCleanup: true,
   });
 
+  if (
+    fs.existsSync(path.join(process.cwd(), 'cache', 'package-lock.json'))
+  ) {
+    console.log('Using cache');
+    shelljs.cp(path.join(process.cwd(), 'cache', 'package-lock.json'), path.join(tmpDir.name, 'package-lock.json'));
+  }
+
+  if (fs.existsSync(path.join(process.cwd(), 'cache', 'yarn.lock'))) {
+    console.log('Using cache');
+    shelljs.cp(path.join(process.cwd(), 'cache', 'yarn.lock'), path.join(tmpDir.name, 'yarn.lock'));
+  }
+
   // copy local files from template to tmpdir
   shelljs.cp(path.join(__dirname, '../../', 'template', 'main.js'), tmpDir.name);
   shelljs.cp(path.join(__dirname, '../../', 'template', 'preload.js'), tmpDir.name);
   shelljs.cp(path.join(__dirname, '../../', 'template', 'package.json'), tmpDir.name);
 
-  // TODO add ignored files/folder (build, )
+  fs.writeFileSync(path.join(tmpDir.name, 'config.js'), `module.exports = ${JSON.stringify(settings, null, '  ')}`, 'utf8');
 
   if (zipFile) {
     await extractZip(zipFile, tmpDir.name);
@@ -44,7 +57,7 @@ module.exports = async (settings, zipFile = null) => {
     shelljs.cp('-R', path.join(process.cwd(), 'app', '*'), tmpDir.name);
   }
 
-  shelljs.cp(path.join(process.cwd(), 'config.js'), tmpDir.name);
+  // shelljs.cp(path.join(process.cwd(), 'config.js'), tmpDir.name);
 
   // editing package.json
   const pkg = fs.readFileSync(path.join(tmpDir.name, 'package.json'), 'utf8');
@@ -64,6 +77,20 @@ module.exports = async (settings, zipFile = null) => {
       cwd: tmpDir.name,
     });
   }
+
+  // Cache ///
+  shelljs.mkdir('-p', path.join(process.cwd(), 'cache'));
+
+  if (fs.existsSync(path.join(tmpDir.name, 'package-lock.json'))) {
+    console.log('Caching files to speed up next builds');
+    shelljs.cp(path.join(tmpDir.name, 'package-lock.json'), path.join(process.cwd(), 'cache'));
+  }
+
+  if (fs.existsSync(path.join(tmpDir.name, 'yarn.lock'))) {
+    console.log('Caching files to speed up next builds');
+    shelljs.cp(path.join(tmpDir.name, 'yarn.lock'), path.join(process.cwd(), 'cache'));
+  }
+  // ~ Cache ///
 
   return tmpDir.name;
 };

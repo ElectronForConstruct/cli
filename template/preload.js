@@ -1,10 +1,8 @@
 delete window.module;
 
 // eslint-disable-next-line
-const electron         = require('electron');
-const { ConfigLoader } = require('@efc/core');
-
-const loader = new ConfigLoader();
+const electron = require('electron');
+const settings = require('./config');
 
 /**
  *
@@ -29,86 +27,87 @@ const _appendScript = src => new Promise((resolve) => {
  *
  */
 
-const workingDir = process.argv.find(arg => arg.includes('--wd=')).replace('--wd=', '');
+if (settings.debug.showConfig) {
+  console.log(settings);
+}
 
-// Load default config and local config and merge them
-loader.load(workingDir).then((conf) => {
-  const settings = conf.mixed;
+document.addEventListener('DOMContentLoaded', () => {
+  if (settings.developer.overlay) {
+    const { overlay } = settings.developer;
 
-  if (settings.debug.showConfig) { console.log(settings); }
+    const parent = document.createElement('span');
 
-  document.addEventListener('DOMContentLoaded', () => {
-    if (settings.developer.overlay) {
-      const { overlay } = settings.developer;
+    const { position } = overlay;
 
-      const parent = document.createElement('span');
+    const vertical = position.split('-')[0];
+    const horizontal = position.split('-')[1];
 
-      const { position } = overlay;
-
-      const vertical = position.split('-')[0];
-      const horizontal = position.split('-')[1];
-
-      if (vertical !== 'top' && vertical !== 'bottom') {
-        console.warn('Only "top" and "bottom" are supported as let part of the position!');
-        return;
-      }
-
-      if (horizontal !== 'left' && horizontal !== 'right') {
-        console.warn('Only "left" and "right" are supported as right part of the position!');
-        return;
-      }
-
-      parent.style[horizontal] = 0;
-      parent.style[vertical] = 0;
-      parent.style.padding = '5px';
-      parent.innerHTML = overlay.content;
-      parent.style.position = 'fixed';
-
-      document.body.append(parent);
+    if (vertical !== 'top' && vertical !== 'bottom') {
+      console.warn('Only "top" and "bottom" are supported as let part of the position!');
+      return;
     }
 
-    if (!settings.developer.showConstructDevTools) { return; }
-
-    // enable devtool
-    Promise.resolve()
-      .then(() => _appendScript('https://unpkg.com/vue'))
-      .then(() => {
-        Vue.config.productionTip = false;
-        Vue.config.devtools = false;
-
-        console.log('adding vue');
-
-        return _appendScript('https://gitcdn.xyz/repo/ElectronForConstruct/construct-devtool/master/dist/construct-devtool.min.js');
-      })
-      .then(() => {
-        const dt = document.createElement('construct-devtool');
-        // dt.style.position = 'fixed';
-        document.body.append(dt);
-        console.log('adding devtool');
-      });
-  });
-
-  document.addEventListener('reloadPage', () => {
-    electron.remote.getCurrentWindow().reload();
-  }, false);
-
-  document.addEventListener('openDevTools', () => {
-    electron.remote.getCurrentWindow().webContents.openDevTools();
-  }, false);
-
-  setInterval(() => {
-    const elem = document.querySelector('.remotePreviewNotification');
-    if (elem) {
-      switch (elem.textContent) {
-        case 'Host disconnected':
-          if (settings.developer.autoClose) { electron.remote.getCurrentWindow().close(); }
-          break;
-        case 'Host updated project':
-          if (settings.developer.autoReload) { electron.remote.getCurrentWindow().reload(); }
-          break;
-        default:
-          break;
-      }
+    if (horizontal !== 'left' && horizontal !== 'right') {
+      console.warn('Only "left" and "right" are supported as right part of the position!');
+      return;
     }
-  }, 1000);
+
+    parent.style[horizontal] = 0;
+    parent.style[vertical] = 0;
+    parent.style.padding = '5px';
+    parent.innerHTML = overlay.content;
+    parent.style.position = 'fixed';
+
+    document.body.append(parent);
+  }
+
+  if (!settings.developer.showConstructDevTools) {
+    return;
+  }
+
+  // enable devtool
+  Promise.resolve()
+    .then(() => _appendScript('https://unpkg.com/vue'))
+    .then(() => {
+      Vue.config.productionTip = false;
+      Vue.config.devtools = false;
+
+      console.log('adding vue');
+
+      return _appendScript('https://gitcdn.xyz/repo/ElectronForConstruct/construct-devtool/master/dist/construct-devtool.min.js');
+    })
+    .then(() => {
+      const dt = document.createElement('construct-devtool');
+      // dt.style.position = 'fixed';
+      document.body.append(dt);
+      console.log('adding devtool');
+    });
 });
+
+document.addEventListener('reloadPage', () => {
+  electron.remote.getCurrentWindow().reload();
+}, false);
+
+document.addEventListener('openDevTools', () => {
+  electron.remote.getCurrentWindow().webContents.openDevTools();
+}, false);
+
+setInterval(() => {
+  const elem = document.querySelector('.remotePreviewNotification');
+  if (elem) {
+    switch (elem.textContent) {
+      case 'Host disconnected':
+        if (settings.developer.autoClose) {
+          electron.remote.getCurrentWindow().close();
+        }
+        break;
+      case 'Host updated project':
+        if (settings.developer.autoReload) {
+          electron.remote.getCurrentWindow().reload();
+        }
+        break;
+      default:
+        break;
+    }
+  }
+}, 1000);

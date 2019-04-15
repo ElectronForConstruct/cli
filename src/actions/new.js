@@ -1,23 +1,29 @@
-const chalk = require('chalk');
-const { prompt } = require('enquirer');
-const fs = require('fs');
-const ora = require('ora');
-const path = require('path');
-const shelljs = require('shelljs');
-const { Command } = require('../core');
-const downloadPreview = require('../utils/downloadPreview');
-
-module.exports = class extends Command {
-  constructor() {
-    super('new', 'Create a new project', 'n');
-    this.setCategory('Toolchain');
-  }
-
-  isVisible() {
-    return !this.config.isProject;
-  }
+module.exports = {
+  name: 'new',
+  description: 'Bootstrap a new project',
+  usage: 'new [ [ -n name ] [ -g ] [ -p ]',
+  cli: {
+    alias: {
+      n: 'name',
+      g: 'git',
+      p: 'preview',
+    },
+  },
 
   async run() {
+    if (this.config.isProject) {
+      console.log('This project is already configured');
+      return;
+    }
+
+    const chalk = require('chalk');
+    const { prompt } = require('enquirer');
+    const ora = require('ora');
+    const fs = require('fs');
+    const path = require('path');
+    const shelljs = require('shelljs');
+    const downloadPreview = require('../utils/downloadPreview');
+
     let answers = {};
     const dir = process.cwd();
     try {
@@ -67,12 +73,14 @@ module.exports = class extends Command {
         fs.unlinkSync(path.join(fullPath, '.gitignore'));
       }
 
-      if (preview) await downloadPreview(fullPath);
+      if (preview) {
+        await downloadPreview(fullPath);
+      }
 
       spinner.succeed('Downloaded');
       console.log(`\nYou can now go to your project by using ${chalk.underline(`cd ${name}`)}`);
     } catch (e) {
       console.error('Aborted:', e);
     }
-  }
+  },
 };

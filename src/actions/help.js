@@ -1,73 +1,45 @@
-const { prompt } = require('enquirer');
-const opn = require('opn');
-const { Command } = require('../core');
-const pkg = require('../../package.json');
+module.exports = {
+  name: 'help',
+  description: 'Display this help',
 
-module.exports = class extends Command {
-  constructor() {
-    super('help', 'Help', 'h');
-  }
+  run(args) {
+    console.log();
+    console.log('Usage: efc <command> [options] [args...]');
+    console.log();
+    console.log('Commands:');
 
-  isVisible() {
-    return true;
-  }
+    if (args._.length === 1 && args._[0] !== 'help') {
+      const cmd = this.modules.find(c => c.name === args._[0]);
+      if (cmd) {
+        console.log(`  efc ${(cmd.usage || cmd.name).padEnd(50)} ${cmd.description}`);
 
-  async run(args = {}) {
-    const argsLength = Object.keys(args).length;
+        console.log();
 
-    console.log(`\n  Version: ${pkg.version}\n`);
+        console.log('Parameters:');
+        Object.keys(cmd.cli).forEach((conf) => {
+          console.log(`- ${conf}:`);
+          Object.entries(cmd.cli[conf]).forEach((items) => {
+            console.log(`  - ${items[0]}: ${items[1]}`);
+          });
+        });
 
-    let { modules } = this;
-    if (argsLength === 1) modules = modules.filter(m => m.id === args[0]);
+        console.log();
 
-    const maxCategoryLength = modules.reduce(
-      (a, b) => (a.category.length > b.category.length ? a : b),
-    ).category.length;
+        if (cmd.config) {
+          console.log('Default configuration:');
+          Object.entries(cmd.config).forEach((conf) => {
+            console.log(`  - ${conf[0]}: ${JSON.stringify(conf[1], null, '  ')}`);
+          });
+        }
 
-    const maxNameLength = modules.reduce(
-      (a, b) => (a.rawName.length > b.rawName.length ? a : b),
-    ).rawName.length;
-
-    const maxIdLength = modules.reduce(
-      (a, b) => (a.id.length > b.id.length ? a : b),
-    ).id.length;
-
-
-    let options = modules.map(
-      module => `  ${module.category.padEnd(maxCategoryLength + 2, ' ')} ${module.rawName.padEnd(maxNameLength + 2, ' ')} ${module.id.padEnd(maxIdLength)} ${module.shortcut ? `(${module.shortcut})` : ''}`,
-    );
-    if (modules.length === 0) options = [`\tUnable to find module "${args[0]}"`];
-
-    if (modules.length === 1) {
-      console.log(`
-${options}
-      
-  ${modules[0].description}
-      `);
-      return;
+        console.log();
+      } else {
+        console.log('Command not found');
+      }
+    } else {
+      this.modules.forEach((cmd) => {
+        console.log(`  efc ${(cmd.usage || cmd.name).padEnd(50)} ${cmd.description}`);
+      });
     }
-
-    console.log(`
-Usage: 
-  
-  efc [id]
-  
-  id: the id of the command you want to execute directly
-      
-Available modules:
-  
-${options.join('\n')}
-    `);
-
-    const answers = await prompt([
-      {
-        type: 'confirm',
-        name: 'confirm',
-        message: 'Get more help in the browser ?',
-      },
-    ]);
-    if (answers.confirm) {
-      opn('https://electronforconstruct.armaldio.xyz');
-    }
-  }
+  },
 };

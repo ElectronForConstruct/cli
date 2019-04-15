@@ -1,15 +1,13 @@
-const { Command } = require('../core');
+/**
+ * Debug command
+ * @type {module.Debug}
+ * @extends module.Command
+ */
+module.exports = {
+  name: 'debug',
+  description: 'Show current confiuration',
 
-module.exports = class extends Command {
-  constructor() {
-    super('debug', 'Debug');
-  }
-
-  isVisible() {
-    return true;
-  }
-
-  async run() {
+  run() {
     console.log(this.settings);
-  }
+  },
 };

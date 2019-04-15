@@ -2,17 +2,23 @@ const minify = require('babel-minify');
 const recursive = require('recursive-readdir');
 const path = require('path');
 const fs = require('fs');
-const { Command } = require('../core');
+const Command = require('../Command');
 
 module.exports = class extends Command {
   constructor() {
     super('minifier', 'Minify');
+
+    this.setDefaultConfiguration({
+      ignore: ['data.js', 'offline.js'],
+    });
   }
 
   async recursiveReadDir(dir) {
     return new Promise((resolve, reject) => {
       recursive(dir, (err, files) => {
-        if (err) { reject(err); }
+        if (err) {
+          reject(err);
+        }
         resolve(files);
       });
     });

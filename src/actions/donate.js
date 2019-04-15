@@ -1,16 +1,9 @@
-const opn = require('opn');
-const { Command } = require('../core');
+module.exports = {
+  name: 'donate',
+  description: 'Open a link where you can donate to support this app',
 
-module.exports = class extends Command {
-  constructor() {
-    super('donate', 'Donate');
-  }
-
-  isVisible() {
-    return true;
-  }
-
-  async run() {
+  run() {
+    const opn = require('opn');
     opn('https://armaldio.xyz/#/donations');
-  }
+  },
 };

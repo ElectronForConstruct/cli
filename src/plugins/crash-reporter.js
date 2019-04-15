@@ -1,8 +1,13 @@
-const { Command } = require('../core');
+const Command = require('../Command');
 
+/**
+ *
+ * @type {module.Command}
+ */
 module.exports = class extends Command {
   constructor() {
     super('crash-reporter', 'Configure crash reporter');
+    this.setDefaultConfiguration({});
   }
 
   isVisible() {

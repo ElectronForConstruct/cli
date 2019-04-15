@@ -1,17 +1,10 @@
-const opn = require('opn');
-const os = require('os');
-const { Command } = require('../core');
+module.exports = {
+  name: 'report-issue',
+  description: 'Report an issue',
 
-module.exports = class extends Command {
-  constructor() {
-    super('report-issue', 'Report an issue');
-  }
-
-  isVisible() {
-    return true;
-  }
-
-  async run() {
+  run () {
+    const opn = require('opn');
+    const os = require('os');
     const msg = `
 Configuration:
 - OS: ${os.platform()}
@@ -22,5 +15,5 @@ Steps to reproduce:
   `.trim();
 
     opn(`https://github.com/ElectronForConstruct/preview/issues/new?body=${encodeURI(msg)}`);
-  }
+  },
 };

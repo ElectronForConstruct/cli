@@ -1,46 +1,64 @@
-const packager = require('electron-packager');
 const path = require('path');
-const fs = require('fs');
-const ws = require('windows-shortcuts');
-const semver = require('semver');
-const { Command } = require('../core');
-const setupDir = require('../utils/setupDir');
 
-module.exports = class extends Command {
-  constructor() {
-    super('build', 'Package app', 'b');
-
-    this.setCategory('Toolchain');
-    this.setDescription('Allow you to cross-compile your project to different OS');
+const deepCheck = (target, p, value) => {
+  if (typeof target !== 'object' || target === null) {
+    return false;
   }
 
-  deepCheck(target, p, value) {
-    if (typeof target !== 'object' || target === null) {
+  const parts = p.split('.');
+
+  while (parts.length) {
+    const property = parts.shift();
+    // eslint-disable-next-line
+    if (!(target.hasOwnProperty(property))) {
       return false;
     }
-
-    const parts = p.split('.');
-
-    while (parts.length) {
-      const property = parts.shift();
-      // eslint-disable-next-line
-      if (!(target.hasOwnProperty(property))) {
-        return false;
-      }
-      // eslint-disable-next-line
-      target = target[ property ];
-    }
-
-    if (value) {
-      return target === value;
-    }
-    return true;
+    // eslint-disable-next-line
+    target = target[ property ];
   }
 
-  async run(args = {}) {
-    const argsLenth = Object.keys(args).length;
+  if (value) {
+    return target === value;
+  }
+  return true;
+};
 
-    const { settings } = this;
+module.exports = {
+  name: 'build',
+  cli: {
+    zip: {
+      shortcut: 'z',
+      description: 'A zip file to use instead of the "app" folder',
+    },
+    production: {
+      boolean: true,
+      shortcut: 'p',
+      description: 'Run in production mode',
+    },
+  },
+  usage: 'build [ [ -z zip ] [ -p ] [ -d ] ]',
+  description: 'Package your app for any OS',
+  config: {
+    dir: process.cwd(),
+    asar: true,
+    icon: path.join(process.cwd(), 'build', 'icon'),
+    out: 'dist',
+    overwrite: true,
+    extraResource: [],
+    ignore: [
+      'preview*',
+      'node_modules/greenworks',
+      'node_modules/app-builder-bin',
+      'node_modules/app-builder-lib',
+    ],
+    win32metadata: {},
+  },
+  async run(args, settings) {
+    const packager = require('electron-packager');
+    const fs = require('fs');
+    const ws = require('windows-shortcuts');
+    const semver = require('semver');
+    const setupDir = require('../utils/setupDir');
 
     console.log('Build started...');
 
@@ -58,20 +76,15 @@ module.exports = class extends Command {
     if (!path.isAbsolute(packOptions.out)) {
       packOptions.out = path.join(process.cwd(), packOptions.out);
     }
-    // shelljs.rm('-rf', packOptions.out);
 
     // setup directories
-    let zipFile = null;
-    if (argsLenth === 1) {
-      // eslint-disable-next-line
-      zipFile = args[ 0 ];
-    }
+    const zipFile = args.zip ? args.zip : null;
     const tempDir = await setupDir(settings, zipFile);
 
     // set src dir to tmpdir
     packOptions.dir = tempDir;
 
-    console.log('Running pre-build hooks...');
+    console.log('Running pre-build operations...');
 
     // Prebuild hooks
     for (let i = 0; i < this.modules.length; i += 1) {
@@ -87,16 +100,16 @@ module.exports = class extends Command {
 
     if (
       !packOptions.appVersion
-      && this.deepCheck(settings, 'project.version')
+      && deepCheck(settings, 'project.version')
     ) {
       packOptions.appVersion = settings.project.version;
     }
 
-    if (!packOptions.name && this.deepCheck(settings, 'project.name')) {
+    if (!packOptions.name && deepCheck(settings, 'project.name')) {
       packOptions.name = settings.project.name;
     }
 
-    if (!this.deepCheck(packOptions, 'win32metadata.CompanyName') && this.deepCheck(settings, 'project.author')) {
+    if (!deepCheck(packOptions, 'win32metadata.CompanyName') && deepCheck(settings, 'project.author')) {
       packOptions.win32metadata.CompanyName = settings.project.author;
     }
 
@@ -105,14 +118,14 @@ module.exports = class extends Command {
     try {
       const appPaths = await packager(packOptions);
 
-      console.log('Files packages successfuly!');
+      console.log('Files packed successfuly!');
       console.log('Available files:', ...appPaths);
     } catch (e) {
       console.error('An error occured while packaging your apps');
       console.log(e);
     }
 
-    const isDirectory = source => fs.lstatSync(source).isDirectory()
+    const isDirectory = source => fs.lstatSync(source).isDirectory();
     const folders = fs
       .readdirSync(packOptions.out)
       .map(name => path.join(packOptions.out, name))
@@ -149,7 +162,7 @@ module.exports = class extends Command {
     }
 
     // postBuild hook
-    console.log('Running post-build hooks...');
+    console.log('Running post-build operations...');
 
     for (let i = 0; i < folders.length; i += 1) {
       const folder = folders[i];
@@ -163,5 +176,5 @@ module.exports = class extends Command {
         }
       }
     }
-  }
+  },
 };

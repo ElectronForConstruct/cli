@@ -1,4 +1,4 @@
-const { Command } = require('../core');
+const Command = require('../Command');
 
 module.exports = class extends Command {
   constructor() {

@@ -7,7 +7,9 @@
     "release": "np --yolo",
     "up": "yarn upgrade-interactive --latest && syncyarnlock -s -k",
     "test": "echo 1",
-    "postpublish": "git log v2.3.7..master --pretty=format:\"- %Cred%h%Creset %s%n%b%n\" --abbrev-commit"
+    "postpublish": "git log v2.3.7..master --pretty=format:\"- %Cred%h%Creset %s%n%b%n\" --abbrev-commit",
+	"package-it": "pkg dist/index.js --output bin/efc",
+	"build": "ncc build index.js -o dist"
   },
   "repository": {
     "type": "git",
@@ -19,6 +21,9 @@
   },
   "engines": {
     "node": ">=9"
+  },
+  "pkg": {    
+    "assets": ["new-project-template/**/*", "template/**/*"]
   },
   "author": "Armaldio <armaldio@gmail.com>",
   "license": "MIT",
@@ -39,13 +44,16 @@
     "extract-zip": "^1.6.7",
     "github-download": "^0.5.0",
     "install-packages": "^0.2.5",
+    "mri": "^1.1.4",
     "node-abi": "^2.7.1",
     "opn": "^5.4.0",
     "ora": "^3.2.0",
+    "phin": "^3.3.0",
     "recursive-readdir": "^2.2.2",
     "request": "^2.88.0",
     "semver": "^5.6.0",
     "shelljs": "^0.8.3",
+    "time-require": "^0.1.2",
     "tmp": "^0.0.33",
     "windows-shortcuts": "^0.1.6"
   },

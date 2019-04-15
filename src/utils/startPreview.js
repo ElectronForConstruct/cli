@@ -2,13 +2,7 @@ const { exec } = require('child_process');
 const path = require('path');
 const os = require('os');
 
-module.exports = (_url, tmpDir) => new Promise(async (resolve) => {
-  let url = _url;
-
-  if (url === '.') {
-    url = null;
-  }
-
+module.exports = (url, tmpDir) => new Promise(async (resolve) => {
   console.log(`Starting preview ${url ? `on "${url}"` : ''}`);
 
   process.chdir(tmpDir);
@@ -33,7 +27,7 @@ module.exports = (_url, tmpDir) => new Promise(async (resolve) => {
       throw new Error('Unsupported OS');
   }
 
-  const command = `${electron} ${tmpDir} ${url ? `--url=${url}` : ''} --wd=${tmpDir}`;
+  const command = `${electron} ${tmpDir} ${url}`;
 
   const npmstart = exec(command);
 

@@ -1,3 +1,4 @@
 #!/usr/bin/env node
 
-require('./src/app');
+// require('time-require');
+require('./src');

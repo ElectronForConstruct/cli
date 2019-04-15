@@ -1,12 +1,27 @@
-const eb = require('electron-builder');
+const eb = require('electron-builder/out/index');
 const fs = require('fs');
 const path = require('path');
-const { Command } = require('../core');
+const Command = require('../Command');
 
 module.exports = class extends Command {
   constructor() {
-    super('installer', 'Generate installer', 'i');
-    this.setCategory('Toolchain');
+    super('installer', 'Generate installer');
+    this.setDefaultConfiguration({
+      appId: 'com.you.yourapp',
+      productName: 'YourAppName',
+      copyright: 'Copyright © 2018 You',
+      directories: {
+        buildResources: 'build',
+        output: 'dist',
+      },
+      files: [
+        '!preview.exe',
+        '!preview',
+        '!node_modules/greenworks/!**',
+        '!node_modules/app-builder-bin/!**',
+        '!node_modules/app-builder-lib/!**',
+      ],
+    });
   }
 
   async run() {

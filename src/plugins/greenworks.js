@@ -4,41 +4,50 @@ const decompress = require('decompress');
 const decompressTargz = require('decompress-targz');
 const nodeAbi = require('node-abi');
 const fs = require('fs');
-const request = require('request');
-const { Command } = require('../core');
+const p = require('phin');
+const Command = require('../Command');
 
 module.exports = class extends Command {
   constructor() {
-    super('greenworks', 'Configure greenworks', 'g');
+    super('greenworks', 'Configure greenworks');
 
-    this.setCategory('Publish');
+    this.setDefaultConfiguration({
+      steamId: 480,
+      sdkPath: 'steam_sdk',
+      localGreenworksPath: null,
+      forceClean: false,
+    });
   }
 
   /**
    * Utils
    */
 
-  githubFileDownload(url, json = false) {
-    return new Promise((resolve, reject) => {
-      request.get({
-        url,
-        headers: {
-          'User-Agent': 'ElectronForContruct',
-        },
-        json,
-      }, (e, r, content) => {
-        if (e) {
-          reject(e);
-        }
-        resolve(content);
-      });
+  async githubFileDownload(url, json = false) {
+    return new Promise(async (resolve, reject) => {
+      let file = '';
+      try {
+        file = await p({
+          url,
+          headers: {
+            'User-Agent': 'ElectronForContruct',
+          },
+          parse: json ? 'none' : 'json',
+        });
+      } catch (e) {
+        reject(e);
+      }
+      resolve(file);
     });
   }
 
-  async downloadFile(url, p) {
+  async downloadFile(url, mypath) {
     return new Promise((resolve) => {
-      request(url).pipe(fs.createWriteStream(
-        p,
+      p({
+        url,
+        stream: true,
+      }).pipe(fs.createWriteStream(
+        mypath,
       )).on('finish', () => {
         resolve(p);
       });
@@ -167,9 +176,9 @@ module.exports = class extends Command {
       const platforms = ['darwin', 'win32', 'linux'];
 
       for (let i = 0; i < platforms.length; i += 1) {
-        const p = platforms[i];
+        const platform = platforms[i];
 
-        const assetName = `greenworks-v0.14.0-electron-v${abi}-${p}-x64.tar.gz`;
+        const assetName = `greenworks-v0.14.0-electron-v${abi}-${platform}-x64.tar.gz`;
         try {
           const res = content.assets.find(asset => asset.name === assetName).browser_download_url;
 
