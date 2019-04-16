@@ -1,15 +1,14 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const p = require('phin');
+const got = require('got');
 
 module.exports = async (fullPath) => {
-  const body = await p({
-    url: 'https://api.github.com/repos/ElectronForConstruct/preview/releases/latest',
+  const { body } = await got.get('https://api.github.com/repos/ElectronForConstruct/preview/releases/latest', {
     headers: {
       'User-Agent': 'ElectronForContruct',
     },
-    parse: 'json',
+    json: true,
   });
 
   let assetUrl;
@@ -32,17 +31,15 @@ module.exports = async (fullPath) => {
 
     default:
       console.log('No preview script available for your platform');
-      return;
   }
 
-  return new Promise((resolve) => {
-    p({
-      url: assetUrl,
-      stream: true,
-    }).pipe(fs.createWriteStream(
+  const prom = new Promise((resolve) => {
+    got.stream(assetUrl).pipe(fs.createWriteStream(
       path.join(fullPath, exeName),
     )).on('finish', () => {
       resolve(true);
     });
   });
+
+  return prom;
 };

@@ -1,13 +1,8 @@
-/**
- * Debug command
- * @type {module.Debug}
- * @extends module.Command
- */
 module.exports = {
   name: 'debug',
-  description: 'Show current confiuration',
+  description: 'Show current configuration',
 
-  run() {
-    console.log(this.settings);
+  run(args, config) {
+    console.log(config);
   },
 };

@@ -32,6 +32,7 @@ module.exports = {
     },
     production: {
       boolean: true,
+      default: false,
       shortcut: 'p',
       description: 'Run in production mode',
     },

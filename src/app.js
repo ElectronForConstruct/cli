@@ -3,7 +3,6 @@ const deepmerge = require('deepmerge');
 const Sentry = require('@sentry/node');
 const mri = require('mri');
 const { USER_CONFIG } = require('./utils/ComonPaths');
-const { checkForUpdate } = require('./updateCheck');
 const base = require('./DefaultConfig');
 const PluginManager = require('./PluginManager');
 
@@ -24,10 +23,14 @@ const argv = mri(process.argv.slice(2), {
   boolean,
 });
 
+// const pUpdate = checkForUpdate();
+
 module.exports = async () => {
   try {
     const config = {
-      isProject: false,
+      mixed: {
+        isProject: false,
+      },
     };
 
     // check if production or dev mode
@@ -41,7 +44,7 @@ module.exports = async () => {
 
     if (fs.existsSync(USER_CONFIG)) {
       const userConfig = require(USER_CONFIG);
-      config.isProject = true;
+      config.mixed.isProject = true;
       config.user = userConfig(config.env === 'production');
     }
 
@@ -50,7 +53,11 @@ module.exports = async () => {
      */
 
     // mix only plugins
-    config.mixed = deepmerge(config.base, { plugins: config.user.plugins || [] });
+    let userPlugins = [];
+    if (config.user && config.user.plugins) {
+      userPlugins = config.user.plugins;
+    }
+    config.mixed = deepmerge(config.base, config.mixed, { plugins: userPlugins });
 
     pm.setConfig(config); // already mixed config
 
@@ -62,7 +69,11 @@ module.exports = async () => {
       mixedConfig = deepmerge(mixedConfig, { [command.name]: command.config || {} });
     });
 
-    config.mixed = deepmerge(mixedConfig, config.user);
+    if (config.user) {
+      config.mixed = deepmerge(mixedConfig, config.user);
+    } else {
+      config.mixed = mixedConfig;
+    }
 
     pm.setConfig(config);
     pm.setModules();
@@ -81,19 +92,25 @@ module.exports = async () => {
 
     const aliases = pm.getAliases();
     const booleans = pm.getBooleans();
+    const defaults = pm.getDefaults();
 
     const args = mri(process.argv.slice(2), {
       alias: deepmerge(alias, aliases),
       boolean: [...boolean, ...booleans],
+      default: defaults,
     });
 
+    console.log();
     if (argv.help || argv.h || argv._[0] === 'help' || argv._.length === 0) {
       await pm.run('help', args);
     } else {
+      if (!config.mixed.isProject && argv._[0] !== 'new') {
+        console.log('Uh oh. This directory doesn\'t looks like an Electron project!');
+        return;
+      }
+
       await pm.run(args._[0], args, config.mixed);
     }
-
-    await checkForUpdate();
   } catch (e) {
     let lastEventId;
     if (errorReporting) {

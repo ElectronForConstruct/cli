@@ -2,8 +2,8 @@ module.exports = {
   name: 'report-issue',
   description: 'Report an issue',
 
-  run () {
-    const opn = require('opn');
+  run() {
+    const opn = require('../utils/openURL');
     const os = require('os');
     const msg = `
 Configuration:

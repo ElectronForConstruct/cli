@@ -6,9 +6,14 @@ require('dotenv').config({
 
 const Sentry = require('@sentry/node');
 const os = require('os');
+const updateNotifier = require('update-notifier');
 const pkg = require('../package.json');
 const app = require('./app');
-const box = require('./box');
+
+updateNotifier({ pkg }).notify({
+  defer: true,
+  isGlobal: true,
+});
 
 const isDev = process.env.NODE_ENV === 'development' || false;
 
@@ -27,7 +32,4 @@ if (isDev) {
   });
 }
 
-
-app().then(() => {
-  console.log(box('Happy with ElectronForConstruct ? ► Donate: https://armaldio.xyz/#/donations ♥'));
-});
+app();

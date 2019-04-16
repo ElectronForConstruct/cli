@@ -251,13 +251,6 @@ ansi-align@^2.0.0:
   dependencies:
     string-width "^2.0.0"
 
-ansi-align@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/ansi-align/-/ansi-align-3.0.0.tgz#b536b371cf687caaef236c18d3e21fe3797467cb"
-  integrity sha512-ZpClVKqXN3RGBmKibdfWzqCY4lnjEuoNzU5T0oEFpfd/z5qJHVarukridD4juLO2FXMiwUQxr9WqQtaYa8XRYw==
-  dependencies:
-    string-width "^3.0.0"
-
 ansi-colors@^3.2.1:
   version "3.2.4"
   resolved "https://registry.yarnpkg.com/ansi-colors/-/ansi-colors-3.2.4.tgz#e3a3da4bfbae6c86a9c285625de124a234026fbf"
@@ -713,19 +706,6 @@ boxen@^1.2.1:
     term-size "^1.2.0"
     widest-line "^2.0.0"
 
-boxen@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/boxen/-/boxen-3.0.0.tgz#2e229f603c9c1da9d2966b7e9a5681eb692eca23"
-  integrity sha512-6BI51DCC62Ylgv78Kfn+MHkyPwSlhulks+b+wz7bK1vsTFgbSEy/E1DOxx1wjf/0YdkrfPUMh9NoaW419M7csQ==
-  dependencies:
-    ansi-align "^3.0.0"
-    camelcase "^5.0.0"
-    chalk "^2.4.2"
-    cli-boxes "^2.0.0"
-    string-width "^3.0.0"
-    term-size "^1.2.0"
-    widest-line "^2.0.0"
-
 brace-expansion@^1.1.7:
   version "1.1.11"
   resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-1.1.11.tgz#3c7fcbf529d87226f3d2f52b966ff5271eb441dd"
@@ -863,11 +843,6 @@ caseless@~0.12.0:
   resolved "https://registry.yarnpkg.com/caseless/-/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
   integrity sha1-G2gcIf+EAzyCZUMJBolCDRhxUdw=
 
-centra@^2.2.1:
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/centra/-/centra-2.2.2.tgz#62d8c6a01bb54ecaf8addae3a06798c4918d2d77"
-  integrity sha512-7M9pOa0afioJy+h3+RvaK9BuxtJdo4/cRXoBPoClUcX1YLlaFMIxQlN/Sp4GoDEp2w17qeQ74NDuMdXPaNLToA==
-
 chalk@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/chalk/-/chalk-0.4.0.tgz#5199a3ddcd0c1efe23bc08c1b027b06176e0c64f"
@@ -926,11 +901,6 @@ cli-boxes@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/cli-boxes/-/cli-boxes-1.0.0.tgz#4fa917c3e59c94a004cd61f8ee509da651687143"
   integrity sha1-T6kXw+WclKAEzWH47lCdplFocUM=
-
-cli-boxes@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/cli-boxes/-/cli-boxes-2.0.0.tgz#de5eb5ce7462833133e85f5710fabb38377e9333"
-  integrity sha512-P46J1Wf3BVD0E5plybtf6g/NtHYAUlOIt7w3ou/Ova/p7dJPdukPV4yp+BF8dpmnnk45XlMzn+x9kfzyucKzrg==
 
 cli-cursor@^2.0.0, cli-cursor@^2.1.0:
   version "2.1.0"
@@ -3431,13 +3401,6 @@ performance-now@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/performance-now/-/performance-now-2.1.0.tgz#6309f4e0e5fa913ec1c69307ae364b4b377c9e7b"
   integrity sha1-Ywn04OX6kT7BxpMHrjZLSzd8nns=
-
-phin@^3.3.0:
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/phin/-/phin-3.3.0.tgz#bad57617bc7d78b56ff2103a85064cc2b5d01d9b"
-  integrity sha512-ybU0WbUmjb/fovlClAkhC+T++et6Wh9RQSTd52B08vz2gIxRpL5O/yQWDw4EzvHY9OhzLDLsPZHFHoFGEBXVJw==
-  dependencies:
-    centra "^2.2.1"
 
 pify@^2.0.0, pify@^2.3.0:
   version "2.3.0"

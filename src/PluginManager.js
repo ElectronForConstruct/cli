@@ -42,8 +42,34 @@ module.exports = class PluginManager {
     return aliases;
   }
 
+  getDefaults() {
+    const defaults = {};
+    this.commands.forEach((command) => {
+      if (!command.cli) {
+        return;
+      }
+
+      Object.entries(command.cli).forEach(([key, value]) => {
+        defaults[key] = value.default;
+      });
+    });
+    return defaults;
+  }
+
   getBooleans() {
-    return [];
+    const booleans = [];
+    this.commands.forEach((command) => {
+      if (!command.cli) {
+        return;
+      }
+
+      Object.entries(command.cli).forEach(([key, value]) => {
+        if (value.boolean) {
+          booleans.push(key);
+        }
+      });
+    });
+    return booleans;
   }
 
   setConfig(config) {
