@@ -1,5 +1,8 @@
+/**
+ * @type EFCModule
+ */
 module.exports = {
-  name: 'report-issue',
+  name: 'issue',
   description: 'Report an issue',
 
   run() {

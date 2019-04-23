@@ -1,9 +1,10 @@
 const { exec } = require('child_process');
 const path = require('path');
 const os = require('os');
+const logger = require('../utils/console').normal('system');
 
 module.exports = (url, tmpDir) => new Promise(async (resolve) => {
-  console.log(`Starting preview ${url ? `on "${url}"` : ''}`);
+  logger.info(`Starting preview ${url ? `on "${url}"` : ''}`);
 
   process.chdir(tmpDir);
 
@@ -32,15 +33,15 @@ module.exports = (url, tmpDir) => new Promise(async (resolve) => {
   const npmstart = exec(command);
 
   npmstart.stdout.on('data', (data) => {
-    console.log(data.toString());
+    logger.info(data.toString());
   });
 
   npmstart.stderr.on('data', (data) => {
-    console.error(`Error: ${data.toString()}`);
+    logger.error(`Error: ${data.toString()}`);
   });
 
   npmstart.on('exit', (code) => {
-    console.log(`Electron exited: ${code.toString()}`);
+    logger.info(`Electron exited: ${code.toString()}`);
     resolve(true);
   });
 });

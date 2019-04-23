@@ -1,18 +1,17 @@
 const fs = require('fs');
 const path = require('path');
+const logger = require('./utils/console').normal('system');
 
 module.exports = class PluginManager {
   constructor() {
     /** @private */
-
     this.defaultCommandPath = path.join(__dirname, 'actions');
 
     /** @private */
     this.defaultCustomCommandPath = path.join(__dirname, 'plugins');
 
+    /** @type {Array<EFCModule>} */
     this.commands = [];
-
-    this.config = {};
   }
 
   async run(name, args, config = {}) {
@@ -21,10 +20,10 @@ module.exports = class PluginManager {
       if (typeof command.run === 'function') {
         await command.run(args, config);
       } else {
-        console.log('No run command defined in this plugin');
+        logger.info('No "run" command defined in this plugin');
       }
     } else {
-      console.log('Command not found');
+      logger.error(`Command ${name} not found`);
     }
   }
 
@@ -35,8 +34,8 @@ module.exports = class PluginManager {
         return;
       }
 
-      Object.entries(command.cli).forEach(([key, value]) => {
-        aliases[key] = value.shortcut;
+      command.cli.forEach((value) => {
+        aliases[value.name] = value.shortcut;
       });
     });
     return aliases;
@@ -49,8 +48,8 @@ module.exports = class PluginManager {
         return;
       }
 
-      Object.entries(command.cli).forEach(([key, value]) => {
-        defaults[key] = value.default;
+      command.cli.forEach((value) => {
+        defaults[value.name] = value.default;
       });
     });
     return defaults;
@@ -63,27 +62,23 @@ module.exports = class PluginManager {
         return;
       }
 
-      Object.entries(command.cli).forEach(([key, value]) => {
+      command.cli.forEach((value) => {
         if (value.boolean) {
-          booleans.push(key);
+          booleans.push(value.name);
         }
       });
     });
     return booleans;
   }
 
-  setConfig(config) {
-    this.config = config;
-  }
-
-  async loadFolder(commandsPath) {
+  async loadFolder(commandsPath, plugins) {
     const files = fs.readdirSync(commandsPath).filter(f => path.extname(f) !== 'js');
 
     const fcts = [];
     files.forEach((key) => {
       fcts.push((async () => {
         const command = require(path.join(commandsPath, key));
-        const c = await this.setupCommand(command);
+        const c = await this.setupCommand(command, plugins);
         return c;
       })());
     });
@@ -96,19 +91,21 @@ module.exports = class PluginManager {
    * Load default getCommands
    * @returns {Promise<void>}
    */
-  async loadDefaultCommands() {
-    const commands = await this.loadFolder(this.defaultCommandPath);
+  async loadDefaultCommands(plugins) {
+    const commands = await this.loadFolder(this.defaultCommandPath, plugins);
     this.commands.push(...commands);
     this.commands = this.commands.filter(Boolean);
   }
 
+  // eslint-disable-next-line
   setModules() {
+    // eslint-disable-next-line
     this.commands.map(m => m.modules = this.commands);
   }
 
   /**
    *
-   * @returns {module.Command} command
+   * @returns {EFCModule} command
    * @param {String} id
    */
   get(id) {
@@ -117,24 +114,18 @@ module.exports = class PluginManager {
 
   /**
    * Return a list of all available getCommands
-   * @returns {Array<module.Command>}
+   * @returns {Array<EFCModule>}
    */
   getCommands() {
     return this.commands;
   }
 
   /**
-   * @param {module.Command} Command
    * @returns {undefined}
+   * @param command
+   * @param plugins
    */
-  async setupCommand(command) {
-    const { plugins } = this.config.mixed;
-
-    // const proxiedCommand = CommandProxy(command);
-
-    // proxiedCommand.config = this.config;
-
-    // load it only if the proxiedCommand is a Command
+  async setupCommand(command, plugins) {
     if (plugins.includes(command.name)) {
       try {
         if (typeof command.onLoad === 'function') {
@@ -142,7 +133,7 @@ module.exports = class PluginManager {
         }
         return command;
       } catch (e) {
-        console.error(e);
+        logger.error(e);
         return undefined;
       }
     }

@@ -1,16 +1,23 @@
+// TODO https://github.com/pmq20/node-packer
+
 const fs = require('fs');
+const path = require('path');
 const deepmerge = require('deepmerge');
-const Sentry = require('@sentry/node');
 const mri = require('mri');
-const { USER_CONFIG } = require('./utils/ComonPaths');
+const rollbar = require('./ErrorReport');
+
+const USER_CONFIG = path.join(process.cwd(), 'config.js');
 const base = require('./DefaultConfig');
 const PluginManager = require('./PluginManager');
+
+const logger = require('./utils/console').normal('system');
 
 const isDev = process.env.NODE_ENV === 'development' || false;
 
 const pm = new PluginManager();
 
-let errorReporting = !isDev;
+const shouldReportError = !isDev;
+let errorReporting = false;
 
 const alias = {
   h: 'help',
@@ -18,34 +25,31 @@ const alias = {
 };
 const boolean = ['help', 'production'];
 
-const argv = mri(process.argv.slice(2), {
+let args = mri(process.argv.slice(2), {
   alias,
   boolean,
 });
 
-// const pUpdate = checkForUpdate();
+let config = {
+  isProject: false,
+};
 
 module.exports = async () => {
   try {
-    const config = {
-      mixed: {
-        isProject: false,
-      },
-    };
-
     // check if production or dev mode
-    if (argv.production) {
+    if (args.production) {
       config.env = 'production';
     } else {
       config.env = 'development';
     }
 
-    config.base = base(config.env === 'production');
+    const baseConfig = base(config.env === 'production');
 
+    let userConfig = {};
     if (fs.existsSync(USER_CONFIG)) {
-      const userConfig = require(USER_CONFIG);
-      config.mixed.isProject = true;
-      config.user = userConfig(config.env === 'production');
+      const usrConfig = require(USER_CONFIG);
+      config.isProject = true;
+      userConfig = usrConfig(config.env === 'production');
     }
 
     /**
@@ -53,74 +57,57 @@ module.exports = async () => {
      */
 
     // mix only plugins
-    let userPlugins = [];
-    if (config.user && config.user.plugins) {
-      userPlugins = config.user.plugins;
+    const userPlugins = [];
+    if (userConfig && userConfig.plugins) {
+      userPlugins.push(...userConfig.plugins);
     }
-    config.mixed = deepmerge(config.base, config.mixed, { plugins: userPlugins });
+    userPlugins.push(...baseConfig.plugins);
 
-    pm.setConfig(config); // already mixed config
-
-    await pm.loadDefaultCommands();
+    await pm.loadDefaultCommands(userPlugins);
     // if (isReady) await pm.loadCustomCommands();
 
-    let mixedConfig = config.mixed;
+    let pluginsConfig = {};
     pm.getCommands().forEach((command) => {
-      mixedConfig = deepmerge(mixedConfig, { [command.name]: command.config || {} });
+      pluginsConfig = deepmerge(pluginsConfig, { [command.name]: command.config || {} });
     });
 
-    if (config.user) {
-      config.mixed = deepmerge(mixedConfig, config.user);
-    } else {
-      config.mixed = mixedConfig;
-    }
+    config = deepmerge.all([config, baseConfig, pluginsConfig, userConfig]);
 
-    pm.setConfig(config);
     pm.setModules();
 
     /**
      * -----------------------------------------------------------------------
      */
 
-    errorReporting = config.mixed.errorLogging;
-
-    if (!isDev) {
-      Sentry.configureScope((scope) => {
-        scope.setExtra('config', config.mixed);
-      });
-    }
+    errorReporting = config.errorLogging;
 
     const aliases = pm.getAliases();
     const booleans = pm.getBooleans();
     const defaults = pm.getDefaults();
 
-    const args = mri(process.argv.slice(2), {
+    args = mri(process.argv.slice(2), {
       alias: deepmerge(alias, aliases),
       boolean: [...boolean, ...booleans],
       default: defaults,
     });
 
-    console.log();
-    if (argv.help || argv.h || argv._[0] === 'help' || argv._.length === 0) {
+    if (args.help || args.h || args._[0] === 'help' || args._.length === 0) {
       await pm.run('help', args);
     } else {
-      if (!config.mixed.isProject && argv._[0] !== 'new') {
-        console.log('Uh oh. This directory doesn\'t looks like an Electron project!');
+      if (!config.isProject && args._[0] !== 'new') {
+        logger.error('Uh oh. This directory doesn\'t looks like an Electron project!');
         return;
       }
 
-      await pm.run(args._[0], args, config.mixed);
+      await pm.run(args._[0], args, config);
     }
   } catch (e) {
-    let lastEventId;
-    if (errorReporting) {
-      lastEventId = Sentry.captureException(e);
-      console.log('There was an error performing the current task.');
-      console.log(`Please, open an issue and specify the following error code in your message: ${lastEventId}`);
+    logger.log('There was an error performing the current task.');
+    if (errorReporting && shouldReportError) {
+      const eventId = await rollbar.report(e, config, args);
+      logger.log(`Please, open an issue and specify the following error code in your message: ${eventId}`);
     }
 
-    console.log();
-
-    console.log(e);
+    logger.fatal(e);
   }
 };

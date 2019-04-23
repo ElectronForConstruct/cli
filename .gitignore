@@ -5,9 +5,7 @@ node_modules
 .idea
 config
 MyGame
-
 yarn-error\.log
-
 package-lock\.json
-
 src/\.env
+dashboard

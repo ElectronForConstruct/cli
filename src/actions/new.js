@@ -1,28 +1,40 @@
+const Console = require('../utils/console');
+
+const logger = Console.normal('new');
+const iaLogger = Console.interactive('new');
+
+/**
+ * @type EFCModule
+ */
 module.exports = {
   name: 'new',
   description: 'Bootstrap a new project',
-  usage: 'new -n name [ [ -g ] [ -p ] ]',
-  cli: {
-    name: {
+  cli: [
+    {
+      name: 'name',
       shortcut: 'n',
     },
-    git: {
+    {
+      name: 'git',
       boolean: true,
       default: true,
     },
-    preview: {
+    {
+      name: 'preview',
       boolean: true,
       default: true,
     },
-  },
+  ],
 
   async run(args, config) {
     if (config.isProject) {
-      console.log('This project is already configured');
+      logger.warn('This project is already configured');
+      return;
     }
 
     if (!args.name) {
-      console.log('A name is required in order to create a project');
+      logger.error('A name is required in order to create a project');
+      return;
     }
 
     const fs = require('fs');
@@ -32,11 +44,11 @@ module.exports = {
 
     const fullPath = path.join(process.cwd(), args.name);
     if (fs.existsSync(fullPath)) {
-      console.log('This path already exist!');
+      logger.warn('This path already exist!');
       return;
     }
 
-    console.log('Bootstrapping project...');
+    iaLogger.info('Bootstrapping project...');
 
     shelljs.mkdir('-p', fullPath);
     shelljs.cp('-R', [
@@ -52,7 +64,7 @@ module.exports = {
       await downloadPreview(fullPath);
     }
 
-    console.log('Downloaded');
-    console.log(`\nYou can now go to your project by using "cd ${args.name}"`);
+    iaLogger.success('Bootstrapping done.');
+    logger.info(`You can now go to your project by using "cd ${args.name}"`);
   },
 };

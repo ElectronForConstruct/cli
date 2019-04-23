@@ -17,5 +17,6 @@ module.exports = {
     'linebreak-style'          : 0,
     'curly'                    : [ 2, 'all' ],
     'no-param-reassign'        : 0,
+    'no-console'               : 2,
   },
 };

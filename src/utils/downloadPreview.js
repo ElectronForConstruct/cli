@@ -3,6 +3,8 @@ const os = require('os');
 const path = require('path');
 const got = require('got');
 
+const logger = require('../utils/console').normal('system');
+
 module.exports = async (fullPath) => {
   const { body } = await got.get('https://api.github.com/repos/ElectronForConstruct/preview/releases/latest', {
     headers: {
@@ -30,7 +32,7 @@ module.exports = async (fullPath) => {
       break;
 
     default:
-      console.log('No preview script available for your platform');
+      logger.log('No preview script available for your platform');
   }
 
   const prom = new Promise((resolve) => {

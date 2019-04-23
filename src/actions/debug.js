@@ -1,8 +1,12 @@
+/**
+ * @type EFCModule
+ */
 module.exports = {
   name: 'debug',
   description: 'Show current configuration',
 
   run(args, config) {
-    console.log(config);
+    const { dump } = require('dumper.js');
+    dump(config);
   },
 };

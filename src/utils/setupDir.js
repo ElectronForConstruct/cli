@@ -4,7 +4,10 @@ const path = require('path');
 // const AdmZip = require('adm-zip');
 const shelljs = require('shelljs');
 const extract = require('extract-zip');
-const install = require('install-packages');
+const installPkg = require('./installPackages');
+const Console = require('../utils/console');
+
+const log = Console.normal('build');
 
 const extractZip = async (from, to) => new Promise((resolve, reject) => {
   extract(from, { dir: to }, (err) => {
@@ -17,11 +20,12 @@ const extractZip = async (from, to) => new Promise((resolve, reject) => {
 
 /**
  * Prepare a sandboxed environment in tmp
- * @param settings
+ * @param {Object} settings
+ * @param {function} log
+ * @param zipFile
  * @returns {Promise<string>}
  */
 module.exports = async (settings, zipFile = null) => {
-  console.log(settings);
   const { electron } = settings;
 
   // create temporary directory
@@ -34,12 +38,12 @@ module.exports = async (settings, zipFile = null) => {
   if (
     fs.existsSync(path.join(process.cwd(), 'cache', 'package-lock.json'))
   ) {
-    console.log('Using cache');
+    log.info('Using cache');
     shelljs.cp(path.join(process.cwd(), 'cache', 'package-lock.json'), path.join(tmpDir.name, 'package-lock.json'));
   }
 
   if (fs.existsSync(path.join(process.cwd(), 'cache', 'yarn.lock'))) {
-    console.log('Using cache');
+    log.info('Using cache');
     shelljs.cp(path.join(process.cwd(), 'cache', 'yarn.lock'), path.join(tmpDir.name, 'yarn.lock'));
   }
 
@@ -68,26 +72,28 @@ module.exports = async (settings, zipFile = null) => {
   fs.writeFileSync(path.join(tmpDir.name, 'package.json'), JSON.stringify(pkgJson, null, '\t'), 'utf8');
 
   if (settings.dependencies && settings.dependencies.length > 0) {
-    await install({
+    await installPkg(settings.dependencies, tmpDir.name);
+    /* await install({
       cwd: tmpDir.name,
       packages: settings.dependencies,
-    });
+    }); */
   } else {
-    await install({
+    await installPkg([], tmpDir.name);
+    /* await install({
       cwd: tmpDir.name,
-    });
+    }); */
   }
 
   // Cache ///
   shelljs.mkdir('-p', path.join(process.cwd(), 'cache'));
 
   if (fs.existsSync(path.join(tmpDir.name, 'package-lock.json'))) {
-    console.log('Caching files to speed up next builds');
+    log.info('Caching files to speed up next builds');
     shelljs.cp(path.join(tmpDir.name, 'package-lock.json'), path.join(process.cwd(), 'cache'));
   }
 
   if (fs.existsSync(path.join(tmpDir.name, 'yarn.lock'))) {
-    console.log('Caching files to speed up next builds');
+    log.info('Caching files to speed up next builds');
     shelljs.cp(path.join(tmpDir.name, 'yarn.lock'), path.join(process.cwd(), 'cache'));
   }
   // ~ Cache ///

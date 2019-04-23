@@ -1,3 +1,7 @@
+const Console = require('../utils/console');
+
+const logger = Console.normal('preview');
+
 const isValid = (url) => {
   if (url === '') {
     return false;
@@ -7,29 +11,34 @@ const isValid = (url) => {
   if (url.match(regexC2) || url.match(regexC3)) {
     return true;
   }
-  console.log(`Invalid URL: ${url}`);
+  logger.log(`Invalid URL: ${url}`);
   return false;
 };
 
+/**
+ * @type EFCModule
+ */
 module.exports = {
   name: 'preview',
   description: 'Preview your construct project',
-  usage: 'preview [ [ -u url ] [ -z zip ] [ -l ] ]',
-  cli: {
-    url: {
+  cli: [
+    {
+      name: 'url',
       shortcut: 'u',
       description: 'The URL to preview',
     },
-    zip: {
+    {
+      name: 'zip',
       shortcut: 'z',
       description: 'The ZIP file to preview',
     },
-    local: {
+    {
+      name: 'local',
       shortcut: 'l',
       boolean: true,
       description: 'The URL to preview',
     },
-  },
+  ],
 
   async run(args, settings) {
     const { prompt } = require('enquirer');
@@ -38,17 +47,17 @@ module.exports = {
     const startPreview = require('../utils/startPreview');
 
     if (args.zip && args.url) {
-      console.log('Cannot specify both "zip" and "url" parameters');
+      logger.error('Cannot specify both "zip" and "url" parameters');
       return;
     }
 
     if (args.local && args.url) {
-      console.log('Cannot specify both "local" and "url" parameters');
+      logger.error('Cannot specify both "local" and "url" parameters');
       return;
     }
 
     if (args.local && args.zip) {
-      console.log('Cannot specify both "local" and "zip" parameters');
+      logger.error('Cannot specify both "local" and "zip" parameters');
       return;
     }
 
@@ -59,10 +68,10 @@ module.exports = {
     } else if (args.local) {
       previewUrl = '.';
     } else {
-      console.log('\nTo preview your Construct project in Electron, you need a valid subscription.');
-      console.log('\t• Construct 3: Go to the preview menu, hit "Remote preview" and paste the link that appear here');
-      console.log('\t• Construct 2: Start a regular browser preview and paste the link here');
-      console.log('\t• Leave blank to preview current folder\n');
+      logger.info('To preview your Construct project in Electron, you need a valid subscription.');
+      logger.info('\t• Construct 3: Go to the preview menu, hit "Remote preview" and paste the link that appear here');
+      logger.info('\t• Construct 2: Start a regular browser preview and paste the link here');
+      logger.info('\t• Leave blank to preview current folder\n');
       const answers = await prompt([
         {
           type: 'input',
@@ -86,7 +95,7 @@ module.exports = {
       const module = this.modules[i];
       if (typeof module.onPreBuild === 'function') {
         // eslint-disable-next-line
-        console.info(`\t${i}/${this.modules.length} (${module.rawName}) ...`);
+        logger.info(`\t${i}/${this.modules.length} (${module.name}) ...`);
         await module.onPreBuild(tempDir);
       }
     }
@@ -95,7 +104,7 @@ module.exports = {
       const module = this.modules[i];
       if (typeof module.onPostBuild === 'function') {
         // eslint-disable-next-line
-        console.info(`\t${i}/${this.modules.length} (${module.rawName}) ...`);
+        logger.info(`\t${i}/${this.modules.length} (${module.name}) ...`);
         await module.onPostBuild(tempDir);
       }
     }

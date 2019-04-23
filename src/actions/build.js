@@ -1,43 +1,27 @@
 const path = require('path');
+const log = require('../utils/console').normal('build');
+const prettyDisplayFolders = require('../utils/prettyFolder');
+const deepCheck = require('../utils/deepValueCheck');
 
-const deepCheck = (target, p, value) => {
-  if (typeof target !== 'object' || target === null) {
-    return false;
-  }
-
-  const parts = p.split('.');
-
-  while (parts.length) {
-    const property = parts.shift();
-    // eslint-disable-next-line
-    if (!(target.hasOwnProperty(property))) {
-      return false;
-    }
-    // eslint-disable-next-line
-    target = target[ property ];
-  }
-
-  if (value) {
-    return target === value;
-  }
-  return true;
-};
-
+/**
+ * @type EFCModule
+ */
 module.exports = {
   name: 'build',
-  cli: {
-    zip: {
+  cli: [
+    {
+      name: 'zip',
       shortcut: 'z',
       description: 'A zip file to use instead of the "app" folder',
     },
-    production: {
+    {
+      name: 'production',
       boolean: true,
       default: false,
       shortcut: 'p',
       description: 'Run in production mode',
     },
-  },
-  usage: 'build [ [ -z zip ] [ -p ] [ -d ] ]',
+  ],
   description: 'Package your app for any OS',
   config: {
     dir: process.cwd(),
@@ -54,6 +38,11 @@ module.exports = {
     ],
     win32metadata: {},
   },
+  /**
+   * @param args
+   * @param {Settings} settings
+   * @return {Promise<void>}
+   */
   async run(args, settings) {
     const packager = require('electron-packager');
     const fs = require('fs');
@@ -61,10 +50,10 @@ module.exports = {
     const semver = require('semver');
     const setupDir = require('../utils/setupDir');
 
-    console.log('Build started...');
+    log.info('Build started...');
 
     if (!settings.build) {
-      console.error('It looks like your "build" configuration is empty');
+      log.error('It looks like your "build" configuration is empty');
       return;
     }
 
@@ -85,17 +74,22 @@ module.exports = {
     // set src dir to tmpdir
     packOptions.dir = tempDir;
 
-    console.log('Running pre-build operations...');
+    log.info('Running pre-build operations...');
 
     // Prebuild hooks
     for (let i = 0; i < this.modules.length; i += 1) {
       const module = this.modules[i];
       if (typeof module.onPreBuild === 'function') {
-        console.info(`\t${i}/${this.modules.length} (${module.rawName}) ...`);
         // eslint-disable-next-line
-        await module.onPreBuild(tempDir);
+        log.start(`Executing ${module.name}`);
+        const done = await module.onPreBuild(args, settings, tempDir);
+        if (!done) {
+          log.fatal('Task aborted! Some task did not complete succesfully');
+          return;
+        }
       }
     }
+    log.success('pre-build operations done.');
 
     // Compute datas //////////////
 
@@ -114,16 +108,19 @@ module.exports = {
       packOptions.win32metadata.CompanyName = settings.project.author;
     }
 
+    packOptions.quiet = true;
+
     // ////////////////////////////
 
     try {
+      log.start('Packaging started');
       const appPaths = await packager(packOptions);
 
-      console.log('Files packed successfuly!');
-      console.log('Available files:', ...appPaths);
+      log.success('Files packed successfuly!');
+      prettyDisplayFolders(appPaths);
     } catch (e) {
-      console.error('An error occured while packaging your apps');
-      console.log(e);
+      log.error('An error occured while packaging your apps');
+      log.error(e);
     }
 
     const isDirectory = source => fs.lstatSync(source).isDirectory();
@@ -149,8 +146,6 @@ module.exports = {
         return f;
       });
 
-      console.log(folders);
-
       // make a shortcut on windows
       folders.forEach((folder) => {
         if (folder.includes('win32')) {
@@ -163,7 +158,7 @@ module.exports = {
     }
 
     // postBuild hook
-    console.log('Running post-build operations...');
+    log.info('Running post-build operations...');
 
     for (let i = 0; i < folders.length; i += 1) {
       const folder = folders[i];
@@ -171,11 +166,14 @@ module.exports = {
       for (let j = 0; j < this.modules.length; j += 1) {
         const module = this.modules[j];
         if (typeof module.onPostBuild === 'function') {
-          console.info(`\t${j}/${this.modules.length} - ${folder} (${module.rawName}) ...`);
-          // eslint-disable-next-line
-          await module.onPostBuild(folder);
+          const done = await module.onPostBuild(args, settings, folder);
+          if (!done) {
+            log.fatal('Task aborted! Some task did not complete succesfully');
+            return;
+          }
         }
       }
     }
+    log.success('post-build operations done.');
   },
 };
