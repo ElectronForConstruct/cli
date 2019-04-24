@@ -26,9 +26,13 @@ module.exports = {
               str += `-${conf.shortcut}, `;
             }
 
-            str += `--${conf.name} `;
+            str += `--${conf.name}`;
 
-            str += `${!conf.boolean ? '<value>' : ''}`;
+            if (conf.boolean) {
+              str += `, --no-${conf.name} <value:${!!conf.default}>`;
+            } else {
+              str += ' <value>';
+            }
 
             str = str.padEnd(30);
 

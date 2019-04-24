@@ -1,25 +1,22 @@
 const path = require('path');
 const nodeAbi = require('node-abi');
 const fs = require('fs');
-const Console = require('../utils/console');
 
-const log = Console.interactive('greenworks');
+const log = require('../utils/console').interactive('greenworks');
 
-const githubFileDownload = async (url, json = false) => new Promise(async (resolve, reject) => {
+const request = async (url, json = false) => new Promise(async (resolve, reject) => {
   const got = require('got');
-  let file = '';
   try {
-    file = await got({
-      url,
+    const { body } = await got(url, {
       headers: {
         'User-Agent': 'ElectronForContruct',
       },
-      parse: json ? 'none' : 'json',
+      json,
     });
+    resolve(body);
   } catch (e) {
     reject(e);
   }
-  resolve(file);
 });
 
 const downloadFile = async (url, mypath) => new Promise((resolve) => {
@@ -33,6 +30,14 @@ const downloadFile = async (url, mypath) => new Promise((resolve) => {
     resolve(got);
   });
 });
+
+const cleanup = (greenworksDir) => {
+  const shelljs = require('shelljs');
+
+  if (fs.existsSync(greenworksDir)) {
+    shelljs.rm('-rf', greenworksDir);
+  }
+};
 
 /**
  * @type EFCModule
@@ -123,11 +128,11 @@ module.exports = {
     // Generate steamId
     if (!settings.greenworks.steamId) {
       log.error('Please specify a steam game id in the configuration file');
+      cleanup(greenworksDir);
       return false;
     }
 
     const { steamId, localGreenworksPath, forceClean } = settings.greenworks;
-
 
     log.info('Downloading greenworks');
 
@@ -136,7 +141,7 @@ module.exports = {
 
     // Download latest greenworks init
     const greenworksjsPath = path.join(greenworksDir, 'greenworks.js');
-    const greenworksFileRemoteContent = await githubFileDownload('https://raw.githubusercontent.com/greenheartgames/greenworks/master/greenworks.js');
+    const greenworksFileRemoteContent = await request('https://raw.githubusercontent.com/greenheartgames/greenworks/master/greenworks.js');
     fs.writeFileSync(greenworksjsPath, greenworksFileRemoteContent, 'utf8');
 
     log.info('Copying files');
@@ -151,15 +156,18 @@ module.exports = {
       path.join(sdkPath, 'public', 'steam', 'lib', 'win64', 'sdkencryptedappticket64.dll'),
     ];
 
-    toCopy.forEach((file) => {
+    for (let i = 0; i < toCopy.length; i += 1) {
+      const file = toCopy[i];
       try {
         if (!fs.existsSync(path.join(greenworksLibsDir, path.basename(file))) || forceClean) {
           shelljs.cp(file, greenworksLibsDir);
         }
       } catch (e) {
+        cleanup(greenworksDir);
         log.error(`There was an error copying ${file}, are you sure steam sdk path is valid ?`);
+        return false;
       }
-    });
+    }
 
     if (localGreenworksPath) {
       const localLibPath = path.join(localGreenworksPath, 'node_modules', 'greenworks', 'lib');
@@ -172,17 +180,18 @@ module.exports = {
           }
         });
       } else {
+        cleanup(greenworksDir);
         log.error(`${localLibPath} can not be found!`);
+        return false;
       }
     } else {
       log.info('Downloading prebuilds');
       const version = settings.electron;
 
       const url = 'https://api.github.com/repos/ElectronForConstruct/greenworks-prebuilds/releases/latest';
-      const content = await githubFileDownload(url, true);
+      const content = await request(url, true);
 
       const abi = nodeAbi.getAbi(version, 'electron');
-      // const platform = os.platform();
 
       const platforms = ['darwin', 'win32', 'linux'];
 
@@ -206,8 +215,9 @@ module.exports = {
           shelljs.cp('-R', path.join(tempFolder, 'build', 'Release/*'), greenworksLibsDir);
           shelljs.rm('-rf', tempFolder);
         } catch (e) {
-          // TODO fix error here
+          cleanup(greenworksDir);
           log.error(`The target ${assetName} seems not to be available currently. Build it yourself, or change Electron version.`);
+          return false;
         }
       }
       shelljs.rm('-rf', path.join(greenworksLibsDir, 'obj.target'));

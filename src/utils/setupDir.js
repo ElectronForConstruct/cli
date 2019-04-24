@@ -35,22 +35,15 @@ module.exports = async (settings, zipFile = null) => {
     unsafeCleanup: true,
   });
 
-  if (
-    fs.existsSync(path.join(process.cwd(), 'cache', 'package-lock.json'))
-  ) {
-    log.info('Using cache');
-    shelljs.cp(path.join(process.cwd(), 'cache', 'package-lock.json'), path.join(tmpDir.name, 'package-lock.json'));
-  }
-
   if (fs.existsSync(path.join(process.cwd(), 'cache', 'yarn.lock'))) {
     log.info('Using cache');
     shelljs.cp(path.join(process.cwd(), 'cache', 'yarn.lock'), path.join(tmpDir.name, 'yarn.lock'));
   }
 
   // copy local files from template to tmpdir
-  shelljs.cp(path.join(__dirname, '../../', 'template', 'main.js'), tmpDir.name);
-  shelljs.cp(path.join(__dirname, '../../', 'template', 'preload.js'), tmpDir.name);
-  shelljs.cp(path.join(__dirname, '../../', 'template', 'package.json'), tmpDir.name);
+  shelljs.cp(path.join(__dirname, '../', 'template', 'main.js'), tmpDir.name);
+  shelljs.cp(path.join(__dirname, '../', 'template', 'preload.js'), tmpDir.name);
+  shelljs.cp(path.join(__dirname, '../', 'template', 'package.json'), tmpDir.name);
 
   fs.writeFileSync(path.join(tmpDir.name, 'config.js'), `module.exports = ${JSON.stringify(settings, null, '  ')}`, 'utf8');
 
@@ -73,24 +66,12 @@ module.exports = async (settings, zipFile = null) => {
 
   if (settings.dependencies && settings.dependencies.length > 0) {
     await installPkg(settings.dependencies, tmpDir.name);
-    /* await install({
-      cwd: tmpDir.name,
-      packages: settings.dependencies,
-    }); */
   } else {
     await installPkg([], tmpDir.name);
-    /* await install({
-      cwd: tmpDir.name,
-    }); */
   }
 
   // Cache ///
   shelljs.mkdir('-p', path.join(process.cwd(), 'cache'));
-
-  if (fs.existsSync(path.join(tmpDir.name, 'package-lock.json'))) {
-    log.info('Caching files to speed up next builds');
-    shelljs.cp(path.join(tmpDir.name, 'package-lock.json'), path.join(process.cwd(), 'cache'));
-  }
 
   if (fs.existsSync(path.join(tmpDir.name, 'yarn.lock'))) {
     log.info('Caching files to speed up next builds');

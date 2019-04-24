@@ -5,10 +5,8 @@
   "scripts": {
     "start": "node src/app.js",
     "release": "np --yolo",
-    "up": "yarn upgrade-interactive --latest && syncyarnlock -s -k",
     "test": "echo 1",
-    "postpublish": "git log v2.3.7..master --pretty=format:\"- %Cred%h%Creset %s%n%b%n\" --abbrev-commit",
-    "lint": "eslint src"
+    "postpublish": "git log v2.3.7..master --pretty=format:\"- %Cred%h%Creset %s%n%b%n\" --abbrev-commit"
   },
   "repository": {
     "type": "git",
@@ -34,7 +32,6 @@
     "enquirer": "^2.3.0",
     "express": "^4.16.4",
     "extract-zip": "^1.6.7",
-    "flow-remove-types": "^1.2.3",
     "got": "^9.6.0",
     "mri": "^1.1.4",
     "node-abi": "^2.7.1",

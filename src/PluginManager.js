@@ -1,15 +1,9 @@
-const fs = require('fs');
-const path = require('path');
 const logger = require('./utils/console').normal('system');
+
+const cmds = require('./actions');
 
 module.exports = class PluginManager {
   constructor() {
-    /** @private */
-    this.defaultCommandPath = path.join(__dirname, 'actions');
-
-    /** @private */
-    this.defaultCustomCommandPath = path.join(__dirname, 'plugins');
-
     /** @type {Array<EFCModule>} */
     this.commands = [];
   }
@@ -71,30 +65,27 @@ module.exports = class PluginManager {
     return booleans;
   }
 
-  async loadFolder(commandsPath, plugins) {
-    const files = fs.readdirSync(commandsPath).filter(f => path.extname(f) !== 'js');
-
-    const fcts = [];
-    files.forEach((key) => {
-      fcts.push((async () => {
-        const command = require(path.join(commandsPath, key));
-        const c = await this.setupCommand(command, plugins);
-        return c;
-      })());
-    });
-
-    const commands = await Promise.all(fcts);
-    return commands;
-  }
-
   /**
    * Load default getCommands
    * @returns {Promise<void>}
    */
   async loadDefaultCommands(plugins) {
-    const commands = await this.loadFolder(this.defaultCommandPath, plugins);
-    this.commands.push(...commands);
-    this.commands = this.commands.filter(Boolean);
+    const arr = Object.keys(cmds).map(k => cmds[k]);
+
+    for (let i = 0; i < arr.length; i += 1) {
+      const command = arr[i];
+
+      if (plugins.includes(command.name)) {
+        try {
+          if (typeof command.onLoad === 'function') {
+            await command.onLoad();
+          }
+          this.commands.push(command);
+        } catch (e) {
+          logger.error(e);
+        }
+      }
+    }
   }
 
   // eslint-disable-next-line
@@ -118,25 +109,5 @@ module.exports = class PluginManager {
    */
   getCommands() {
     return this.commands;
-  }
-
-  /**
-   * @returns {undefined}
-   * @param command
-   * @param plugins
-   */
-  async setupCommand(command, plugins) {
-    if (plugins.includes(command.name)) {
-      try {
-        if (typeof command.onLoad === 'function') {
-          await command.onLoad();
-        }
-        return command;
-      } catch (e) {
-        logger.error(e);
-        return undefined;
-      }
-    }
-    return undefined;
   }
 };
