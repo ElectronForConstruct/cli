@@ -51,13 +51,10 @@ module.exports = {
     iaLogger.info('Bootstrapping project...');
 
     shelljs.mkdir('-p', fullPath);
-    shelljs.cp('-R', [
-      path.join(__dirname, '../', 'new-project-template', '*'), // regular files
-      path.join(__dirname, '../', 'new-project-template', '.*'), // hidden files (.gitignore, etc)
-    ], fullPath);
+    shelljs.cp('-R', path.join(__dirname, '../', 'new-project-template', '*'), fullPath);
 
-    if (!args.git && fs.existsSync(path.join(fullPath, '.gitignore'))) {
-      fs.unlinkSync(path.join(fullPath, '.gitignore'));
+    if (args.git) {
+      shelljs.cp(path.join(__dirname, '../', 'new-project-template', '.gitignore'), fullPath);
     }
 
     if (args.preview) {

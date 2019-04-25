@@ -21,7 +21,7 @@ module.exports = async (packages = [], cwd = process.cwd()) => new Promise((reso
   });
 
   yarnCmd.stderr.on('data', (data) => {
-    logger.error(`Error: ${data.toString()}`);
+    logger.info(data.toString().trim());
   });
 
   yarnCmd.on('exit', (code) => {

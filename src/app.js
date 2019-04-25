@@ -1,4 +1,4 @@
-// TODO https://github.com/pmq20/node-packer
+// TODO https://github.com/dthree/cash
 
 const fs = require('fs');
 const path = require('path');

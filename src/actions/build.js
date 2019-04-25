@@ -2,6 +2,7 @@ const path = require('path');
 const log = require('../utils/console').normal('build');
 const prettyDisplayFolders = require('../utils/prettyFolder');
 const deepCheck = require('../utils/deepValueCheck');
+const { postBuild, preBuild } = require('../utils/hooks');
 
 /**
  * @type EFCModule
@@ -74,22 +75,7 @@ module.exports = {
     // set src dir to tmpdir
     packOptions.dir = tempDir;
 
-    log.info('Running pre-build operations...');
-
-    // Prebuild hooks
-    for (let i = 0; i < this.modules.length; i += 1) {
-      const module = this.modules[i];
-      if (typeof module.onPreBuild === 'function') {
-        // eslint-disable-next-line
-        log.start(`Executing ${module.name}`);
-        const done = await module.onPreBuild(args, settings, tempDir);
-        if (!done) {
-          log.fatal('Task aborted! Some task did not complete succesfully');
-          return;
-        }
-      }
-    }
-    log.success('pre-build operations done.');
+    await preBuild(this.modules, args, settings, tempDir);
 
     // Compute datas //////////////
 
@@ -157,23 +143,6 @@ module.exports = {
       });
     }
 
-    // postBuild hook
-    log.info('Running post-build operations...');
-
-    for (let i = 0; i < folders.length; i += 1) {
-      const folder = folders[i];
-
-      for (let j = 0; j < this.modules.length; j += 1) {
-        const module = this.modules[j];
-        if (typeof module.onPostBuild === 'function') {
-          const done = await module.onPostBuild(args, settings, folder);
-          if (!done) {
-            log.fatal('Task aborted! Some task did not complete succesfully');
-            return;
-          }
-        }
-      }
-    }
-    log.success('post-build operations done.');
+    await postBuild(this.modules, args, settings, folders);
   },
 };

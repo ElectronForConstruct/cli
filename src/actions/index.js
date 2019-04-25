@@ -12,6 +12,7 @@ const preview = require('./preview');
 const reportAnIssue = require('./report-an-issue');
 const richPresence = require('./rich-presence');
 const ui = require('./ui');
+const login = require('./login');
 
 module.exports = {
   build,
@@ -28,4 +29,5 @@ module.exports = {
   reportAnIssue,
   richPresence,
   ui,
+  login,
 };

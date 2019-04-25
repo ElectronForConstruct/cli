@@ -1,6 +1,5 @@
-const Console = require('../utils/console');
-
-const logger = Console.normal('preview');
+const logger = require('../utils/console').normal('preview');
+const { preBuild, postBuild } = require('../utils/hooks');
 
 const isValid = (url) => {
   if (url === '') {
@@ -91,23 +90,8 @@ module.exports = {
 
     const tempDir = await setupDir(settings, zipFile);
 
-    for (let i = 0; i < this.modules.length; i += 1) {
-      const module = this.modules[i];
-      if (typeof module.onPreBuild === 'function') {
-        // eslint-disable-next-line
-        logger.info(`\t${i}/${this.modules.length} (${module.name}) ...`);
-        await module.onPreBuild(tempDir);
-      }
-    }
-
-    for (let i = 0; i < this.modules.length; i += 1) {
-      const module = this.modules[i];
-      if (typeof module.onPostBuild === 'function') {
-        // eslint-disable-next-line
-        logger.info(`\t${i}/${this.modules.length} (${module.name}) ...`);
-        await module.onPostBuild(tempDir);
-      }
-    }
+    await preBuild(this.modules, args, settings, tempDir);
+    await postBuild(this.modules, args, settings, [tempDir]);
 
     await startPreview(previewUrl, tempDir, settings.electron);
   },

@@ -28,7 +28,7 @@ module.exports = isProd => ({
     version: '0.0.0',
   },
   plugins: [
-    'build', 'preview', 'debug', 'donate', 'new', 'report-issue', 'help', 'ui',
+    'build', 'preview', 'debug', 'donate', 'new', 'report-issue', 'help', 'ui', 'login',
   ],
   switches: [],
 });
