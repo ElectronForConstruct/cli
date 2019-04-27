@@ -21,7 +21,6 @@ const extractZip = async (from, to) => new Promise((resolve, reject) => {
 /**
  * Prepare a sandboxed environment in tmp
  * @param {Object} settings
- * @param {function} log
  * @param zipFile
  * @returns {Promise<string>}
  */
@@ -42,10 +41,15 @@ module.exports = async (settings, zipFile = null) => {
 
   // copy local files from template to tmpdir
   shelljs.cp(path.join(__dirname, '../', 'template', 'main.js'), tmpDir.name);
+  shelljs.cp(path.join(__dirname, '../', 'template', 'config.js'), tmpDir.name);
   shelljs.cp(path.join(__dirname, '../', 'template', 'preload.js'), tmpDir.name);
   shelljs.cp(path.join(__dirname, '../', 'template', 'package.json'), tmpDir.name);
 
-  fs.writeFileSync(path.join(tmpDir.name, 'config.js'), `module.exports = ${JSON.stringify(settings, null, '  ')}`, 'utf8');
+  console.log(tmpDir.name);
+
+  shelljs.cp(path.join(process.cwd(), 'config.js'), path.join(tmpDir.name, 'config-user.js'));
+
+  fs.writeFileSync(path.join(tmpDir.name, 'config-base.js'), `module.exports = ${JSON.stringify(settings, null, '  ')}`, 'utf8');
 
   if (zipFile) {
     await extractZip(zipFile, tmpDir.name);
@@ -53,8 +57,6 @@ module.exports = async (settings, zipFile = null) => {
     // copy app/* to root of temp dir
     shelljs.cp('-R', path.join(process.cwd(), 'app', '*'), tmpDir.name);
   }
-
-  // shelljs.cp(path.join(process.cwd(), 'config.js'), tmpDir.name);
 
   // editing package.json
   const pkg = fs.readFileSync(path.join(tmpDir.name, 'package.json'), 'utf8');

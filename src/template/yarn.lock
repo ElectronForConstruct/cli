@@ -2,13 +2,6 @@
 # yarn lockfile v1
 
 
-"@efc/core@latest":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@efc/core/-/core-0.0.2.tgz#12a83f6d71014d8dcb5378cf632f3a83c8c6e513"
-  integrity sha512-WcCWRQzbCY2EVRNL4Y4TESeQWvQP/VuYbbf5c1Mn27iHDU/4DjgcF6eVXsWf1MkRmYYqZUPszDR4sYu4pCOxTQ==
-  dependencies:
-    deepmerge "^3.2.0"
-
 "@types/node@^8.0.24":
   version "8.10.45"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-8.10.45.tgz#4c49ba34106bc7dced77ff6bae8eb6543cde8351"
