@@ -1,12 +1,9 @@
-const path = require('path');
-
-const isDev = process.env.NODE_ENV === 'development' || false;
-
 function hookStdout(callback) {
   const oldWrite = process.stdout.write;
 
   process.stdout.write = (function (write) {
     return function (string, encoding, fd) {
+      // eslint-disable-next-line
       write.apply(process.stdout, arguments);
       callback(string, encoding, fd);
     };
@@ -25,27 +22,30 @@ module.exports = {
   description: 'Super secret command ;)',
 
   async run(args, settings) {
-    const express = require('express');
+    const fs = require('fs');
+    const path = require('path');
+    const io = require('socket.io');
 
-    const app = express();
-    const http = require('http').Server(app);
-    const io = require('socket.io')(http);
-
+    const homedir = require('os').homedir();
     const logger = require('../utils/console').normal('ui');
 
-    if (!isDev) {
-      app.use(express.static(path.join(__dirname, '..', '..', 'dist-dashboard')));
-    }
+    const tokenFile = 'efc.conf';
+    const identFile = JSON.parse(fs.readFileSync(path.join(homedir, tokenFile)));
 
-    io.on('connection', (socket) => {
+    //          efc
+    const ioSocket = io.listen(56342, () => {
+      logger.log('listening on *:56342');
+    });
+
+    ioSocket.of(identFile.uid).on('connection', (socket) => {
       const unhook = hookStdout((string, encoding, fd) => {
         socket.emit('log', string);
       });
 
-      logger.log('an user connected');
+      logger.log('You are connected');
 
       socket.on('disconnect', () => {
-        logger.log('user disconnected');
+        logger.log('You are disconnected');
         unhook();
       });
 
@@ -53,17 +53,14 @@ module.exports = {
         const build = this.modules.find(m => m.name === 'build');
 
         if (typeof build.run === 'function') {
-          const done = await build.run(args, settings);
-          if (!done) {
-            logger.fatal('Task aborted! Some task did not complete succesfully');
+          try {
+            await build.run(args, settings);
+            socket.emit('buildDone');
+          } catch (e) {
+            logger.fatal('Task aborted! Some task did not complete succesfully', e);
           }
         }
       });
-    });
-
-    //          efc
-    http.listen(56342, () => {
-      logger.log('listening on *:56342');
     });
   },
 };

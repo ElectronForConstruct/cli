@@ -45,8 +45,6 @@ module.exports = async (settings, zipFile = null) => {
   shelljs.cp(path.join(__dirname, '../', 'template', 'preload.js'), tmpDir.name);
   shelljs.cp(path.join(__dirname, '../', 'template', 'package.json'), tmpDir.name);
 
-  console.log(tmpDir.name);
-
   shelljs.cp(path.join(process.cwd(), 'config.js'), path.join(tmpDir.name, 'config-user.js'));
 
   fs.writeFileSync(path.join(tmpDir.name, 'config-base.js'), `module.exports = ${JSON.stringify(settings, null, '  ')}`, 'utf8');

@@ -59,6 +59,7 @@ module.exports = {
 
         fs.writeFileSync(path.join(homedir, tokenFile), JSON.stringify({
           token: answers.token,
+          uid: body.uid,
         }));
         logger.success('Successfully logged in! Welcome back.');
         return true;
