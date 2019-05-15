@@ -153,20 +153,29 @@ module.exports = {
       const platforms = ['darwin', 'win32', 'linux'];
       const platformsX = ['osx', 'win', 'linux'];
 
+      const downloads = [];
+
       log.info('Downloading prebuilds');
       for (let i = 0; i < platforms.length; i += 1) {
         const platform = platforms[i];
 
         const assetName = `greenworks-electron-v${abi}-${platform}.node`;
-        try {
-          const res = content.assets.find(asset => asset.name === assetName).browser_download_url;
-
-          await downloadFile(res, path.join(greenworksLibsDir, `greenworks-${platformsX[i]}64.node`));
-        } catch (e) {
-          log.error(`The target ${assetName} seems not to be available currently. Build it yourself, or change Electron version.`);
+        const res = content.assets.find(asset => asset.name === assetName).browser_download_url;
+        /* if (res.notfound) {
+          log.error(`The target ${assetName} seems not to be available
+          currently. Build it yourself, or change Electron version.`);
           return false;
-        }
+        } */
+
+        downloads.push(downloadFile(res, path.join(greenworksLibsDir, `greenworks-${platformsX[i]}64.node`)));
       }
+
+      try {
+        await Promise.all(downloads);
+      } catch (e) {
+        log.error(e);
+      }
+
       shelljs.rm('-rf', path.join(greenworksLibsDir, 'obj.target'));
     }
 
