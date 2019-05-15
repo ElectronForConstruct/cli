@@ -143,12 +143,19 @@ module.exports = {
       }
     } else {
       const version = settings.electron;
+      const abi = nodeAbi.getAbi(version, 'electron');
+
+      if (version[0] === '4' && abi === '64') {
+        log.error(`Electron version ${version} found - aborting due to known ABI issue
+More information about this issue can be found at https://github.com/lgeiger/node-abi/issues/54
+Please, avoid using electron from 4.0.0 to 4.0.3`);
+        throw new Error('Invalid Electron version');
+      }
 
       log.info('Fetching prebuilds');
       const url = 'https://api.github.com/repos/ElectronForConstruct/greenworks-prebuilds/releases/tags/v0.2.5';
       const content = await request(url, true);
 
-      const abi = nodeAbi.getAbi(version, 'electron');
 
       const platforms = ['darwin', 'win32', 'linux'];
       const platformsX = ['osx', 'win', 'linux'];

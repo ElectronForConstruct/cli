@@ -4,7 +4,7 @@
   "description": "A command-line tool to manage your Construct Electron projects",
   "scripts": {
     "start": "node src/app.js",
-    "release": "np --yolo",
+    "release": "np --yolo --any-branch --no-yarn",
     "test": "echo 1",
     "postpublish": "git log v2.3.7..master --pretty=format:\"- %Cred%h%Creset %s%n%b%n\" --abbrev-commit"
   },
