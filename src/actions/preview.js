@@ -88,7 +88,7 @@ module.exports = {
       previewUrl = '.';
     }
 
-    const tempDir = await setupDir(settings, zipFile);
+    const tempDir = await setupDir(settings, zipFile, 'preview');
 
     await preBuild(this.modules, args, settings, tempDir);
     await postBuild(this.modules, args, settings, [tempDir]);

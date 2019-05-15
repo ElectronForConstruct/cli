@@ -24,7 +24,7 @@ const extractZip = async (from, to) => new Promise((resolve, reject) => {
  * @param zipFile
  * @returns {Promise<string>}
  */
-module.exports = async (settings, zipFile = null) => {
+module.exports = async (settings, zipFile = null, mode) => {
   const { electron } = settings;
 
   // create temporary directory
@@ -59,7 +59,13 @@ module.exports = async (settings, zipFile = null) => {
   // editing package.json
   const pkg = fs.readFileSync(path.join(tmpDir.name, 'package.json'), 'utf8');
   const pkgJson = JSON.parse(pkg);
-  pkgJson.devDependencies.electron = electron;
+
+  if (mode === 'build') {
+    pkgJson.devDependencies = {};
+  } else {
+    pkgJson.devDependencies.electron = electron;
+  }
+
   pkgJson.name = settings.project.name;
   pkgJson.version = settings.project.version;
   fs.writeFileSync(path.join(tmpDir.name, 'package.json'), JSON.stringify(pkgJson, null, '\t'), 'utf8');

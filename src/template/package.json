@@ -5,7 +5,7 @@
   "license": "UNLICENSED",
   "private": true,
   "devDependencies": {
-    "electron": "3.1.6"
+    "electron": "5.0.1"
   },
   "dependencies": {
     "deepmerge": "^3.2.0",

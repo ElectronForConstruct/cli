@@ -1,5 +1,5 @@
 module.exports = isProd => ({
-  electron: '3.1.6',
+  electron: '5.0.1',
   errorLogging: true,
   singleInstance: false,
   window: {

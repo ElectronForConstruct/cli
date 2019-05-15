@@ -70,7 +70,7 @@ module.exports = {
 
     // setup directories
     const zipFile = args.zip ? args.zip : null;
-    const tempDir = await setupDir(settings, zipFile);
+    const tempDir = await setupDir(settings, zipFile, 'build');
 
     // set src dir to tmpdir
     packOptions.dir = tempDir;
