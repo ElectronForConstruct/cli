@@ -1,7 +1,6 @@
-const eb = require('electron-builder/out/index');
-const fs = require('fs');
 const path = require('path');
 const Console = require('../utils/console');
+const prettyDisplayFolders = require('../utils/prettyFolder');
 
 const log = Console.normal('installer');
 
@@ -13,11 +12,14 @@ module.exports = {
   description: 'Generate installer',
   config: {
     appId: 'com.you.yourapp',
+
+    asar: false,
+
     productName: 'YourAppName',
     copyright: 'Copyright © 2018 You',
     directories: {
       buildResources: 'build',
-      output: 'dist',
+      output: 'installers',
     },
     files: [
       '!preview.exe',
@@ -26,31 +28,55 @@ module.exports = {
       '!node_modules/app-builder-bin/!**',
       '!node_modules/app-builder-lib/!**',
     ],
+    publish: [],
   },
 
   async run(args, settings) {
-    for (let i = 0; i < this.modules.length; i += 1) {
-      const module = this.modules[i];
+    const { postBuild, preBuild, postInstaller } = require('../utils/hooks');
+    const setupDir = require('../utils/setupDir');
+    const eb = require('electron-builder/out/index');
 
-      if (typeof module.onPreBuild === 'function') {
-        // eslint-disable-next-line
-        await module.onPreBuild();
-      }
+    const packOptions = settings.installer;
+
+
+    if (settings.electron) {
+      packOptions.electronVersion = settings.electron;
     }
 
-    if (
-      !fs.existsSync(path.join(process.cwd(), 'index.html'))
-      && !fs.existsSync(path.join(process.cwd(), 'data.js'))
-      && !fs.existsSync(path.join(process.cwd(), 'data.json'))) {
-      log.warn('It seems that there isn\'t any Construct game inside this folder. You must be currently inside a folder containing an HTML5 export of a Construct game');
-    } else {
-      try {
-        // eslint-disable-next-line
-        const result = await eb.build({ config: settings.build });
-        log.log(result);
-      } catch (e) {
-        log.log('There was an error building your project:', e);
-      }
+    // setup directories
+    const zipFile = args.zip ? args.zip : null;
+    const tempDir = await setupDir(settings, zipFile, 'build');
+
+    packOptions.afterPack = async (context) => {
+      await postBuild(this.modules, args, settings, [context.appOutDir]);
+    };
+
+    packOptions.directories.app = tempDir;
+
+    if (!path.isAbsolute(packOptions.directories.output)) {
+      packOptions.directories.output = path.join(process.cwd(), packOptions.directories.output);
+    }
+    if (!path.isAbsolute(packOptions.directories.app)) {
+      packOptions.directories.app = path.join(process.cwd(), packOptions.directories.app);
+    }
+    if (!path.isAbsolute(packOptions.directories.buildResources)) {
+      packOptions.directories.buildResources = path.join(
+        process.cwd(),
+        packOptions.directories.buildResources,
+      );
+    }
+
+    await preBuild(this.modules, args, settings, tempDir);
+
+    try {
+      const appPaths = await eb.build({ config: packOptions });
+
+      log.success('Files packed successfuly!');
+      prettyDisplayFolders(appPaths.filter(p => !p.includes('blockmap')));
+
+      postInstaller(this.modules, args, settings, path.dirname(appPaths[0]));
+    } catch (e) {
+      log.log('There was an error building your project:', e);
     }
   },
 };

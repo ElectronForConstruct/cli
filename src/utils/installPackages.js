@@ -8,7 +8,7 @@ const logger = require('./console').interactive('system');
  * @param {string} cwd
  */
 module.exports = async (packages = [], cwd = process.cwd()) => new Promise((resolve) => {
-  const yarn = path.join(__dirname, 'yarn-1.15.2.js');
+  const yarn = path.join(__dirname, 'yarn.js');
   let command = `node "${yarn}" --cwd="${cwd}"`;
   if (packages.length > 0) {
     command += ` add ${packages.join(' ')}`;

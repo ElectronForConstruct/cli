@@ -115,34 +115,6 @@ module.exports = {
       .map(name => path.join(packOptions.out, name))
       .filter(isDirectory);
 
-    if (settings.switches.length > 0 && semver.satisfies(settings.electron, '>= 4')) {
-      const switchesAsString = settings.switches.map((flag) => {
-        let f = Array.isArray(flag) ? flag[0] : flag;
-
-        if (Array.isArray(flag)) {
-          if (f[0] !== '-' && f[1] !== '-') {
-            f = `--${f}`;
-          }
-          return `${f}=${flag[1]}`;
-        }
-
-        if (f[0] !== '-' && f[1] !== '-') {
-          f = `--${f}`;
-        }
-        return f;
-      });
-
-      // make a shortcut on windows
-      folders.forEach((folder) => {
-        if (folder.includes('win32')) {
-          ws.create(folder, {
-            target: path.join(folder, `${packOptions.name}.exe`),
-            args: switchesAsString.join(' '),
-          });
-        }
-      });
-    }
-
     await postBuild(this.modules, args, settings, folders);
   },
 };

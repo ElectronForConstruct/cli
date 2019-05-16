@@ -41,6 +41,11 @@
  * @property {Array<string>} build.ignore
  * @property {Object} build.win32metadata
  *
+ * Installer
+ *
+ * @property {Object} installer
+ * @property {Object} installer.directories
+ *
  * Greenworks
  *
  * @property {Object} greenworks
@@ -53,7 +58,7 @@
  *
  * @property {Object} minifier
  * @property {Array<string>} ignore,
-**/
+ * */
 
 /**
  * The complete EFC module definition.

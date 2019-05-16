@@ -1,5 +1,3 @@
-// TODO https://github.com/dthree/cash
-
 const fs = require('fs');
 const path = require('path');
 const deepmerge = require('deepmerge');
