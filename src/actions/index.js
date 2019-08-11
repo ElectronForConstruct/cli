@@ -10,8 +10,6 @@ const minify = require('./minify');
 const _new = require('./new');
 const preview = require('./preview');
 const reportAnIssue = require('./report-an-issue');
-const ui = require('./ui');
-const login = require('./login');
 
 module.exports = {
   build,
@@ -26,6 +24,4 @@ module.exports = {
   _new,
   preview,
   reportAnIssue,
-  ui,
-  login,
 };

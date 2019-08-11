@@ -1,6 +1,3 @@
-const deepmerge = require('deepmerge');
+const user = require('./user');
 
-const base = require('./config-base');
-const user = require('./config-user');
-
-module.exports = deepmerge(base, user(base.env === 'production'));
+module.exports = user;

@@ -1,11 +1,10 @@
 const fs = require('fs');
 const path = require('path');
-const deepmerge = require('deepmerge');
 const mri = require('mri');
+const deepmerge = require('deepmerge');
 const rollbar = require('./ErrorReport');
 
 const USER_CONFIG = path.join(process.cwd(), 'config.js');
-const base = require('./DefaultConfig');
 const PluginManager = require('./PluginManager');
 
 const logger = require('./utils/console').normal('system');
@@ -41,8 +40,6 @@ module.exports = async () => {
       config.env = 'development';
     }
 
-    const baseConfig = base(config.env === 'production');
-
     let userConfig = {};
     if (fs.existsSync(USER_CONFIG)) {
       const usrConfig = require(USER_CONFIG);
@@ -56,10 +53,13 @@ module.exports = async () => {
 
     // mix only plugins
     const userPlugins = [];
-    if (userConfig && userConfig.plugins) {
+    const defaultPlugins = [
+      'build', 'preview', 'debug', 'donate', 'new', 'report-issue', 'help',
+    ];
+    if (userConfig.plugins) {
       userPlugins.push(...userConfig.plugins);
     }
-    userPlugins.push(...baseConfig.plugins);
+    userPlugins.push(...defaultPlugins);
 
     await pm.loadDefaultCommands(userPlugins);
     // if (isReady) await pm.loadCustomCommands();
@@ -69,7 +69,7 @@ module.exports = async () => {
       pluginsConfig = deepmerge(pluginsConfig, { [command.name]: command.config || {} });
     });
 
-    config = deepmerge.all([config, baseConfig, pluginsConfig, userConfig]);
+    config = deepmerge.all([config, pluginsConfig, userConfig]);
 
     pm.setModules();
 

@@ -45,9 +45,9 @@ module.exports = async (settings, zipFile = null, mode) => {
   shelljs.cp(path.join(__dirname, '../', 'template', 'preload.js'), tmpDir.name);
   shelljs.cp(path.join(__dirname, '../', 'template', 'package.json'), tmpDir.name);
 
-  shelljs.cp(path.join(process.cwd(), 'config.js'), path.join(tmpDir.name, 'config-user.js'));
+  // shelljs.cp(path.join(process.cwd(), 'config.js'), path.join(tmpDir.name, 'user.js'));
 
-  fs.writeFileSync(path.join(tmpDir.name, 'config-base.js'), `module.exports = ${JSON.stringify(settings, null, '  ')}`, 'utf8');
+  fs.writeFileSync(path.join(tmpDir.name, 'user.js'), `module.exports = ${JSON.stringify(settings, null, '  ')}`, 'utf8');
 
   if (zipFile) {
     await extractZip(zipFile, tmpDir.name);

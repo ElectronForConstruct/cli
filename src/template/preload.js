@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       console.log('adding vue');
 
-      return _appendScript('https://gitcdn.xyz/repo/ElectronForConstruct/construct-devtool/master/dist/construct-devtool.min.js');
+      return _appendScript('https://cdn.jsdelivr.net/gh/ElectronForConstruct/construct-devtool/dist/construct-devtool.min.js');
     })
     .then(() => {
       const dt = document.createElement('construct-devtool');
