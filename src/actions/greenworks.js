@@ -153,7 +153,7 @@ Please, avoid using electron from 4.0.0 to 4.0.3`);
       }
 
       log.info('Fetching prebuilds');
-      const url = 'https://api.github.com/repos/ElectronForConstruct/greenworks-prebuilds/releases/tags/v0.2.5';
+      const url = 'https://api.github.com/repos/ElectronForConstruct/greenworks-prebuilds/releases/tags/v0.2.6';
       const content = await request(url, true);
 
 
@@ -166,13 +166,14 @@ Please, avoid using electron from 4.0.0 to 4.0.3`);
       for (let i = 0; i < platforms.length; i += 1) {
         const platform = platforms[i];
 
-        const assetName = `greenworks-electron-v${abi}-${platform}.node`;
-        const res = content.assets.find(asset => asset.name === assetName).browser_download_url;
-        /* if (res.notfound) {
+        const assetName = `greenworks-electron-v${abi}-${platform}-x64.node`;
+        const asset = content.assets.find(a => a.name === assetName);
+        if (!asset) {
           log.error(`The target ${assetName} seems not to be available
           currently. Build it yourself, or change Electron version.`);
           return false;
-        } */
+        }
+        const res = asset.browser_download_url;
 
         downloads.push(downloadFile(res, path.join(greenworksLibsDir, `greenworks-${platformsX[i]}64.node`)));
       }
