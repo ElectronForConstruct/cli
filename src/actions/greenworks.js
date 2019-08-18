@@ -153,9 +153,9 @@ Please, avoid using electron from 4.0.0 to 4.0.3`);
       }
 
       log.info('Fetching prebuilds');
-      let release = `tags/v${prebuildsVersion}`;
-      if (!prebuildsVersion) {
-        release = 'latest';
+      let release = 'latest';
+      if (prebuildsVersion) {
+        release = `tags/v${prebuildsVersion}`;
       }
       const url = `https://api.github.com/repos/ElectronForConstruct/greenworks-prebuilds/releases/${release}`;
       const content = await request(url, true);
