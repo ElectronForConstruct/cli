@@ -32,6 +32,7 @@
     "express": "^4.16.4",
     "extract-zip": "^1.6.7",
     "got": "^9.6.0",
+    "javascript-obfuscator": "^0.18.1",
     "mri": "^1.1.4",
     "node-abi": "^2.8.0",
     "recursive-readdir": "^2.2.2",
