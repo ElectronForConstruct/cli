@@ -1,6 +1,6 @@
 // Happy with ElectronForConstruct ? ► Donate: https://armaldio.xyz/donations ♥
 
-module.exports = isProd => ({
+module.exports = {
   // add your own configuration
 
   electron: '6.0.1',
@@ -9,7 +9,7 @@ module.exports = isProd => ({
   window: {
     width: 800,
     height: 600,
-    fullscreen: isProd,
+    fullscreen: false,
     frame: true,
     transparent: false,
     toolbar: true,
@@ -19,10 +19,10 @@ module.exports = isProd => ({
     showConfig: false,
   },
   developer: {
-    showConstructDevTools: !isProd,
-    autoClose: !isProd,
-    autoReload: !isProd,
-    showChromeDevTools: !isProd,
+    showConstructDevTools: true,
+    autoClose: true,
+    autoReload: true,
+    showChromeDevTools: true,
     overlay: null,
   },
   project: {
@@ -32,4 +32,4 @@ module.exports = isProd => ({
     version: '0.0.0',
   },
   switches: [],
-});
+};

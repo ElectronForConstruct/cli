@@ -7,7 +7,8 @@ const rollbar = require('./ErrorReport');
 const USER_CONFIG = path.join(process.cwd(), 'config.js');
 const PluginManager = require('./PluginManager');
 
-const logger = require('./utils/console').normal('system');
+const logger = require('./utils/console')
+  .normal('system');
 
 const isDev = process.env.EFC_ENV === 'development';
 
@@ -18,9 +19,9 @@ let errorReporting = false;
 
 const alias = {
   h: 'help',
-  p: 'production',
+  p: 'profile',
 };
-const boolean = ['help', 'production'];
+const boolean = ['help'];
 
 let args = mri(process.argv.slice(2), {
   alias,
@@ -33,18 +34,21 @@ let config = {
 
 module.exports = async () => {
   try {
-    // check if production or dev mode
-    if (args.production) {
-      config.env = 'production';
-    } else {
-      config.env = 'development';
-    }
+    const profile = args.profile || 'development';
+
+    config.profile = profile;
 
     let userConfig = {};
     if (fs.existsSync(USER_CONFIG)) {
-      const usrConfig = require(USER_CONFIG);
       config.isProject = true;
-      userConfig = usrConfig(config.env === 'production');
+      userConfig = require(USER_CONFIG);
+    }
+
+    // todo support json
+    const profileConfigPath = path.join(process.cwd(), `config.${profile}.js`);
+    if (fs.existsSync(profileConfigPath)) {
+      const profileConfig = require(profileConfigPath);
+      userConfig = deepmerge(userConfig, profileConfig);
     }
 
     /**
@@ -60,9 +64,10 @@ module.exports = async () => {
     await pm.loadCommands();
 
     let pluginsConfig = {};
-    pm.getCommands().forEach((command) => {
-      pluginsConfig = deepmerge(pluginsConfig, { [command.name]: command.config || {} });
-    });
+    pm.getCommands()
+      .forEach((command) => {
+        pluginsConfig = deepmerge(pluginsConfig, { [command.name]: command.config || {} });
+      });
 
     config = deepmerge.all([config, pluginsConfig, userConfig]);
 
