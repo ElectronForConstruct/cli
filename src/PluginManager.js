@@ -3,6 +3,9 @@ const fs = require('fs');
 const logger = require('./utils/console')
   .normal('system');
 const Logger = require('./utils/console');
+const { postBuild, preBuild, postInstaller } = require('../../cli/src/utils/hooks');
+const setupDir = require('../../cli/src/utils/setupDir');
+const prettyDisplayFolders = require('../../cli/src/utils/prettyFolder');
 
 const cmds = require('./actions');
 
@@ -87,6 +90,15 @@ module.exports = class PluginManager {
         try {
           module = require(infos.path);
           module.Logger = Logger;
+
+          const Utils = {
+            postBuild,
+            preBuild,
+            postInstaller,
+            setupDir,
+            prettyDisplayFolders,
+          };
+          module.Utils = Utils;
         } catch (e) {
           logger.error(`Unable to load ${name}`);
         }
