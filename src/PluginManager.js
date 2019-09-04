@@ -1,4 +1,8 @@
-const logger = require('./utils/console').normal('system');
+const path = require('path');
+const fs = require('fs');
+const logger = require('./utils/console')
+  .normal('system');
+const Logger = require('./utils/console');
 
 const cmds = require('./actions');
 
@@ -9,7 +13,7 @@ module.exports = class PluginManager {
   }
 
   async run(name, args, config = {}) {
-    const command = this.commands.find(c => c.name === name);
+    const command = this.commands.find((c) => c.name === name);
     if (command) {
       if (typeof command.run === 'function') {
         await command.run(args, config);
@@ -65,25 +69,55 @@ module.exports = class PluginManager {
     return booleans;
   }
 
+  async getAvailablePlugins() {
+    const pluginsDirectory = path.join(process.cwd(), 'plugins');
+
+    if (!fs.existsSync(pluginsDirectory)) {
+      return [];
+    }
+
+    const pluginsIndex = path.join(pluginsDirectory, 'plugins.json');
+
+    const index = require(pluginsIndex);
+
+    const plugins = Object.entries(index)
+      .map(([name, infos]) => {
+        let module = null;
+
+        try {
+          module = require(infos.path);
+          module.Logger = Logger;
+        } catch (e) {
+          logger.error(`Unable to load ${name}`);
+        }
+
+        return module;
+      });
+    return plugins.filter(Boolean);
+  }
+
   /**
    * Load default getCommands
    * @returns {Promise<void>}
    */
-  async loadDefaultCommands(plugins) {
-    const arr = Object.keys(cmds).map(k => cmds[k]);
+  async loadCommands() {
+    const availableCommands = Object.keys(cmds)
+      .map((k) => cmds[k]);
+    const availablePlugins = await this.getAvailablePlugins();
 
-    for (let i = 0; i < arr.length; i += 1) {
-      const command = arr[i];
+    const allCommands = [...availableCommands, ...availablePlugins];
 
-      if (plugins.includes(command.name)) {
-        try {
-          if (typeof command.onLoad === 'function') {
-            await command.onLoad();
-          }
-          this.commands.push(command);
-        } catch (e) {
-          logger.error(e);
+
+    for (let i = 0; i < allCommands.length; i += 1) {
+      const command = allCommands[i];
+
+      try {
+        if (typeof command.onLoad === 'function') {
+          await command.onLoad();
         }
+        this.commands.push(command);
+      } catch (e) {
+        logger.error(e);
       }
     }
   }
@@ -100,7 +134,7 @@ module.exports = class PluginManager {
    * @param {String} id
    */
   get(id) {
-    return this.commands.find(x => x.id === id);
+    return this.commands.find((x) => x.id === id);
   }
 
   /**

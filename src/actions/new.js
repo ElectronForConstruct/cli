@@ -32,17 +32,18 @@ module.exports = {
       return;
     }
 
-    if (!args.name) {
+    if (!args.name && !args._[1]) {
       logger.error('A name is required in order to create a project');
       return;
     }
+    const name = args.name || args._[1];
 
     const fs = require('fs');
     const path = require('path');
     const shelljs = require('shelljs');
     const downloadPreview = require('../utils/downloadPreview');
 
-    const fullPath = path.join(process.cwd(), args.name);
+    const fullPath = path.join(process.cwd(), name);
     if (fs.existsSync(fullPath)) {
       logger.warn('This path already exist!');
       return;
@@ -62,6 +63,6 @@ module.exports = {
     }
 
     iaLogger.success('Bootstrapping done.');
-    logger.info(`You can now go to your project by using "cd ${args.name}"`);
+    logger.info(`You can now go to your project by using "cd ${name}"`);
   },
 };

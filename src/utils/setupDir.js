@@ -1,6 +1,6 @@
 const fs = require('fs');
-const tmp = require('tmp');
 const path = require('path');
+const os = require('os');
 // const AdmZip = require('adm-zip');
 const shelljs = require('shelljs');
 const extract = require('extract-zip');
@@ -28,36 +28,23 @@ module.exports = async (settings, zipFile = null, mode) => {
   const { electron } = settings;
 
   // create temporary directory
-  tmp.setGracefulCleanup();
-  const tmpDir = tmp.dirSync({
-    prefix: 'efc_',
-    unsafeCleanup: true,
-  });
-
-  if (fs.existsSync(path.join(process.cwd(), 'cache', 'yarn.lock'))) {
-    log.info('Using cache');
-    shelljs.cp(path.join(process.cwd(), 'cache', 'yarn.lock'), path.join(tmpDir.name, 'yarn.lock'));
-  }
+  const tmpDir = path.join(os.tmpdir(), `efc_${path.basename(process.cwd())}`);
+  shelljs.mkdir('-p', tmpDir);
 
   // copy local files from template to tmpdir
-  shelljs.cp(path.join(__dirname, '../', 'template', 'main.js'), tmpDir.name);
-  shelljs.cp(path.join(__dirname, '../', 'template', 'config.js'), tmpDir.name);
-  shelljs.cp(path.join(__dirname, '../', 'template', 'preload.js'), tmpDir.name);
-  shelljs.cp(path.join(__dirname, '../', 'template', 'package.json'), tmpDir.name);
+  shelljs.cp(path.join(__dirname, '../', 'template', '*'), tmpDir);
 
-  // shelljs.cp(path.join(process.cwd(), 'config.js'), path.join(tmpDir.name, 'user.js'));
-
-  fs.writeFileSync(path.join(tmpDir.name, 'user.js'), `module.exports = ${JSON.stringify(settings, null, '  ')}`, 'utf8');
+  fs.writeFileSync(path.join(tmpDir, 'config.js'), `module.exports=${JSON.stringify(settings)}`, 'utf8');
 
   if (zipFile) {
-    await extractZip(zipFile, tmpDir.name);
+    await extractZip(zipFile, tmpDir);
   } else {
     // copy app/* to root of temp dir
-    shelljs.cp('-R', path.join(process.cwd(), 'app', '*'), tmpDir.name);
+    shelljs.cp('-R', path.join(process.cwd(), 'app', '*'), tmpDir);
   }
 
   // editing package.json
-  const pkg = fs.readFileSync(path.join(tmpDir.name, 'package.json'), 'utf8');
+  const pkg = fs.readFileSync(path.join(tmpDir, 'package.json'), 'utf8');
   const pkgJson = JSON.parse(pkg);
 
   if (mode === 'build') {
@@ -68,22 +55,13 @@ module.exports = async (settings, zipFile = null, mode) => {
 
   pkgJson.name = settings.project.name;
   pkgJson.version = settings.project.version;
-  fs.writeFileSync(path.join(tmpDir.name, 'package.json'), JSON.stringify(pkgJson, null, '\t'), 'utf8');
+  fs.writeFileSync(path.join(tmpDir, 'package.json'), JSON.stringify(pkgJson), 'utf8');
 
   if (settings.dependencies && settings.dependencies.length > 0) {
-    await installPkg(settings.dependencies, tmpDir.name);
+    await installPkg(settings.dependencies, tmpDir);
   } else {
-    await installPkg([], tmpDir.name);
+    await installPkg([], tmpDir);
   }
 
-  // Cache ///
-  shelljs.mkdir('-p', path.join(process.cwd(), 'cache'));
-
-  if (fs.existsSync(path.join(tmpDir.name, 'yarn.lock'))) {
-    log.info('Caching files to speed up next builds');
-    shelljs.cp(path.join(tmpDir.name, 'yarn.lock'), path.join(process.cwd(), 'cache'));
-  }
-  // ~ Cache ///
-
-  return tmpDir.name;
+  return tmpDir;
 };

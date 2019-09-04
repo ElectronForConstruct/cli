@@ -1,17 +1,17 @@
-const log         = require('signale');
+const log = require('signale');
 const { version } = require('../../package');
 
 /**
  * @type EFCModule
  */
 module.exports = {
-  name       : 'help',
+  name: 'help',
   description: 'Display this help',
 
   run(args) {
     log.log(`Electron for Construct cli v${version}\n`);
-    if (args._.length === 1 && args._[ 0 ] !== 'help') {
-      const cmd = this.modules.find(c => c.name === args._[ 0 ]);
+    if (args._.length === 1 && args._[0] !== 'help') {
+      const cmd = this.modules.find((c) => c.name === args._[0]);
 
       if (cmd) {
         log.log(`Usage: efc ${cmd.name} [options]`);

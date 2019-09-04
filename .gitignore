@@ -9,3 +9,5 @@ yarn-error\.log
 package-lock\.json
 src/\.env
 dashboard
+
+.env

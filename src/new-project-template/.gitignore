@@ -3,3 +3,5 @@ dist
 greenworks
 *.exe
 package-lock.json
+plugins/*
+!plugins/plugins.json

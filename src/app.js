@@ -9,7 +9,7 @@ const PluginManager = require('./PluginManager');
 
 const logger = require('./utils/console').normal('system');
 
-const isDev = process.env.NODE_ENV === 'development' || false;
+const isDev = process.env.EFC_ENV === 'development';
 
 const pm = new PluginManager();
 
@@ -53,16 +53,11 @@ module.exports = async () => {
 
     // mix only plugins
     const userPlugins = [];
-    const defaultPlugins = [
-      'build', 'preview', 'debug', 'donate', 'new', 'report-issue', 'help',
-    ];
     if (userConfig.plugins) {
       userPlugins.push(...userConfig.plugins);
     }
-    userPlugins.push(...defaultPlugins);
 
-    await pm.loadDefaultCommands(userPlugins);
-    // if (isReady) await pm.loadCustomCommands();
+    await pm.loadCommands();
 
     let pluginsConfig = {};
     pm.getCommands().forEach((command) => {

@@ -11,13 +11,17 @@ module.exports = {
     const got = require('got');
     const pkg = require('../package.json');
 
-    const stack = error.stack.split('\n').map(x => x.trim());
+    const stack = error.stack.split('\n')
+      .map((x) => x.trim());
 
     stack.shift();
 
     const frames = [];
     stack.forEach((line) => {
       const match = new RegExp(/at (.*) \((.*):(\d*?):(\d*?)\)/gi).exec(line);
+      if (!match) {
+        return;
+      }
       frames.push({
         filename: match[2],
         lineno: match[3],
