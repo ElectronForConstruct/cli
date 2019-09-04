@@ -47,8 +47,6 @@ module.exports = {
   async run(args, settings) {
     const packager = require('electron-packager');
     const fs = require('fs');
-    const ws = require('windows-shortcuts');
-    const semver = require('semver');
     const setupDir = require('../utils/setupDir');
 
     log.info('Build started...');
