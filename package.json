@@ -1,6 +1,6 @@
 {
   "name": "@efc/cli",
-  "version": "4.0.1",
+  "version": "4.1.0",
   "description": "A command-line tool to manage your Construct Electron projects",
   "scripts": {
     "start": "node src/app.js",
