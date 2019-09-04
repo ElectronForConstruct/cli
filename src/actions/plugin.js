@@ -86,7 +86,9 @@ module.exports = {
           logger.info('No plugins installed');
           return;
         }
-        logger.info(plugins.join('\n'));
+        plugins.forEach((p) => {
+          logger.info(p);
+        });
         break;
       default:
         logger.error('Unknown command. Use "efc plugin -h" for help.');

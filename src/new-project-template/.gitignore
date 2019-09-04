@@ -5,3 +5,4 @@ greenworks
 package-lock.json
 plugins/*
 !plugins/plugins.json
+itch/*
