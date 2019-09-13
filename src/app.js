@@ -4,13 +4,13 @@ const mri = require('mri');
 const deepmerge = require('deepmerge');
 const rollbar = require('./ErrorReport');
 
-const USER_CONFIG = path.join(process.cwd(), 'config.js');
+const userConfigPath = path.join(process.cwd(), 'config.js');
 const PluginManager = require('./PluginManager');
 
 const logger = require('./utils/console')
   .normal('system');
 
-const isDev = process.env.EFC_ENV === 'development';
+const isDev = process.env.CYN_ENV === 'development';
 
 const pm = new PluginManager();
 
@@ -39,9 +39,9 @@ module.exports = async () => {
     config.profile = profile;
 
     let userConfig = {};
-    if (fs.existsSync(USER_CONFIG)) {
+    if (fs.existsSync(userConfigPath)) {
       config.isProject = true;
-      userConfig = require(USER_CONFIG);
+      userConfig = require(userConfigPath);
     }
 
     // todo support json
@@ -55,12 +55,6 @@ module.exports = async () => {
      * -----------------------------------------------------------------------
      */
 
-    // mix only plugins
-    const userPlugins = [];
-    if (userConfig.plugins) {
-      userPlugins.push(...userConfig.plugins);
-    }
-
     await pm.loadCommands();
 
     let pluginsConfig = {};
@@ -72,6 +66,7 @@ module.exports = async () => {
     config = deepmerge.all([config, pluginsConfig, userConfig]);
 
     pm.setModules();
+    pm.enhanceModules();
 
     /**
      * -----------------------------------------------------------------------
@@ -93,7 +88,7 @@ module.exports = async () => {
       await pm.run('help', args);
     } else {
       if (!config.isProject && args._[0] !== 'new') {
-        logger.error('Uh oh. This directory doesn\'t looks like an Electron project!');
+        logger.error('Uh oh. This directory doesn\'t looks like an Cyn project!');
         return;
       }
 

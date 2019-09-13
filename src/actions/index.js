@@ -6,6 +6,7 @@ const _new = require('./new');
 const preview = require('./preview');
 const reportAnIssue = require('./report-an-issue');
 const plugin = require('./plugin');
+const config = require('./config');
 
 module.exports = {
   build,
@@ -16,4 +17,5 @@ module.exports = {
   preview,
   reportAnIssue,
   plugin,
+  config,
 };

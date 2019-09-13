@@ -1,18 +1,7 @@
-const logger = require('../utils/console').normal('preview');
+const path = require('path');
+const setupDir = require('../utils/setupDir');
+const startPreview = require('../utils/startPreview');
 const { preBuild, postBuild } = require('../utils/hooks');
-
-const isValid = (url) => {
-  if (url === '') {
-    return false;
-  }
-  const regexC3 = /https:\/\/preview\.construct\.net\/#.{8}$/;
-  const regexC2 = /^https?:\/\/(?:localhost|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}):\d*\/?$/;
-  if (url.match(regexC2) || url.match(regexC3)) {
-    return true;
-  }
-  logger.log(`Invalid URL: ${url}`);
-  return false;
-};
 
 /**
  * @type EFCModule
@@ -21,11 +10,6 @@ module.exports = {
   name: 'preview',
   description: 'Preview your construct project',
   cli: [
-    {
-      name: 'url',
-      shortcut: 'u',
-      description: 'The URL to preview',
-    },
     {
       name: 'zip',
       shortcut: 'z',
@@ -40,52 +24,33 @@ module.exports = {
   ],
 
   async run(args, settings) {
-    const { prompt } = require('enquirer');
-    const path = require('path');
-    const setupDir = require('../utils/setupDir');
-    const startPreview = require('../utils/startPreview');
+    let url = args._[1];
 
-    if (args.zip && args.url) {
-      logger.error('Cannot specify both "zip" and "url" parameters');
+    if (args.zip && url) {
+      this.logger.error('Cannot specify both "zip" and "url" parameters');
       return;
     }
 
-    if (args.local && args.url) {
-      logger.error('Cannot specify both "local" and "url" parameters');
+    if (args.local && url) {
+      this.logger.error('Cannot specify both "local" and "url" parameters');
       return;
     }
 
     if (args.local && args.zip) {
-      logger.error('Cannot specify both "local" and "zip" parameters');
+      this.logger.error('Cannot specify both "local" and "zip" parameters');
       return;
     }
 
-    let previewUrl = '';
-
-    if (args.url) {
-      previewUrl = args.url;
-    } else if (args.local) {
-      previewUrl = '.';
-    } else {
-      logger.info('To preview your Construct project in Electron, you need a valid subscription.');
-      logger.info('\t• Construct 3: Go to the preview menu, hit "Remote preview" and paste the link that appear here');
-      logger.info('\t• Construct 2: Start a regular browser preview and paste the link here');
-      logger.info('\t• Leave blank to preview current folder\n');
-      const answers = await prompt([
-        {
-          type: 'input',
-          name: 'url',
-          message: 'Enter your Construct URL: ',
-          validate: isValid,
-        },
-      ]);
-      previewUrl = answers.url;
-    }
 
     let zipFile = null;
-    if (args.zip && path.extname(args.zip) === '.zip') {
-      zipFile = previewUrl;
-      previewUrl = '.';
+    if (args.local) {
+      url = '.';
+    } else if (args.zip && path.extname(args.zip) === '.zip') {
+      zipFile = args.zip;
+      url = '.';
+    } else {
+      this.logger.error('Missing url argument');
+      return;
     }
 
     const tempDir = await setupDir(settings, zipFile, 'preview');
@@ -93,6 +58,6 @@ module.exports = {
     await preBuild(this.modules, args, settings, tempDir);
     await postBuild(this.modules, args, settings, [tempDir]);
 
-    await startPreview(previewUrl, tempDir, settings.electron);
+    await startPreview(url, tempDir, settings.electron);
   },
 };

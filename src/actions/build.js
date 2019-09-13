@@ -1,5 +1,4 @@
 const path = require('path');
-const log = require('../utils/console').normal('build');
 const prettyDisplayFolders = require('../utils/prettyFolder');
 const deepCheck = require('../utils/deepValueCheck');
 const { postBuild, preBuild } = require('../utils/hooks');
@@ -14,13 +13,6 @@ module.exports = {
       name: 'zip',
       shortcut: 'z',
       description: 'A zip file to use instead of the "app" folder',
-    },
-    {
-      name: 'production',
-      boolean: true,
-      default: false,
-      shortcut: 'p',
-      description: 'Run in production mode',
     },
   ],
   description: 'Package your app for any OS',
@@ -49,10 +41,10 @@ module.exports = {
     const fs = require('fs');
     const setupDir = require('../utils/setupDir');
 
-    log.info('Build started...');
+    this.logger.info('Build started...');
 
     if (!settings.build) {
-      log.error('It looks like your "build" configuration is empty');
+      this.logger.error('It looks like your "build" configuration is empty');
       return;
     }
 
@@ -97,20 +89,20 @@ module.exports = {
     // ////////////////////////////
 
     try {
-      log.start('Packaging started');
+      this.logger.start('Packaging started');
       const appPaths = await packager(packOptions);
 
-      log.success('Files packed successfuly!');
+      this.logger.success('Files packed successfuly!');
       prettyDisplayFolders(appPaths);
     } catch (e) {
-      log.error('An error occured while packaging your apps');
-      log.error(e);
+      this.logger.error('An error occured while packaging your apps');
+      this.logger.error(e);
     }
 
-    const isDirectory = source => fs.lstatSync(source).isDirectory();
+    const isDirectory = (source) => fs.lstatSync(source).isDirectory();
     const folders = fs
       .readdirSync(packOptions.out)
-      .map(name => path.join(packOptions.out, name))
+      .map((name) => path.join(packOptions.out, name))
       .filter(isDirectory);
 
     await postBuild(this.modules, args, settings, folders);

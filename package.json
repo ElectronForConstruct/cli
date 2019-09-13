@@ -32,6 +32,7 @@
     "github-content": "^1.0.1",
     "github-trees": "^0.2.0",
     "got": "^9.6.0",
+    "launch-editor": "^2.2.1",
     "mri": "^1.1.4",
     "semver": "^6.0.0",
     "shelljs": "^0.8.3",

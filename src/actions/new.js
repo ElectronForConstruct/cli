@@ -1,7 +1,8 @@
-const Console = require('../utils/console');
+const fs = require('fs');
+const path = require('path');
+const shelljs = require('shelljs');
+const downloadPreview = require('../utils/downloadPreview');
 
-const logger = Console.normal('new');
-const iaLogger = Console.interactive('new');
 
 /**
  * @type EFCModule
@@ -9,60 +10,34 @@ const iaLogger = Console.interactive('new');
 module.exports = {
   name: 'new',
   description: 'Bootstrap a new project',
-  cli: [
-    {
-      name: 'name',
-      shortcut: 'n',
-    },
-    {
-      name: 'git',
-      boolean: true,
-      default: true,
-    },
-    {
-      name: 'preview',
-      boolean: true,
-      default: true,
-    },
-  ],
 
   async run(args, config) {
     if (config.isProject) {
-      logger.warn('This project is already configured');
+      this.logger.warn('This project is already configured');
       return;
     }
 
-    if (!args.name && !args._[1]) {
-      logger.error('A name is required in order to create a project');
+    if (!args._[1]) {
+      this.logger.error('A name is required in order to create a project');
       return;
     }
-    const name = args.name || args._[1];
-
-    const fs = require('fs');
-    const path = require('path');
-    const shelljs = require('shelljs');
-    const downloadPreview = require('../utils/downloadPreview');
+    const name = args._[1];
 
     const fullPath = path.join(process.cwd(), name);
     if (fs.existsSync(fullPath)) {
-      logger.warn('This path already exist!');
+      this.logger.warn('This path already exist!');
       return;
     }
 
-    iaLogger.info('Bootstrapping project...');
+    this.iLogger.info('Generating project, please wait...');
 
     shelljs.mkdir('-p', fullPath);
-    shelljs.cp('-R', path.join(__dirname, '../', 'new-project-template', '*'), fullPath);
+    const templatePath = path.join(__dirname, '../', 'new-project-template');
+    shelljs.cp('-R', [`${templatePath}/*`, `${templatePath}/.*`], fullPath);
 
-    if (args.git) {
-      shelljs.cp(path.join(__dirname, '../', 'new-project-template', '.gitignore'), fullPath);
-    }
+    await downloadPreview(fullPath);
 
-    if (args.preview) {
-      await downloadPreview(fullPath);
-    }
-
-    iaLogger.success('Bootstrapping done.');
-    logger.info(`You can now go to your project by using "cd ${name}"`);
+    this.iLogger.success('Bootstrapping done.');
+    this.logger.info(`You can now go to your project by using "cd ${name}"`);
   },
 };

@@ -4,11 +4,9 @@ const got = require('got');
 const fs = require('fs');
 const semver = require('semver');
 const enquirer = require('enquirer');
-const download = require('../utils/github-download-folder');
-const Console = require('../utils/console');
-const installPkg = require('../utils/installPackages');
 
-const logger = Console.normal('plugin');
+const download = require('../utils/github-download-folder');
+const installPkg = require('../utils/installPackages');
 
 /**
  * @type EFCModule
@@ -22,11 +20,11 @@ module.exports = {
     const plugin = args._[2];
 
     if (!command) {
-      logger.error('You must specify a command! Use "efc plugin -h" for more infos');
+      this.logger.error('You must specify a command! Use "efc plugin -h" for more infos');
       return;
     }
 
-    const pluginsDirectory = path.join(process.cwd(), 'plugins');
+    const pluginsDirectory = path.join(process.cwd(), '.cyn', 'plugins');
     const indexPath = path.join(pluginsDirectory, 'plugins.json');
 
     const indexExists = fs.existsSync(indexPath);
@@ -39,7 +37,7 @@ module.exports = {
     switch (command) {
       case 'add':
         // todo if no plugin specified, install everything from plugins.json
-        pluginsDirectoryTargetPlugin = path.join(process.cwd(), 'plugins', plugin);
+        pluginsDirectoryTargetPlugin = path.join(pluginsDirectory, plugin);
         const targetFolder = await download({
           owner: 'ElectronForConstruct',
           repo: 'plugins',
@@ -58,7 +56,7 @@ module.exports = {
         fs.writeFileSync(indexPath, JSON.stringify(index, null, '  '));
         break;
       case 'remove':
-        pluginsDirectoryTargetPlugin = path.join(process.cwd(), 'plugins', plugin);
+        pluginsDirectoryTargetPlugin = path.join(pluginsDirectory, plugin);
         const answers = await enquirer.prompt({
           type: 'confirm',
           name: 'choice',
@@ -83,15 +81,15 @@ module.exports = {
         });
         const plugins = await Promise.all(pPlugins);
         if (plugins.length === 0) {
-          logger.info('No plugins installed');
+          this.logger.info('No plugins installed');
           return;
         }
         plugins.forEach((p) => {
-          logger.info(p);
+          this.logger.info(p);
         });
         break;
       default:
-        logger.error('Unknown command. Use "efc plugin -h" for help.');
+        this.logger.error('Unknown command. Use "efc plugin -h" for help.');
         break;
     }
   },

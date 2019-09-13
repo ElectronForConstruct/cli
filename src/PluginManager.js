@@ -89,16 +89,6 @@ module.exports = class PluginManager {
 
         try {
           module = require(infos.path);
-          module.Logger = Logger;
-
-          const Utils = {
-            postBuild,
-            preBuild,
-            postInstaller,
-            setupDir,
-            prettyDisplayFolders,
-          };
-          module.Utils = Utils;
         } catch (e) {
           logger.error(`Unable to load ${name}`);
         }
@@ -132,6 +122,21 @@ module.exports = class PluginManager {
         logger.error(e);
       }
     }
+  }
+
+  enhanceModules() {
+    this.commands.forEach((module) => {
+      module.logger = Logger.normal(module.name);
+      module.iLogger = Logger.interactive(module.name);
+
+      module.Utils = {
+        postBuild,
+        preBuild,
+        postInstaller,
+        setupDir,
+        prettyDisplayFolders,
+      };
+    });
   }
 
   // eslint-disable-next-line

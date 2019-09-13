@@ -1,6 +1,9 @@
 const log = require('signale');
 const { version } = require('../../package');
 
+const longest = (arr) => arr.reduce((a, b) => (a.length > b.length ? a : b)).length;
+
+
 /**
  * @type EFCModule
  */
@@ -52,9 +55,15 @@ module.exports = {
     } else {
       log.log('Usage: efc <command> [options]');
       log.log();
+      log.log('Options:');
+      log.log('  -p, --profile <profileName>');
+      log.log();
       log.log('Commands:');
+
+      const commandsName = this.modules.map((module) => module.name);
+      const padLength = longest(commandsName);
       this.modules.forEach((cmd) => {
-        log.log(`  ${cmd.name.padEnd(20)} ${cmd.description}`);
+        log.log(`  ${cmd.name.padEnd(padLength + 1)} ${cmd.description}`);
       });
     }
   },
