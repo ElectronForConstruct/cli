@@ -6,6 +6,7 @@ const shelljs = require('shelljs');
 const extract = require('extract-zip');
 const installPkg = require('./installPackages');
 const Console = require('../utils/console');
+var changeCase = require('change-case')
 
 const log = Console.normal('build');
 
@@ -66,7 +67,8 @@ module.exports = async (settings, zipFile = null, mode) => {
     pkgJson.devDependencies.electron = electron;
   }
 
-  pkgJson.name = settings.project.name;
+  // todo rework this part
+  pkgJson.name = changeCase.paramCase(settings.project.name);
   pkgJson.version = settings.project.version;
   fs.writeFileSync(path.join(tmpDir.name, 'package.json'), JSON.stringify(pkgJson, null, '\t'), 'utf8');
 
