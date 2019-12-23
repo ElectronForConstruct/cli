@@ -1,3 +1,5 @@
+import mri = require("mri");
+
 /**
  * @typedef {Object} Settings
  * @property {string} electron
@@ -60,27 +62,33 @@
  * @property {Array<string>} ignore,
  * */
 
-/**
- * The complete EFC module definition.
- * @typedef {Object} EFCModule
- * @property {string} name - Indicates whether the Courage component is present.
- * @property {string} description
- * @property {Array<EFCModule>} modules
- * @type {Object} cli
- * @property {Object} config
- * @property {run} run
- * @property {onPreBuild} onPreBuild
- * @property {onPostBuild} onPostBuild
- */
+export interface CliObject {
+  name: string,
+  shortcut: string,
+  description: string,
+  default: boolean
+  boolean: boolean
+}
 
-/**
- * This is the complete definition of the run command.
- * @typedef {function} run
- * @async
- * @param {Object} args
- * @param {Object} settings
- * @return {boolean}
- */
+export interface EFCModule {
+  id?: string
+  
+  name: string
+  description: string
+
+  modules?: EFCModule[]
+  cli?: CliObject[]
+  config?: object
+  run: run
+  // onPreBuild: onPreBuild
+  // onPostBuild: onPostBuild
+
+  logger?: any
+  iLogger?: any
+  Utils?: any
+}
+
+export type run = (args: mri.Argv, settings: any) => Promise<void>|Promise<boolean>
 
 /**
  * This is the complete definition of the onPreBuild hook.

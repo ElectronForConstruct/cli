@@ -1,13 +1,10 @@
-const fs = require('fs');
-const path = require('path');
-const shelljs = require('shelljs');
-const downloadPreview = require('../utils/downloadPreview');
+import fs from 'fs';
+import path from 'path';
+import shelljs from 'shelljs';
+import downloadPreview from '../utils/downloadPreview';
+import { EFCModule } from '../doc'
 
-
-/**
- * @type EFCModule
- */
-module.exports = {
+const command: EFCModule = {
   name: 'new',
   description: 'Bootstrap a new project',
 
@@ -39,5 +36,7 @@ module.exports = {
 
     this.iLogger.success('Bootstrapping done.');
     this.logger.info(`You can now go to your project by using "cd ${name}"`);
-  },
-};
+  }
+}
+
+export default command

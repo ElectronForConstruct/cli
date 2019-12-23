@@ -1,18 +1,16 @@
-const fs = require('fs');
-const path = require('path');
-const mri = require('mri');
-const deepmerge = require('deepmerge');
-const rollbar = require('./ErrorReport');
+import fs from 'fs';
+import path from 'path';
+import mri from 'mri';
+import deepmerge from 'deepmerge';
+import rollbar from './ErrorReport';
 
 const userConfigPath = path.join(process.cwd(), 'config.js');
-const PluginManager = require('./PluginManager');
+import PluginManager from './PluginManager';
 
 const logger = require('./utils/console')
   .normal('system');
 
 const isDev = process.env.CYN_ENV === 'development';
-
-const pm = new PluginManager();
 
 const shouldReportError = !isDev;
 let errorReporting = false;
@@ -28,11 +26,11 @@ let args = mri(process.argv.slice(2), {
   boolean,
 });
 
-let config = {
+let config: any = {
   isProject: false,
 };
 
-module.exports = async () => {
+async function app() {
   try {
     const profile = args.profile || 'development';
 
@@ -55,18 +53,18 @@ module.exports = async () => {
      * -----------------------------------------------------------------------
      */
 
-    await pm.loadCommands();
+    await PluginManager.getInstance().loadCommands();
 
     let pluginsConfig = {};
-    pm.getCommands()
+    PluginManager.getInstance().getCommands()
       .forEach((command) => {
         pluginsConfig = deepmerge(pluginsConfig, { [command.name]: command.config || {} });
       });
 
     config = deepmerge.all([config, pluginsConfig, userConfig]);
 
-    pm.setModules();
-    pm.enhanceModules();
+    PluginManager.getInstance().setModules();
+    PluginManager.getInstance().enhanceModules();
 
     /**
      * -----------------------------------------------------------------------
@@ -74,9 +72,9 @@ module.exports = async () => {
 
     errorReporting = config.errorLogging;
 
-    const aliases = pm.getAliases();
-    const booleans = pm.getBooleans();
-    const defaults = pm.getDefaults();
+    const aliases = PluginManager.getInstance().getAliases();
+    const booleans = PluginManager.getInstance().getBooleans();
+    const defaults = PluginManager.getInstance().getDefaults();
 
     args = mri(process.argv.slice(2), {
       alias: deepmerge(alias, aliases),
@@ -85,14 +83,14 @@ module.exports = async () => {
     });
 
     if (args.help || args.h || args._[0] === 'help' || args._.length === 0) {
-      await pm.run('help', args);
+      await PluginManager.getInstance().run('help', args);
     } else {
       if (!config.isProject && args._[0] !== 'new') {
         logger.error('Uh oh. This directory doesn\'t looks like an Cyn project!');
         return;
       }
 
-      await pm.run(args._[0], args, config);
+      await PluginManager.getInstance().run(args._[0], args, config);
     }
   } catch (e) {
     logger.log('There was an error performing the current task.');
@@ -103,4 +101,6 @@ module.exports = async () => {
 
     logger.fatal(e);
   }
-};
+}
+
+export default app

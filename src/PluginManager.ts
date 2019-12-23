@@ -1,21 +1,33 @@
-const path = require('path');
-const fs = require('fs');
+import * as path from 'path';
+import * as fs from 'fs';
 const logger = require('./utils/console')
   .normal('system');
-const Logger = require('./utils/console');
-const { postBuild, preBuild, postInstaller } = require('../../cli/src/utils/hooks');
-const setupDir = require('../../cli/src/utils/setupDir');
-const prettyDisplayFolders = require('../../cli/src/utils/prettyFolder');
+import Logger from './utils/console';
+import { postBuild, preBuild, postInstaller } from '../../cli/src/utils/hooks';
+import setupDir from '../../cli/src/utils/setupDir';
+import prettyDisplayFolders from '../../cli/src/utils/prettyFolder';
 
-const cmds = require('./actions');
+import { EFCModule } from './doc'
+import mri from 'mri';
 
-module.exports = class PluginManager {
-  constructor() {
-    /** @type {Array<EFCModule>} */
-    this.commands = [];
+import * as cmds from './actions';
+
+export default class PluginManager {
+  private static instance: PluginManager;
+
+  private constructor() {
   }
 
-  async run(name, args, config = {}) {
+  static getInstance() {
+    if (!PluginManager.instance) {
+      PluginManager.instance = new PluginManager();
+    }
+    return PluginManager.instance;
+  }
+
+  commands: EFCModule[] = [];
+
+  async run(name: string, args: mri.Argv, config = {}) {
     const command = this.commands.find((c) => c.name === name);
     if (command) {
       if (typeof command.run === 'function') {
@@ -29,7 +41,7 @@ module.exports = class PluginManager {
   }
 
   getAliases() {
-    const aliases = {};
+    const aliases: { [index: string]: any } = {};
     this.commands.forEach((command) => {
       if (!command.cli) {
         return;
@@ -43,7 +55,7 @@ module.exports = class PluginManager {
   }
 
   getDefaults() {
-    const defaults = {};
+    const defaults: { [index: string]: any } = {};
     this.commands.forEach((command) => {
       if (!command.cli) {
         return;
@@ -57,7 +69,7 @@ module.exports = class PluginManager {
   }
 
   getBooleans() {
-    const booleans = [];
+    const booleans: string[] = [];
     this.commands.forEach((command) => {
       if (!command.cli) {
         return;
@@ -84,7 +96,7 @@ module.exports = class PluginManager {
     const index = require(pluginsIndex);
 
     const plugins = Object.entries(index)
-      .map(([name, infos]) => {
+      .map(([name, infos]: [any, any]) => {
         let module = null;
 
         try {
@@ -98,12 +110,9 @@ module.exports = class PluginManager {
     return plugins.filter(Boolean);
   }
 
-  /**
-   * Load default getCommands
-   * @returns {Promise<void>}
-   */
   async loadCommands() {
     const availableCommands = Object.keys(cmds)
+      // @ts-ignore
       .map((k) => cmds[k]);
     const availablePlugins = await this.getAvailablePlugins();
 
@@ -139,26 +148,15 @@ module.exports = class PluginManager {
     });
   }
 
-  // eslint-disable-next-line
   setModules() {
-    // eslint-disable-next-line
     this.commands.map(m => m.modules = this.commands);
   }
 
-  /**
-   *
-   * @returns {EFCModule} command
-   * @param {String} id
-   */
-  get(id) {
+  get(id: string): EFCModule | undefined {
     return this.commands.find((x) => x.id === id);
   }
 
-  /**
-   * Return a list of all available getCommands
-   * @returns {Array<EFCModule>}
-   */
-  getCommands() {
+  getCommands(): EFCModule[] {
     return this.commands;
   }
 };
