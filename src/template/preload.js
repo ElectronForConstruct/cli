@@ -67,7 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // enable devtool
   Promise.resolve()
-    .then(() => _appendScript('https://unpkg.com/vue'))
     .then(() => {
       Vue.config.productionTip = false;
       Vue.config.devtools = false;
@@ -78,7 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .then(() => {
       const dt = document.createElement('construct-devtool');
-      // dt.style.position = 'fixed';
       document.body.append(dt);
       console.log('adding devtool');
     });

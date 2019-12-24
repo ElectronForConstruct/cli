@@ -3,12 +3,11 @@ import path from 'path';
 import mri from 'mri';
 import deepmerge from 'deepmerge';
 import rollbar from './ErrorReport';
+import PluginManager from './PluginManager';
+import { createNormalLogger } from './utils/console';
 
 const userConfigPath = path.join(process.cwd(), 'config.js');
-import PluginManager from './PluginManager';
-
-const logger = require('./utils/console')
-  .normal('system');
+const logger = createNormalLogger('system');
 
 const isDev = process.env.CYN_ENV === 'development';
 
@@ -45,7 +44,7 @@ async function app() {
     // todo support json
     const profileConfigPath = path.join(process.cwd(), `config.${profile}.js`);
     if (fs.existsSync(profileConfigPath)) {
-      const profileConfig = require(profileConfigPath);
+      const profileConfig = await import(profileConfigPath);
       userConfig = deepmerge(userConfig, profileConfig);
     }
 
@@ -103,4 +102,4 @@ async function app() {
   }
 }
 
-export default app
+export default app;

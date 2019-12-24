@@ -1,14 +1,15 @@
-import * as path from 'path'
+import * as path from 'path';
+
+import updateNotifier from 'update-notifier';
+import { createNormalLogger } from './utils/console';
+import pkg from '../package.json';
+import app from './app';
 
 require('dotenv').config({
   path: path.resolve(__dirname, '.env'),
 });
 
-// @ts-ignore
-import updateNotifier from 'update-notifier';
-const logger = require('./utils/console').normal('system');
-import pkg from '../package.json';
-import app from './app';
+const logger = createNormalLogger('system');
 
 updateNotifier({ pkg }).notify({
   defer: true,
@@ -21,4 +22,4 @@ if (isDev) {
   logger.info('Running in development');
 }
 
-export default app
+export default app;

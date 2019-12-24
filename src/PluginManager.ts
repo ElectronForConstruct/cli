@@ -1,47 +1,44 @@
 import * as path from 'path';
 import * as fs from 'fs';
-const logger = require('./utils/console')
-  .normal('system');
-import Logger from './utils/console';
-import { postBuild, preBuild, postInstaller } from '../../cli/src/utils/hooks';
-import setupDir from '../../cli/src/utils/setupDir';
-import prettyDisplayFolders from '../../cli/src/utils/prettyFolder';
-
-import { EFCModule } from './doc'
 import mri from 'mri';
+import * as Logger from './utils/console';
+import { postBuild, preBuild, postInstaller } from './utils/hooks';
+import setupDir from './utils/setupDir';
+import prettyDisplayFolders from './utils/prettyFolder';
+
+import { CynModule, Settings } from './definitions';
 
 import * as cmds from './actions';
+
+const logger = Logger.createNormalLogger('system');
 
 export default class PluginManager {
   private static instance: PluginManager;
 
-  private constructor() {
-  }
-
-  static getInstance() {
+  static getInstance(): PluginManager {
     if (!PluginManager.instance) {
       PluginManager.instance = new PluginManager();
     }
     return PluginManager.instance;
   }
 
-  commands: EFCModule[] = [];
+  commands: CynModule[] = [];
 
-  async run(name: string, args: mri.Argv, config = {}) {
+  run(name: string, args: mri.Argv, config: Settings = {}): Promise<boolean> | boolean {
     const command = this.commands.find((c) => c.name === name);
     if (command) {
       if (typeof command.run === 'function') {
-        await command.run(args, config);
-      } else {
-        logger.info('No "run" command defined in this plugin');
+        return command.run(args, config);
       }
+      logger.info('No "run" command defined in this plugin');
     } else {
       logger.error(`Command ${name} not found`);
     }
+    return false;
   }
 
-  getAliases() {
-    const aliases: { [index: string]: any } = {};
+  getAliases(): object {
+    const aliases: { [index: string]: string | undefined } = {};
     this.commands.forEach((command) => {
       if (!command.cli) {
         return;
@@ -54,8 +51,8 @@ export default class PluginManager {
     return aliases;
   }
 
-  getDefaults() {
-    const defaults: { [index: string]: any } = {};
+  getDefaults(): object {
+    const defaults: { [index: string]: boolean | undefined } = {};
     this.commands.forEach((command) => {
       if (!command.cli) {
         return;
@@ -68,7 +65,7 @@ export default class PluginManager {
     return defaults;
   }
 
-  getBooleans() {
+  getBooleans(): string[] {
     const booleans: string[] = [];
     this.commands.forEach((command) => {
       if (!command.cli) {
@@ -84,7 +81,7 @@ export default class PluginManager {
     return booleans;
   }
 
-  async getAvailablePlugins() {
+  async getAvailablePlugins(): Promise<CynModule[]> {
     const pluginsDirectory = path.join(process.cwd(), 'plugins');
 
     if (!fs.existsSync(pluginsDirectory)) {
@@ -93,11 +90,15 @@ export default class PluginManager {
 
     const pluginsIndex = path.join(pluginsDirectory, 'plugins.json');
 
-    const index = require(pluginsIndex);
+    console.log('pluginsIndex', pluginsIndex);
+
+    const index = await import(pluginsIndex);
+
+    console.log('index', index);
 
     const plugins = Object.entries(index)
-      .map(([name, infos]: [any, any]) => {
-        let module = null;
+      .map(([name, infos]: [string, any]) => {
+        let module;
 
         try {
           module = require(infos.path);
@@ -112,6 +113,7 @@ export default class PluginManager {
 
   async loadCommands() {
     const availableCommands = Object.keys(cmds)
+      // eslint-disable-next-line
       // @ts-ignore
       .map((k) => cmds[k]);
     const availablePlugins = await this.getAvailablePlugins();
@@ -133,10 +135,10 @@ export default class PluginManager {
     }
   }
 
-  enhanceModules() {
+  enhanceModules(): void {
     this.commands.forEach((module) => {
-      module.logger = Logger.normal(module.name);
-      module.iLogger = Logger.interactive(module.name);
+      module.logger = Logger.createNormalLogger(module.name);
+      module.iLogger = Logger.createInteractiveLogger(module.name);
 
       module.Utils = {
         postBuild,
@@ -148,15 +150,17 @@ export default class PluginManager {
     });
   }
 
-  setModules() {
-    this.commands.map(m => m.modules = this.commands);
+  setModules(): void {
+    this.commands.forEach((m) => {
+      m.modules = this.commands;
+    });
   }
 
-  get(id: string): EFCModule | undefined {
+  get(id: string): CynModule | undefined {
     return this.commands.find((x) => x.id === id);
   }
 
-  getCommands(): EFCModule[] {
+  getCommands(): CynModule[] {
     return this.commands;
   }
-};
+}

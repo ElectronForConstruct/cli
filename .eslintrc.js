@@ -1,14 +1,31 @@
 module.exports = {
-  'extends': [
-    'airbnb',
+  'extends' : [
+    'airbnb-base',
+    'plugin:@typescript-eslint/recommended',
   ],
-  'globals': {
+  plugins   : [ 'import' ],
+  'parser'  : '@typescript-eslint/parser',
+  'globals' : {
     'fetch'   : false,
     'document': false,
     'window'  : false,
     'Vue'     : false,
   },
-  'rules'  : {
+  'env'     : {
+    'node': true,
+  },
+  'settings': {
+    'import/parsers' : {
+      '@typescript-eslint/parser': [ '.ts', '.tsx' ],
+    },
+    'import/resolver': {
+      'typescript': {
+        'alwaysTryTypes': true,
+      },
+    },
+  },
+  'rules'   : {
+    'import/no-unresolved'     : 'error',
     'no-underscore-dangle'     : 0,
     'class-methods-use-this'   : 0,
     'import/no-dynamic-require': 0,
@@ -19,5 +36,17 @@ module.exports = {
     'no-param-reassign'        : 0,
     'no-console'               : 0,
     'no-case-declarations'     : 0,
+    'object-curly-spacing'     : [ 'error', 'always' ],
+    'import/extensions'        : [
+      'error',
+      'ignorePackages',
+      {
+        'js' : 'never',
+        'mjs': 'never',
+        'jsx': 'never',
+        'ts' : 'never',
+        'tsx': 'never',
+      },
+    ],
   },
 };
