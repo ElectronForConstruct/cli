@@ -1,7 +1,6 @@
 import mri from 'mri';
 import { Options as BuildSettings } from 'electron-packager';
 
-
 /**
  *
  * Installer
@@ -101,10 +100,10 @@ export interface CynModule {
   Utils?: any;
 }
 
-export type run = (args: mri.Argv, settings: Settings) => Promise<boolean>
+export type run = (args: mri.Argv, settings: Settings) => Promise<boolean> | boolean
 export type onPreBuild = (args: mri.Argv, settings: any, tmpdir: string)
-  => Promise<void> | Promise<boolean>
+  => Promise<boolean>
 export type onPostBuild = (args: mri.Argv, settings: any, out: string)
-  => Promise<void> | Promise<boolean>
+  => Promise<boolean>
 export type onPostInstaller = (args: mri.Argv, settings: any, folder: string)
-  => Promise<void> | Promise<boolean>
+  => Promise<boolean>

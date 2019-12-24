@@ -1,40 +1,50 @@
-const path = require('path');
-const shelljs = require('shelljs');
-const got = require('got');
-const fs = require('fs');
-const semver = require('semver');
-const enquirer = require('enquirer');
+import * as path from 'path';
+import * as fs from 'fs';
+import shelljs from 'shelljs';
+import got from 'got';
+import semver from 'semver';
+import enquirer from 'enquirer';
+import download from '../utils/github-download-folder';
+import installPkg from '../utils/installPackages';
+import { CynModule } from '../definitions';
 
-const download = require('../utils/github-download-folder');
-const installPkg = require('../utils/installPackages');
+async function getRemoteVersion(plugin: string, branch: string): Promise<string> {
+  const { body } = await got(
+    `https://raw.githubusercontent.com/ElectronForConstruct/plugins/${branch || 'master'}/${plugin}/package.json`,
+  ).json();
+  return body.version;
+}
 
-/**
- * @type EFCModule
- */
-module.exports = {
+const command: CynModule = {
   name: 'plugin',
   description: 'Manage project plugins',
 
   async run(args) {
-    const command = args._[1];
+    const subcommand = args._[1];
     const plugin = args._[2];
 
-    if (!command) {
+    if (!subcommand) {
       this.logger.error('You must specify a command! Use "efc plugin -h" for more infos');
-      return;
+      return false;
     }
 
     const pluginsDirectory = path.join(process.cwd(), '.cyn', 'plugins');
     const indexPath = path.join(pluginsDirectory, 'plugins.json');
 
     const indexExists = fs.existsSync(indexPath);
-    let index = {};
+    let index: {
+      [index: string]: {
+        version: string;
+        path: string;
+        branch: string;
+      };
+    } = {};
     if (indexExists) {
       index = require(indexPath);
     }
 
     let pluginsDirectoryTargetPlugin = '';
-    switch (command) {
+    switch (subcommand) {
       case 'add':
         // todo if no plugin specified, install everything from plugins.json
         pluginsDirectoryTargetPlugin = path.join(pluginsDirectory, plugin);
@@ -47,17 +57,20 @@ module.exports = {
         await installPkg([], targetFolder);
 
         const targetPackagePath = path.join(targetFolder, 'package.json');
-        const targetPackage = require(targetPackagePath);
+        const targetPackage = await import(targetPackagePath);
         index[plugin] = {
           version: targetPackage.version,
           path: targetFolder,
+          branch: 'master',
         };
 
         fs.writeFileSync(indexPath, JSON.stringify(index, null, '  '));
         break;
       case 'remove':
         pluginsDirectoryTargetPlugin = path.join(pluginsDirectory, plugin);
-        const answers = await enquirer.prompt({
+        const answers: {
+          choice: string;
+        } = await enquirer.prompt({
           type: 'confirm',
           name: 'choice',
           initial: false,
@@ -75,14 +88,14 @@ module.exports = {
       case 'list':
         const pluginsObject = Object.entries(index);
         const pPlugins = pluginsObject.map(async ([key, value]) => {
-          const remoteVersion = await this.getRemoteVersion(key, value.branch);
+          const remoteVersion = await getRemoteVersion(key, value.branch);
           const canUpdate = semver.gt(remoteVersion, value.version);
           return `- ${key}@${value.version}${canUpdate ? ` -> ${remoteVersion}` : ''}`;
         });
         const plugins = await Promise.all(pPlugins);
         if (plugins.length === 0) {
           this.logger.info('No plugins installed');
-          return;
+          return false;
         }
         plugins.forEach((p) => {
           this.logger.info(p);
@@ -92,9 +105,7 @@ module.exports = {
         this.logger.error('Unknown command. Use "efc plugin -h" for help.');
         break;
     }
-  },
-  async getRemoteVersion(plugin, branch) {
-    const { body } = await got(`https://raw.githubusercontent.com/ElectronForConstruct/plugins/${branch || 'master'}/${plugin}/package.json`, { json: true });
-    return body.version;
+    return true;
   },
 };
+export default command;

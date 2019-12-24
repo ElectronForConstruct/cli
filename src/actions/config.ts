@@ -1,11 +1,12 @@
-const openInEditor = require('launch-editor');
-const path = require('path');
-const fs = require('fs');
+// eslint-disable-next-line
+// @ts-ignore
+import openInEditor from 'launch-editor';
 
-/**
- * @type EFCModule
- */
-module.exports = {
+import * as path from 'path';
+import * as fs from 'fs';
+import { CynModule } from '../definitions';
+
+const command: CynModule = {
   name: 'config',
   description: 'Open a link where you can donate to support this app',
   cli: [
@@ -21,7 +22,7 @@ module.exports = {
 
     if (!fs.existsSync(configPath)) {
       this.logger.error(`It seems that "${path.basename(configPath)}" doesn't exist!`);
-      return;
+      return false;
     }
 
     this.logger.log(`Opening ${configPath}`);
@@ -30,6 +31,10 @@ module.exports = {
       openInEditor(configPath);
     } catch (e) {
       this.logger.error(e);
+      return false;
     }
+
+    return true;
   },
 };
+export default command;

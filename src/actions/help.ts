@@ -1,20 +1,19 @@
-const log = require('signale');
-const { version } = require('../../package');
+import log from 'signale';
+import { version } from '../../package.json';
+import { CynModule } from '../definitions';
 
-const longest = (arr) => arr.reduce((a, b) => (a.length > b.length ? a : b)).length;
+const longest = (arr: string[]): number => arr.reduce(
+  (a, b) => (a.length > b.length ? a : b),
+).length;
 
-
-/**
- * @type EFCModule
- */
-module.exports = {
+const command: CynModule = {
   name: 'help',
   description: 'Display this help',
 
   run(args) {
     log.log(`Electron for Construct cli v${version}\n`);
     if (args._.length === 1 && args._[0] !== 'help') {
-      const cmd = this.modules.find((c) => c.name === args._[0]);
+      const cmd = this.modules?.find((c) => c.name === args._[0]);
 
       if (cmd) {
         log.log(`Usage: efc ${cmd.name} [options]`);
@@ -60,11 +59,19 @@ module.exports = {
       log.log();
       log.log('Commands:');
 
-      const commandsName = this.modules.map((module) => module.name);
-      const padLength = longest(commandsName);
-      this.modules.forEach((cmd) => {
+      const commandsName = this.modules?.map((module) => module.name);
+      let padLength: number;
+      if (commandsName && commandsName.length > 0) {
+        padLength = longest(commandsName);
+      } else {
+        padLength = 0;
+      }
+      // eslint-disable-next-line
+      this.modules?.forEach((cmd) => {
         log.log(`  ${cmd.name.padEnd(padLength + 1)} ${cmd.description}`);
       });
     }
+    return true;
   },
 };
+export default command;

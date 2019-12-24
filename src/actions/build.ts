@@ -1,9 +1,12 @@
 import * as path from 'path';
+import packager from 'electron-packager';
+import * as fs from 'fs';
 import prettyDisplayFolders from '../utils/prettyFolder';
-import deepCheck from '../utils/deepValueCheck';
 import { postBuild, preBuild } from '../utils/hooks';
+import { CynModule } from '../definitions';
+import setupDir from '../utils/setupDir';
 
-export default {
+const command: CynModule = {
   name: 'build',
   cli: [
     {
@@ -28,21 +31,12 @@ export default {
     ],
     win32metadata: {},
   },
-  /**
-   * @param args
-   * @param {Settings} settings
-   * @return {Promise<void>}
-   */
   async run(args, settings) {
-    const packager = require('electron-packager');
-    const fs = require('fs');
-    const setupDir = require('../utils/setupDir');
-
     this.logger.info('Build started...');
 
     if (!settings.build) {
       this.logger.error('It looks like your "build" configuration is empty');
-      return;
+      return false;
     }
 
     const packOptions = settings.build;
@@ -51,7 +45,7 @@ export default {
     }
 
     // resolve out directory and delete it
-    if (!path.isAbsolute(packOptions.out)) {
+    if (packOptions.out && !path.isAbsolute(packOptions.out)) {
       packOptions.out = path.join(process.cwd(), packOptions.out);
     }
 
@@ -62,23 +56,28 @@ export default {
     // set src dir to tmpdir
     packOptions.dir = tempDir;
 
-    await preBuild(this.modules, args, settings, tempDir);
+    if (this.modules && this.modules.length > 0) {
+      await preBuild(this.modules, args, settings, tempDir);
+    }
 
     // Compute datas //////////////
 
     if (
       !packOptions.appVersion
-      && deepCheck(settings, 'project.version')
+      && (settings && settings.project && settings.project.version)
     ) {
       packOptions.appVersion = settings.project.version;
     }
 
-    if (!packOptions.name && deepCheck(settings, 'project.name')) {
+    if (!packOptions.name && (settings && settings.project && settings.project.name)) {
       packOptions.name = settings.project.name;
     }
 
-    if (!deepCheck(packOptions, 'win32metadata.CompanyName') && deepCheck(settings, 'project.author')) {
-      packOptions.win32metadata.CompanyName = settings.project.author;
+    if (
+      packOptions.win32metadata && packOptions.win32metadata.CompanyName
+      && settings.project && settings.project.author
+    ) {
+      packOptions.win32metadata.CompanyName = settings.project?.author;
     }
 
     packOptions.quiet = true;
@@ -90,18 +89,30 @@ export default {
       const appPaths = await packager(packOptions);
 
       this.logger.success('Files packed successfuly!');
-      prettyDisplayFolders(appPaths);
+      if (Array.isArray(appPaths)) {
+        prettyDisplayFolders(appPaths);
+      } else {
+        prettyDisplayFolders([appPaths]);
+      }
     } catch (e) {
       this.logger.error('An error occured while packaging your apps');
       this.logger.error(e);
     }
 
-    const isDirectory = (source) => fs.lstatSync(source).isDirectory();
-    const folders = fs
-      .readdirSync(packOptions.out)
-      .map((name) => path.join(packOptions.out, name))
-      .filter(isDirectory);
+    const isDirectory = (source: string): boolean => fs.lstatSync(source).isDirectory();
 
-    await postBuild(this.modules, args, settings, folders);
+    if (packOptions.out !== undefined) {
+      const folders = fs
+        .readdirSync(packOptions.out)
+        .map((name) => path.join(packOptions.out || '', name))
+        .filter(isDirectory);
+
+      if (this.modules && this.modules.length > 0) {
+        await postBuild(this.modules, args, settings, folders);
+      }
+    }
+    return true;
   },
 };
+
+export default command;
