@@ -6,19 +6,19 @@ const show = (options: SignaleOptions) => {
     displayLabel: false,
   });
   return log;
-}
+};
 
 const createNormalLogger = (scope: string) => show({
   scope,
-})
+});
 
 const createInteractiveLogger = (scope: string) => show({
   scope,
   interactive: true,
-})
+});
 
 export {
   show,
   createNormalLogger,
-  createInteractiveLogger
+  createInteractiveLogger,
 };

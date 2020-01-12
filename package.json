@@ -1,11 +1,13 @@
 {
-  "name": "@efc/cli",
+  "name": "@cyn/cli",
   "version": "4.1.0",
   "description": "A command-line tool to manage your Construct Electron projects",
   "scripts": {
-    "start": "ts-node src/app.js",
+    "build": "tsc",
+    "watch": "tsc -w",
     "release": "np --yolo --any-branch --no-yarn",
     "test": "echo 1",
+    "lint": "eslint src",
     "postpublish": "git log v2.3.7..master --pretty=format:\"- %Cred%h%Creset %s%n%b%n\" --abbrev-commit"
   },
   "repository": {
@@ -14,51 +16,59 @@
   },
   "preferGlobal": true,
   "bin": {
-    "cyn": "./bin/run"
+    "cyn": "./bin/run.js"
   },
   "engines": {
     "node": ">=9"
   },
+  "files": [
+    "dist"
+  ],
   "author": "Armaldio <armaldio@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@types/electron-packager": "^14.0.0",
-    "@typescript-eslint/eslint-plugin": "^2.13.0",
-    "@typescript-eslint/parser": "^2.13.0",
+    "convict": "^5.2.0",
     "deepmerge": "^4.0.0",
     "dotenv": "^8.1.0",
     "dumper.js": "^1.3.1",
     "electron-packager": "^14.0.4",
-    "enquirer": "^2.3.0",
-    "eslint-config-airbnb-base": "^14.0.0",
     "extract-zip": "^1.6.7",
+    "fs-extra": "^8.1.0",
     "github-content": "^1.0.1",
     "github-trees": "^0.2.0",
-    "got": "^10.2.0",
+    "got": "^10.2.1",
     "launch-editor": "^2.2.1",
     "mri": "^1.1.4",
+    "prompt-confirm": "^2.0.4",
     "semver": "^7.1.1",
-    "shelljs": "^0.8.3",
     "signale": "^1.4.0",
-    "terser": "^4.1.4",
+    "source-map-support": "^0.5.16",
+    "terser": "^4.6.2",
     "tmp": "^0.1.0",
-    "ts-node": "^8.5.4",
     "update-notifier": "^4.0.0",
-    "windows-shortcuts": "^0.1.6"
+    "yarn": "^1.21.1"
   },
   "devDependencies": {
+    "@types/convict": "^4.2.1",
+    "@types/electron-packager": "^14.0.0",
     "@types/extract-zip": "^1.6.2",
+    "@types/fs-extra": "^8.0.1",
     "@types/mri": "^1.1.0",
     "@types/semver": "^6.2.0",
     "@types/shelljs": "^0.8.6",
     "@types/signale": "^1.2.1",
     "@types/update-notifier": "^2.5.0",
+    "@typescript-eslint/eslint-plugin": "^2.15.0",
+    "@typescript-eslint/parser": "^2.15.0",
     "babel-eslint": "^10.0.1",
     "cross-env": "^6.0.3",
     "eslint": "^6.1.0",
+    "eslint-config-airbnb-base": "^14.0.0",
     "eslint-import-resolver-typescript": "^2.0.0",
     "eslint-plugin-import": "^2.19.1",
     "np": "^5.0.1",
+    "ts-node": "^8.6.0",
+    "tsconfig-paths": "^3.9.0",
     "typescript": "^3.7.3"
   }
 }

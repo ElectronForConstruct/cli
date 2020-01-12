@@ -1,9 +1,9 @@
-import fs from 'fs';
+import fs from 'fs-extra';
 import path from 'path';
 import mri from 'mri';
 import deepmerge from 'deepmerge';
-import rollbar from './ErrorReport';
-import PluginManager from './PluginManager';
+import rollbar from './utils/ErrorReport';
+import PluginManager from './classes/pluginManager';
 import { createNormalLogger } from './utils/console';
 
 const userConfigPath = path.join(process.cwd(), 'config.js');
@@ -25,25 +25,34 @@ let args = mri(process.argv.slice(2), {
   boolean,
 });
 
-let config: any = {
+interface Config {
+  isProject: boolean;
+  profile?: string;
+  errorLogging?: boolean;
+}
+
+let config: Config = {
   isProject: false,
 };
 
-async function app() {
+async function app(): Promise<void> {
   try {
     const profile = args.profile || 'development';
 
     config.profile = profile;
 
     let userConfig = {};
-    if (fs.existsSync(userConfigPath)) {
+    const userConfigPathExist = await fs.pathExists(userConfigPath);
+    if (userConfigPathExist) {
       config.isProject = true;
       userConfig = require(userConfigPath);
     }
 
     // todo support json
+    // https://github.com/davidtheclark/cosmiconfig#cosmiconfigoptions
     const profileConfigPath = path.join(process.cwd(), `config.${profile}.js`);
-    if (fs.existsSync(profileConfigPath)) {
+    const profileConfigPathExist = await fs.pathExists(profileConfigPath);
+    if (profileConfigPathExist) {
       const profileConfig = await import(profileConfigPath);
       userConfig = deepmerge(userConfig, profileConfig);
     }
@@ -60,7 +69,7 @@ async function app() {
         pluginsConfig = deepmerge(pluginsConfig, { [command.name]: command.config || {} });
       });
 
-    config = deepmerge.all([config, pluginsConfig, userConfig]);
+    config = deepmerge.all([config, pluginsConfig, userConfig]) as Config;
 
     PluginManager.getInstance().setModules();
     PluginManager.getInstance().enhanceModules();
@@ -69,7 +78,7 @@ async function app() {
      * -----------------------------------------------------------------------
      */
 
-    errorReporting = config.errorLogging;
+    errorReporting = config.errorLogging || false;
 
     const aliases = PluginManager.getInstance().getAliases();
     const booleans = PluginManager.getInstance().getBooleans();

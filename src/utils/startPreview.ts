@@ -1,7 +1,7 @@
 import { exec } from 'child_process';
 import * as path from 'path';
 import os from 'os';
-import { createNormalLogger } from '../utils/console'
+import { createNormalLogger } from './console'
 const logger = createNormalLogger('system');
 
 export default function (url: string, tmpDir: string) {

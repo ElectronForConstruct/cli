@@ -4,33 +4,20 @@
       "./node_modules/@types",
       "./src/@types"
     ],
+    "esModuleInterop": true,
     "resolveJsonModule": true,
     "allowJs": true,
     "module": "CommonJS",
-    "esModuleInterop": true,
-    "target": "es2017",
-    "noImplicitAny": true,
+    "target": "ES5",
     "strict": true,
-    "noImplicitThis": true,
-    "forceConsistentCasingInFileNames": true,
-    "strictNullChecks": true,
     "moduleResolution": "node",
     "sourceMap": true,
     "importHelpers": true,
-    "strictPropertyInitialization": true,
-    "strictBindCallApply": true,
-    "strictFunctionTypes": true,
     "removeComments": true,
     "outDir": "dist",
-    "baseUrl": ".",
-    "paths": {
-      "*": [
-        "node_modules/*",
-        "src/definitions/*"
-      ]
-    }
+    "rootDir": "src"
   },
   "include": [
-    "./src/**/*"
+    "src"
   ]
 }

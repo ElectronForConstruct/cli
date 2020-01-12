@@ -22,7 +22,7 @@ interface ReleaseResultBody {
 const logger = createNormalLogger('system');
 
 export default async function (fullPath: string): Promise<boolean> {
-  const { body }: { body: ReleaseResultBody } = await got
+  const body: ReleaseResultBody = await got
     .get(
       'https://api.github.com/repos/ElectronForConstruct/preview/releases/latest',
       {
@@ -32,6 +32,7 @@ export default async function (fullPath: string): Promise<boolean> {
       },
     )
     .json();
+
 
   let assetUrl = '';
   let exeName = '';

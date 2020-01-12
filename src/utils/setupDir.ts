@@ -1,9 +1,8 @@
-import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 
 // const AdmZip = require('adm-zip');
-import shelljs from 'shelljs';
+import fs from 'fs-extra';
 import extract from 'extract-zip';
 
 import installPkg from './installPackages';
@@ -31,18 +30,18 @@ async function setupDir(
 
   // create temporary directory
   const tmpDir = path.join(os.tmpdir(), `efc_${path.basename(process.cwd())}`);
-  shelljs.mkdir('-p', tmpDir);
+  await fs.ensureDir(tmpDir);
 
   // copy local files from template to tmpdir
-  shelljs.cp(path.join(__dirname, '../', 'template', '*'), tmpDir);
+  await fs.copy(path.join(__dirname, '../', 'template'), tmpDir);
 
-  fs.writeFileSync(path.join(tmpDir, 'config.js'), `module.exports=${JSON.stringify(settings)}`, 'utf8');
+  await fs.writeFile(path.join(tmpDir, 'config.js'), `module.exports=${JSON.stringify(settings)}`, 'utf8');
 
   if (zipFile) {
     await extractZip(zipFile, tmpDir);
   } else {
     // copy app/* to root of temp dir
-    shelljs.cp('-R', path.join(process.cwd(), 'app', '*'), tmpDir);
+    await fs.copy(path.join(process.cwd(), 'app'), tmpDir);
   }
 
   // editing package.json

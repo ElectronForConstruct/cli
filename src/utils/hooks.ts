@@ -1,6 +1,6 @@
 import mri from 'mri';
+import { CynModule } from '../models';
 import { createNormalLogger } from './console';
-import { CynModule } from '../definitions';
 
 const logger = createNormalLogger('hooks');
 

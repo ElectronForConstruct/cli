@@ -1,5 +1,4 @@
 assets
-bin
 tools
 node_modules
 .idea
@@ -9,5 +8,6 @@ yarn-error\.log
 package-lock\.json
 src/\.env
 dashboard
-
 .env
+
+dist/

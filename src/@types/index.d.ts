@@ -26,3 +26,6 @@ declare module 'launch-editor' {
 
   export default launch;
 }
+
+declare module 'prompt-confirm'
+declare module 'yarn'

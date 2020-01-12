@@ -1,8 +1,9 @@
 import * as path from 'path';
-
 import updateNotifier from 'update-notifier';
+
+import pkg from './utils/readPkg';
 import { createNormalLogger } from './utils/console';
-import pkg from '../package.json';
+
 import app from './app';
 
 require('dotenv').config({

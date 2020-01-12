@@ -1,30 +1,39 @@
+const path = require('path');
+
+console.log(path.resolve(__dirname, './tsconfig.json'));
+
 module.exports = {
-  'extends' : [
+  'extends'      : [
     'airbnb-base',
-    'plugin:@typescript-eslint/recommended',
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking"
   ],
-  plugins   : [ 'import' ],
-  'parser'  : '@typescript-eslint/parser',
-  'globals' : {
+  plugins        : [ 'import' ],
+  parser         : '@typescript-eslint/parser',
+  parserOptions: {
+    project: path.resolve(__dirname, './tsconfig.json'),
+    tsconfigRootDir: __dirname
+  },
+  'globals'      : {
     'fetch'   : false,
     'document': false,
     'window'  : false,
     'Vue'     : false,
   },
-  'env'     : {
+  'env'          : {
     'node': true,
   },
-  'settings': {
+  'settings'     : {
     'import/parsers' : {
       '@typescript-eslint/parser': [ '.ts', '.tsx' ],
     },
     'import/resolver': {
-      'typescript': {
-        'alwaysTryTypes': true,
-      },
+      'typescript': {},
     },
   },
-  'rules'   : {
+  'rules'        : {
     'import/no-unresolved'     : 'error',
     'no-underscore-dangle'     : 0,
     'class-methods-use-this'   : 0,
@@ -48,5 +57,7 @@ module.exports = {
         'tsx': 'never',
       },
     ],
+
+    '@typescript-eslint/explicit-function-return-type': 2
   },
 };
