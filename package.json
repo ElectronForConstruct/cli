@@ -14,8 +14,7 @@
   },
   "preferGlobal": true,
   "bin": {
-    "efc": "./index.js",
-    "cyn": "./index.js"
+    "efc": "./index.js"
   },
   "engines": {
     "node": ">=9"

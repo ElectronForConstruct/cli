@@ -80,6 +80,14 @@ function createWindow() {
 
   mainWindow = new BrowserWindow(finalConfig);
 
+  if (!window.menu) {
+    try {
+      mainWindow.setMenu(null);
+    } catch (e) {
+      console.log('Unable to remove menu');
+    }
+  }
+
   const ses = mainWindow.webContents.session;
   ses.clearStorageData({
     storages: ['cachestorage', 'serviceworkers'],
