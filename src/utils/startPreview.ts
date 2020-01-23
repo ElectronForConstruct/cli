@@ -1,54 +1,55 @@
 import { exec } from 'child_process';
 import * as path from 'path';
 import os from 'os';
-import { createNormalLogger } from './console'
-const logger = createNormalLogger('system');
+import { createLogger } from './console';
 
-export default function (url: string, tmpDir: string) {
-  return new Promise(async (resolve, reject) => {
-    logger.info(`Starting preview ${url ? `on "${url}"` : ''}`);
+const logger = createLogger({
+  scope: 'system',
+});
 
-    process.chdir(tmpDir);
+export default (url: string, tmpDir: string): Promise<boolean> => new Promise((resolve, reject) => {
+  logger.info(`Starting preview ${url ? `on "${url}"` : ''}`);
 
-    const rootPath = path.join(tmpDir, 'node_modules', 'electron', 'dist');
+  process.chdir(tmpDir);
 
-    let electron;
-    switch (os.platform()) {
-      case 'darwin':
-        electron = path.join(rootPath, 'Electron.app', 'Contents', 'MacOS', 'Electron');
-        break;
+  const rootPath = path.join(tmpDir, 'node_modules', 'electron', 'dist');
 
-      case 'win32':
-        electron = path.join(rootPath, 'electron.exe');
-        break;
+  let electron;
+  switch (os.platform()) {
+    case 'darwin':
+      electron = path.join(rootPath, 'Electron.app', 'Contents', 'MacOS', 'Electron');
+      break;
 
-      case 'linux':
-        electron = path.join(rootPath, 'electron');
-        break;
+    case 'win32':
+      electron = path.join(rootPath, 'electron.exe');
+      break;
 
-      default:
-        throw new Error('Unsupported OS');
-    }
+    case 'linux':
+      electron = path.join(rootPath, 'electron');
+      break;
 
-    const command = `${electron} ${tmpDir} ${url}`;
+    default:
+      throw new Error('Unsupported OS');
+  }
 
-    const npmstart = exec(command);
+  const command = `${electron} ${tmpDir} ${url}`;
 
-    if (npmstart && npmstart.stdout && npmstart.stderr) {
-      npmstart.stdout.on('data', (data) => {
-        logger.info(data.toString());
-      });
+  const npmstart = exec(command);
 
-      npmstart.stderr.on('data', (data) => {
-        logger.error(`Error: ${data.toString()}`);
-      });
+  if (npmstart && npmstart.stdout && npmstart.stderr) {
+    npmstart.stdout.on('data', (data) => {
+      logger.info(data.toString());
+    });
 
-      npmstart.on('exit', (code) => {
-        logger.info(`Electron exited: ${code?.toString()}`);
-        resolve(true);
-      });
-    } else {
-      return reject(false)
-    }
-  })
-}
+    npmstart.stderr.on('data', (data) => {
+      logger.error(`Error: ${data.toString()}`);
+    });
+
+    npmstart.on('exit', (code) => {
+      logger.info(`Electron exited: ${code?.toString()}`);
+      return resolve(true);
+    });
+  } else {
+    return reject(false);
+  }
+});

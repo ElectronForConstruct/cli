@@ -1,5 +1,7 @@
 import mri from 'mri';
 import { Options as BuildSettings } from 'electron-packager';
+import { createLogger } from '../utils/console';
+import {Signale, SignaleBase} from "signale";
 
 export interface WindowSettings {
   width: number;
@@ -55,28 +57,34 @@ export interface CliObject {
   name: string;
   shortcut?: string;
   description?: string;
-  default?: boolean;
+  default?: string;
   boolean?: boolean;
 }
 
-export interface CynModule {
-  id?: string;
+export interface CynModuleWrapper {
+  alias: Record<string, string>;
+  boolean: string[];
+  default: Record<string, string>;
+  command: CynModule;
+}
 
-  name: string;
-  description: string;
+export abstract class CynModule {
+  abstract name: string;
 
-  modules?: CynModule[];
+  abstract description: string;
+
   cli?: CliObject[];
+
   config?: object;
 
-  run: run;
-  onPreBuild?: onPreBuild;
-  onPostBuild?: onPostBuild;
-  onPostInstaller?: onPostInstaller;
+  abstract run: run;
 
-  logger?: any;
-  iLogger?: any;
-  Utils?: any;
+  createLogger(interactive = false): Signale {
+    return createLogger({
+      scope: this.name,
+      interactive,
+    });
+  }
 }
 
 export type run = (args: mri.Argv, settings: Settings) => Promise<boolean> | boolean

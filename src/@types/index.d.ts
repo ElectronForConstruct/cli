@@ -29,3 +29,4 @@ declare module 'launch-editor' {
 
 declare module 'prompt-confirm'
 declare module 'yarn'
+declare module 'fs-extra'

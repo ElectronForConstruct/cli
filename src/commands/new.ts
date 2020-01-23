@@ -1,14 +1,16 @@
 import path from 'path';
 import fs from 'fs-extra';
-import {CynModule} from '../models';
+import {CynModule, Settings} from '../models';
 import downloadPreview from '../utils/downloadPreview';
 import {TEMPLATE_DIRECTORY} from '../constants';
+import mri from "mri";
 
-const command: CynModule = {
-  name: 'new',
-  description: 'Bootstrap a new project',
+export const hooks = [];
+export const command = class New extends CynModule {
+  name = 'new';
+  description = 'Bootstrap a new project';
 
-  async run(args, config) {
+  run = async (args: mri.Argv, settings: Settings): Promise<boolean> => {
     if (config.isProject) {
       this.logger.warn('This project is already configured');
       return false;
@@ -40,7 +42,5 @@ const command: CynModule = {
     this.iLogger.success('Bootstrapping done.');
     this.logger.info(`You can now go to your project by using "cd ${name}"`);
     return true;
-  },
+  };
 };
-
-export default command;

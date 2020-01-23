@@ -1,16 +1,19 @@
 // eslint-disable-next-line
 // @ts-ignore
 import { dump } from 'dumper.js';
-import { CynModule } from '../models';
+import {CynModule, Settings} from '../models';
+import mri from "mri";
 
-const command: CynModule = {
-  name: 'debug',
-  description: 'Show current configuration',
+class Debug extends CynModule {
+  name = 'debug';
 
-  run(args, config) {
+  description = 'Show current configuration';
+
+  run = (args: mri.Argv, settings: Settings): Promise<boolean> => {
     dump(config);
     return true;
-  },
-};
+  };
+}
 
-export default command;
+export const command = Debug;
+export const hooks = [];

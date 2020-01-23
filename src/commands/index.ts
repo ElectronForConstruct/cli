@@ -1,15 +1,13 @@
-import _new from './new';
-import preview from './preview';
-import build from './build';
-import debug from './debug';
-import help from './help';
-import plugin from './plugin';
+import { command as preview } from './preview';
+import { command as build } from './build';
+import { command as debug } from './debug';
+import { command as help } from './help';
+import { command as plugin } from './plugin';
 
 export {
   build,
   help,
   debug,
-  _new,
   preview,
   plugin,
 };

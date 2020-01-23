@@ -2,13 +2,16 @@ import path from 'path';
 import setupDir from '../utils/setupDir';
 import startPreview from '../utils/startPreview';
 import { preBuild, postBuild } from '../utils/hooks';
-import { CynModule } from '../models';
+import {CynModule, Settings} from '../models';
+import mri from "mri";
 
-const command: CynModule = {
-  name: 'preview',
-  description: 'Preview your construct project',
+export const hooks = [];
+export const command = class Preview extends CynModule {
+  name = 'preview';
 
-  cli: [
+  description = 'Preview your construct project';
+
+  cli = [
     {
       name: 'zip',
       shortcut: 'z',
@@ -20,23 +23,25 @@ const command: CynModule = {
       boolean: true,
       description: 'The URL to preview',
     },
-  ],
+  ];
 
-  async run(args, settings) {
+  run = async (args: mri.Argv, settings: Settings): Promise<boolean> => {
+    const logger = this.createLogger();
+
     let url = args._[1];
 
     if (args.zip && url) {
-      this.logger.error('Cannot specify both "zip" and "url" parameters');
+      logger.error('Cannot specify both "zip" and "url" parameters');
       return false;
     }
 
     if (args.local && url) {
-      this.logger.error('Cannot specify both "local" and "url" parameters');
+      logger.error('Cannot specify both "local" and "url" parameters');
       return false;
     }
 
     if (args.local && args.zip) {
-      this.logger.error('Cannot specify both "local" and "zip" parameters');
+      logger.error('Cannot specify both "local" and "zip" parameters');
       return false;
     }
 
@@ -48,7 +53,7 @@ const command: CynModule = {
       zipFile = args.zip;
       url = '.';
     } else {
-      this.logger.error('Missing url argument');
+      logger.error('Missing url argument');
       return false;
     }
 
@@ -61,7 +66,5 @@ const command: CynModule = {
 
     await startPreview(url, tempDir/* , settings.electron */);
     return true;
-  },
+  };
 };
-
-export default command;

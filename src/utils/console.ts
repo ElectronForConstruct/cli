@@ -1,24 +1,12 @@
-import { Signale, SignaleOptions } from 'signale';
+import {
+  Signale, SignaleOptions,
+} from 'signale';
 
-const show = (options: SignaleOptions) => {
+// eslint-disable-next-line import/prefer-default-export
+export const createLogger = (options: SignaleOptions): Signale => {
   const log = new Signale(options);
   log.config({
     displayLabel: false,
   });
   return log;
-};
-
-const createNormalLogger = (scope: string) => show({
-  scope,
-});
-
-const createInteractiveLogger = (scope: string) => show({
-  scope,
-  interactive: true,
-});
-
-export {
-  show,
-  createNormalLogger,
-  createInteractiveLogger,
 };

@@ -3,20 +3,25 @@ import packager from 'electron-packager';
 import * as fs from 'fs';
 import prettyDisplayFolders from '../utils/prettyFolder';
 import { postBuild, preBuild } from '../utils/hooks';
-import { CynModule } from '../models';
+import {CynModule, Settings} from '../models';
 import setupDir from '../utils/setupDir';
+import mri from "mri";
 
-const command: CynModule = {
-  name: 'build',
-  cli: [
+export const hooks = [];
+export const command = class Build extends CynModule {
+  name = 'build';
+
+  cli = [
     {
       name: 'zip',
       shortcut: 'z',
       description: 'A zip file to use instead of the "app" folder',
     },
-  ],
-  description: 'Package your app for any OS',
-  config: {
+  ];
+
+  description = 'Package your app for any OS';
+
+  config = {
     dir: process.cwd(),
     asar: true,
     icon: path.join(process.cwd(), 'build', 'icon'),
@@ -30,8 +35,9 @@ const command: CynModule = {
       'node_modules/app-builder-lib',
     ],
     win32metadata: {},
-  },
-  async run(args, settings) {
+  };
+
+  run = async (args: mri.Argv, settings: Settings): Promise<boolean> => {
     this.logger.info('Build started...');
 
     if (!settings.build) {
@@ -112,7 +118,5 @@ const command: CynModule = {
       }
     }
     return true;
-  },
+  };
 };
-
-export default command;

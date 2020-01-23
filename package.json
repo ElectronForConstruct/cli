@@ -1,18 +1,17 @@
 {
   "name": "@cyn/cli",
-  "version": "4.1.0",
+  "version": "1.0.0",
   "description": "A command-line tool to manage your Construct Electron projects",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "release": "np --yolo --any-branch --no-yarn",
+    "release": "np --yolo",
     "test": "echo 1",
-    "lint": "eslint src",
-    "postpublish": "git log v2.3.7..master --pretty=format:\"- %Cred%h%Creset %s%n%b%n\" --abbrev-commit"
+    "lint": "eslint src"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ElectronForConstruct/cli"
+    "url": "https://github.com/Cyn/cli"
   },
   "preferGlobal": true,
   "bin": {

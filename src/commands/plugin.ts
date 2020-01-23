@@ -3,9 +3,10 @@ import fs from 'fs-extra';
 import got from 'got';
 import semver from 'semver';
 import Confirm from 'prompt-confirm';
+import mri from 'mri';
 import download from '../utils/githubDownloadFolder';
 import installPkg from '../utils/installPackages';
-import { CynModule } from '../models';
+import { CynModule, Settings } from '../models';
 
 async function getRemoteVersion(plugin: string, branch: string): Promise<string> {
   const { body } = await got(
@@ -14,11 +15,13 @@ async function getRemoteVersion(plugin: string, branch: string): Promise<string>
   return body.version;
 }
 
-const command: CynModule = {
-  name: 'plugin',
-  description: 'Manage project plugins',
+export const hooks = [];
+export const command = class Plugin extends CynModule {
+  name = 'plugin';
 
-  async run(args) {
+  description = 'Manage project plugins';
+
+  run = async (args: mri.Argv, settings: Settings): Promise<boolean> => {
     const subcommand = args._[1];
     const plugin = args._[2];
 
@@ -100,6 +103,5 @@ const command: CynModule = {
         break;
     }
     return true;
-  },
+  };
 };
-export default command;

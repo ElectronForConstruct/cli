@@ -1,6 +1,7 @@
 import log from 'signale';
+import mri from 'mri';
 import pkg from '../utils/readPkg';
-import { CynModule } from '../models';
+import { CynModule, Settings } from '../models';
 
 const { version } = pkg;
 
@@ -8,11 +9,13 @@ const longest = (arr: string[]): number => arr.reduce(
   (a, b) => (a.length > b.length ? a : b),
 ).length;
 
-const command: CynModule = {
-  name: 'help',
-  description: 'Display this help',
+export const hooks = [];
+export const command = class Help extends CynModule {
+  name = 'help';
 
-  run(args) {
+  description = 'Display this help';
+
+  run = (args: mri.Argv, settings: Settings): Promise<boolean> => {
     log.log(`Electron for Construct cli v${version}\n`);
     if (args._.length === 1 && args._[0] !== 'help') {
       const cmd = this.modules?.find((c) => c.name === args._[0]);
@@ -74,6 +77,5 @@ const command: CynModule = {
       });
     }
     return true;
-  },
+  };
 };
-export default command;
