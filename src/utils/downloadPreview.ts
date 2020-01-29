@@ -4,7 +4,7 @@ import * as path from 'path';
 import got from 'got';
 import { promisify } from 'util';
 import * as stream from 'stream';
-import { createNormalLogger } from './console';
+import { createScopedLogger } from './console';
 
 const pipeline = promisify(stream.pipeline);
 
@@ -19,7 +19,7 @@ interface ReleaseResultBody {
   assets: ReleaseAsset[];
 }
 
-const logger = createNormalLogger('system');
+const logger = createScopedLogger('system');
 
 export default async function (fullPath: string): Promise<boolean> {
   const body: ReleaseResultBody = await got

@@ -1,13 +1,37 @@
 import * as path from 'path';
 import packager from 'electron-packager';
 import * as fs from 'fs';
+import mri from 'mri';
 import prettyDisplayFolders from '../utils/prettyFolder';
-import { postBuild, preBuild } from '../utils/hooks';
-import {CynModule, Settings} from '../models';
+import { CynModule, Hook, Settings } from '../models';
 import setupDir from '../utils/setupDir';
-import mri from "mri";
 
-export const hooks = [];
+const onPreBuild = class OnPreBuild extends Hook {
+  description = 'Run on the pre build step';
+
+  hookName = 'pre-build';
+
+  name = 'onPreBuild';
+
+  run = () => {
+  };
+};
+
+const onPostBuild = class OnPostBuild extends Hook {
+  description = 'Run on the post build step';
+
+  hookName = 'post-build';
+
+  name = 'onPostBuild';
+
+  run = () => {
+  };
+};
+
+export const hooks = [
+  onPreBuild,
+  onPostBuild,
+];
 export const command = class Build extends CynModule {
   name = 'build';
 
@@ -38,10 +62,12 @@ export const command = class Build extends CynModule {
   };
 
   run = async (args: mri.Argv, settings: Settings): Promise<boolean> => {
-    this.logger.info('Build started...');
+    const logger = this.createLogger();
+
+    logger.info('Build started...');
 
     if (!settings.build) {
-      this.logger.error('It looks like your "build" configuration is empty');
+      logger.error('It looks like your "build" configuration is empty');
       return false;
     }
 
@@ -91,18 +117,18 @@ export const command = class Build extends CynModule {
     // ////////////////////////////
 
     try {
-      this.logger.start('Packaging started');
+      logger.start('Packaging started');
       const appPaths = await packager(packOptions);
 
-      this.logger.success('Files packed successfuly!');
+      logger.success('Files packed successfuly!');
       if (Array.isArray(appPaths)) {
         prettyDisplayFolders(appPaths);
       } else {
         prettyDisplayFolders([appPaths]);
       }
     } catch (e) {
-      this.logger.error('An error occured while packaging your apps');
-      this.logger.error(e);
+      logger.error('An error occured while packaging your apps');
+      logger.error(e);
     }
 
     const isDirectory = (source: string): boolean => fs.lstatSync(source).isDirectory();

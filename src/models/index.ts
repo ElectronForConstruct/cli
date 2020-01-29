@@ -1,7 +1,8 @@
 import mri from 'mri';
 import { Options as BuildSettings } from 'electron-packager';
+import { Signale } from 'signale';
 import { createLogger } from '../utils/console';
-import {Signale, SignaleBase} from "signale";
+import HooksManager from '../classes/hooksManager';
 
 export interface WindowSettings {
   width: number;
@@ -68,6 +69,16 @@ export interface CynModuleWrapper {
   command: CynModule;
 }
 
+export abstract class Hook {
+  abstract name: string;
+
+  abstract description: string;
+
+  abstract hookName: string
+
+  abstract run: run;
+}
+
 export abstract class CynModule {
   abstract name: string;
 
@@ -84,6 +95,10 @@ export abstract class CynModule {
       scope: this.name,
       interactive,
     });
+  }
+
+  dispatchHook(): Promise<boolean> | boolean {
+    return HooksManager.getInstance().dispatch();
   }
 }
 

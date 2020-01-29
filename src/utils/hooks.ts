@@ -1,8 +1,8 @@
 import mri from 'mri';
 import { CynModule } from '../models';
-import { createNormalLogger } from './console';
+import { createScopedLogger } from './console';
 
-const logger = createNormalLogger('hooks');
+const logger = createScopedLogger('hooks');
 
 async function preBuild(
   modules: CynModule[],

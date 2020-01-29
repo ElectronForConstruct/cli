@@ -1,8 +1,8 @@
 import { exec } from 'child_process';
 import * as path from 'path';
-import { createNormalLogger } from './console';
+import { createScopedLogger } from './console';
 
-const logger = createNormalLogger('system');
+const logger = createScopedLogger('system');
 
 async function installPackages(
   packages: string[] = [],

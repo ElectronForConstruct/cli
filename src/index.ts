@@ -2,7 +2,7 @@ import * as path from 'path';
 import updateNotifier from 'update-notifier';
 
 import pkg from './utils/readPkg';
-import { createNormalLogger } from './utils/console';
+import { createScopedLogger } from './utils/console';
 
 import app from './app';
 
@@ -10,7 +10,7 @@ require('dotenv').config({
   path: path.resolve(__dirname, '.env'),
 });
 
-const logger = createNormalLogger('system');
+const logger = createScopedLogger('system');
 
 updateNotifier({ pkg }).notify({
   defer: true,

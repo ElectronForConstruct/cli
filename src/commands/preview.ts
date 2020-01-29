@@ -1,9 +1,9 @@
 import path from 'path';
+import mri from 'mri';
 import setupDir from '../utils/setupDir';
 import startPreview from '../utils/startPreview';
 import { preBuild, postBuild } from '../utils/hooks';
-import {CynModule, Settings} from '../models';
-import mri from "mri";
+import { CynModule, Settings } from '../models';
 
 export const hooks = [];
 export const command = class Preview extends CynModule {
@@ -59,10 +59,8 @@ export const command = class Preview extends CynModule {
 
     const tempDir = await setupDir(settings, zipFile, 'preview');
 
-    if (this.modules && this.modules.length > 0) {
-      await preBuild(this.modules, args, settings, tempDir);
-      await postBuild(this.modules, args, settings, [tempDir]);
-    }
+    await this.dispatchHook('pre-build', args, settings, tempDir);
+    await this.dispatchHook('post-build', args, settings, [tempDir]);
 
     await startPreview(url, tempDir/* , settings.electron */);
     return true;

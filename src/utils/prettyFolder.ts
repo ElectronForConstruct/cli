@@ -1,6 +1,6 @@
-import { createNormalLogger } from './console';
+import { createScopedLogger } from './console';
 
-const log = createNormalLogger('build');
+const log = createScopedLogger('build');
 
 export default function (folders: string[]): void {
   for (let i = 0; i < folders.length; i += 1) {

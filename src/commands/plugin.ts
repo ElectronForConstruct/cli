@@ -22,11 +22,13 @@ export const command = class Plugin extends CynModule {
   description = 'Manage project plugins';
 
   run = async (args: mri.Argv, settings: Settings): Promise<boolean> => {
+    const logger = this.createLogger();
+
     const subcommand = args._[1];
     const plugin = args._[2];
 
     if (!subcommand) {
-      this.logger.error('You must specify a command! Use "efc plugin -h" for more infos');
+      logger.error('You must specify a command! Use "efc plugin -h" for more infos');
       return false;
     }
 
@@ -91,15 +93,15 @@ export const command = class Plugin extends CynModule {
         });
         const plugins = await Promise.all(pPlugins);
         if (plugins.length === 0) {
-          this.logger.info('No plugins installed');
+          logger.info('No plugins installed');
           return false;
         }
         plugins.forEach((p) => {
-          this.logger.info(p);
+          logger.info(p);
         });
         break;
       default:
-        this.logger.error('Unknown command. Use "efc plugin -h" for help.');
+        logger.error('Unknown command. Use "efc plugin -h" for help.');
         break;
     }
     return true;
