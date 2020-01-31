@@ -7,12 +7,13 @@ const logger = createScopedLogger('system');
 async function installPackages(
   packages: string[] = [],
   cwd: string = process.cwd(),
+  dev = false,
 ): Promise<boolean> {
   return new Promise((resolve) => {
-    const yarn = path.join(__dirname, '..', '3rd-party', 'yarn.js');
+    const yarn = path.join(__dirname, '..', '..', '3rd-party', 'yarn.js');
     let command = `node "${yarn}" --cwd="${cwd}"`;
     if (packages.length > 0) {
-      command += ` add ${packages.join(' ')}`;
+      command += ` add ${dev ? '-D' : ''} ${packages.join(' ')}`;
     }
 
     const yarnCmd = exec(command);

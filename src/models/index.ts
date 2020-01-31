@@ -1,8 +1,5 @@
 import mri from 'mri';
 import { Options as BuildSettings } from 'electron-packager';
-import { Signale } from 'signale';
-import { createLogger } from '../utils/console';
-import HooksManager from '../classes/hooksManager';
 
 export interface WindowSettings {
   width: number;
@@ -37,9 +34,7 @@ export interface ProjectSettings {
   version: string;
 }
 
-export interface Settings {
-  isProject?: boolean;
-
+export interface RawSettings {
   electron?: string;
   errorLogging?: boolean;
   singleInstance?: boolean;
@@ -52,7 +47,15 @@ export interface Settings {
   switches?: string[];
 
   build?: BuildSettings;
+
+  profiles?: Record<string, Settings>;
 }
+
+export interface ProfileSettings {
+  profiles?: Record<string, Settings>;
+}
+
+export type Settings = RawSettings & ProfileSettings
 
 export interface CliObject {
   name: string;
@@ -62,47 +65,8 @@ export interface CliObject {
   boolean?: boolean;
 }
 
-export interface CynModuleWrapper {
-  alias: Record<string, string>;
-  boolean: string[];
-  default: Record<string, string>;
-  command: CynModule;
-}
-
-export abstract class Hook {
-  abstract name: string;
-
-  abstract description: string;
-
-  abstract hookName: string
-
-  abstract run: run;
-}
-
-export abstract class CynModule {
-  abstract name: string;
-
-  abstract description: string;
-
-  cli?: CliObject[];
-
-  config?: object;
-
-  abstract run: run;
-
-  createLogger(interactive = false): Signale {
-    return createLogger({
-      scope: this.name,
-      interactive,
-    });
-  }
-
-  dispatchHook(): Promise<boolean> | boolean {
-    return HooksManager.getInstance().dispatch();
-  }
-}
-
-export type run = (args: mri.Argv, settings: Settings) => Promise<boolean> | boolean
+export type moduleRun = (args: mri.Argv, settings: Settings) => Promise<boolean> | boolean
+export type hookRun = (hookArguments: unknown) => Promise<boolean>
 export type onPreBuild = (args: mri.Argv, settings: any, tmpdir: string)
   => Promise<boolean>
 export type onPostBuild = (args: mri.Argv, settings: any, out: string)

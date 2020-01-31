@@ -6,7 +6,8 @@ import Confirm from 'prompt-confirm';
 import mri from 'mri';
 import download from '../utils/githubDownloadFolder';
 import installPkg from '../utils/installPackages';
-import { CynModule, Settings } from '../models';
+import { Settings } from '../models';
+import CynModule from '../classes/cynModule';
 
 async function getRemoteVersion(plugin: string, branch: string): Promise<string> {
   const { body } = await got(

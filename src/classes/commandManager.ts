@@ -1,4 +1,4 @@
-import { CynModule, CynModuleWrapper } from '../models';
+import CynModule, { CynModuleWrapper } from './cynModule';
 
 export default class CommandManager {
   private static instance: CommandManager;
@@ -54,7 +54,6 @@ export default class CommandManager {
 
   async getCommand(name: string): Promise<CynModuleWrapper> {
     const Module = await import((`../commands/${name}`));
-    console.log(Module);
 
     // eslint-disable-next-line
     const command = new Module.default();

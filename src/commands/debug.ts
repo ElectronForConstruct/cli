@@ -1,8 +1,9 @@
 import { dump } from 'dumper.js';
 import mri from 'mri';
-import { CynModule, Settings } from '../models';
+import { Settings } from '../models';
+import CynModule from '../classes/cynModule';
 
-class Debug extends CynModule {
+export default class extends CynModule {
   name = 'debug';
 
   description = 'Show current configuration';
@@ -12,6 +13,3 @@ class Debug extends CynModule {
     return true;
   };
 }
-
-export const command = Debug;
-export const hooks = [];

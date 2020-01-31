@@ -3,36 +3,11 @@ import packager from 'electron-packager';
 import * as fs from 'fs';
 import mri from 'mri';
 import prettyDisplayFolders from '../utils/prettyFolder';
-import { CynModule, Hook, Settings } from '../models';
+import { Settings } from '../models';
 import setupDir from '../utils/setupDir';
+import CynModule from '../classes/cynModule';
 
-const onPreBuild = class OnPreBuild extends Hook {
-  description = 'Run on the pre build step';
-
-  hookName = 'pre-build';
-
-  name = 'onPreBuild';
-
-  run = () => {
-  };
-};
-
-const onPostBuild = class OnPostBuild extends Hook {
-  description = 'Run on the post build step';
-
-  hookName = 'post-build';
-
-  name = 'onPostBuild';
-
-  run = () => {
-  };
-};
-
-export const hooks = [
-  onPreBuild,
-  onPostBuild,
-];
-export const command = class Build extends CynModule {
+export default class extends CynModule {
   name = 'build';
 
   cli = [
@@ -82,15 +57,13 @@ export const command = class Build extends CynModule {
     }
 
     // setup directories
-    const zipFile = args.zip ? args.zip : null;
-    const tempDir = await setupDir(settings, zipFile, 'build');
+    // const zipFile = args.zip ? args.zip : null;
+    const tempDir = await setupDir(settings, 'build');
 
     // set src dir to tmpdir
     packOptions.dir = tempDir;
 
-    if (this.modules && this.modules.length > 0) {
-      await preBuild(this.modules, args, settings, tempDir);
-    }
+    this.dispatchHook('pre-build', tempDir);
 
     // Compute datas //////////////
 
@@ -139,10 +112,8 @@ export const command = class Build extends CynModule {
         .map((name) => path.join(packOptions.out || '', name))
         .filter(isDirectory);
 
-      if (this.modules && this.modules.length > 0) {
-        await postBuild(this.modules, args, settings, folders);
-      }
+      this.dispatchHook('post-build', folders);
     }
     return true;
   };
-};
+}

@@ -12,7 +12,7 @@ convict.addFormat({
   },
 });
 
-export default convict({
+const settings = convict({
   electron: {
     format: String,
     default: '6.0.1',
@@ -117,3 +117,5 @@ export default convict({
     default: [],
   },
 });
+
+export default settings;
