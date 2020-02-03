@@ -11,11 +11,6 @@ export default class extends CynModule {
   name = 'build';
 
   cli = [
-    {
-      name: 'zip',
-      shortcut: 'z',
-      description: 'A zip file to use instead of the "app" folder',
-    },
   ];
 
   description = 'Package your app for any OS';
@@ -41,19 +36,21 @@ export default class extends CynModule {
 
     logger.info('Build started...');
 
-    if (!settings.build) {
-      logger.error('It looks like your "build" configuration is empty');
-      return false;
+    let buildSettings = settings.build;
+
+    if (!buildSettings) {
+      buildSettings = {
+        dir: '',
+      };
     }
 
-    const packOptions = settings.build;
     if (settings.electron) {
-      packOptions.electronVersion = settings.electron;
+      buildSettings.electronVersion = settings.electron;
     }
 
     // resolve out directory and delete it
-    if (packOptions.out && !path.isAbsolute(packOptions.out)) {
-      packOptions.out = path.join(process.cwd(), packOptions.out);
+    if (buildSettings.out && !path.isAbsolute(buildSettings.out)) {
+      buildSettings.out = path.join(process.cwd(), buildSettings.out);
     }
 
     // setup directories
@@ -61,37 +58,37 @@ export default class extends CynModule {
     const tempDir = await setupDir(settings, 'build');
 
     // set src dir to tmpdir
-    packOptions.dir = tempDir;
+    buildSettings.dir = tempDir;
 
     this.dispatchHook('pre-build', tempDir);
 
     // Compute datas //////////////
 
     if (
-      !packOptions.appVersion
+      !buildSettings.appVersion
       && (settings && settings.project && settings.project.version)
     ) {
-      packOptions.appVersion = settings.project.version;
+      buildSettings.appVersion = settings.project.version;
     }
 
-    if (!packOptions.name && (settings && settings.project && settings.project.name)) {
-      packOptions.name = settings.project.name;
+    if (!buildSettings.name && (settings && settings.project && settings.project.name)) {
+      buildSettings.name = settings.project.name;
     }
 
     if (
-      packOptions.win32metadata && packOptions.win32metadata.CompanyName
+      buildSettings.win32metadata && buildSettings.win32metadata.CompanyName
       && settings.project && settings.project.author
     ) {
-      packOptions.win32metadata.CompanyName = settings.project?.author;
+      buildSettings.win32metadata.CompanyName = settings.project?.author;
     }
 
-    packOptions.quiet = true;
+    buildSettings.quiet = true;
 
     // ////////////////////////////
 
     try {
       logger.start('Packaging started');
-      const appPaths = await packager(packOptions);
+      const appPaths = await packager(buildSettings);
 
       logger.success('Files packed successfuly!');
       if (Array.isArray(appPaths)) {
@@ -106,10 +103,11 @@ export default class extends CynModule {
 
     const isDirectory = (source: string): boolean => fs.lstatSync(source).isDirectory();
 
-    if (packOptions.out !== undefined) {
+    if (buildSettings.out) {
+      const { out } = buildSettings;
       const folders = fs
-        .readdirSync(packOptions.out)
-        .map((name) => path.join(packOptions.out || '', name))
+        .readdirSync(out)
+        .map((name) => path.join(out ?? '', name))
         .filter(isDirectory);
 
       this.dispatchHook('post-build', folders);

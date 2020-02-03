@@ -1,13 +1,13 @@
 import preview from './preview';
 import build from './build';
-import debug from './debug';
 import help from './help';
+// import debug from './debug';
 // import plugin from './plugin';
 
 export {
   build,
   help,
-  debug,
+  // debug,
   preview,
   // plugin,
 };

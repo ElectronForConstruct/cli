@@ -12,8 +12,9 @@ async function app(): Promise<void> {
   const alias = {
     h: 'help',
     p: 'profile',
+    c: 'config',
   };
-  const boolean = ['help'];
+  const boolean = ['help', 'debug'];
 
   const argv = process.argv.slice(2);
   const commandName = argv[0];

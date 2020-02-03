@@ -38,17 +38,6 @@ async function setupDir(
 
   await fs.writeFile(path.join(tmpDir, 'config.js'), `module.exports=${JSON.stringify(settings)}`, 'utf8');
 
-  // if (zipFile) {
-  //   await extractZip(zipFile, tmpDir);
-  // } else {
-  //   // copy app/* to root of temp dir
-  //   await fs.copy(path.join(process.cwd(), 'app'), tmpDir);
-  // }
-
-  // editing package.json
-  // const pkg = fs.readFileSync(path.join(tmpDir, 'package.json'), 'utf8');
-  // const pkgJson = JSON.parse(pkg);
-
   if (mode === 'build') {
     await installPkg([], tmpDir);
   } else if (electron) {
@@ -56,10 +45,6 @@ async function setupDir(
   } else {
     await installPkg(['electron'], tmpDir, true);
   }
-
-  // pkgJson.name = settings.project?.name ?? 'Cyn';
-  // pkgJson.version = settings.project?.version ?? '1.0.0';
-  // fs.writeFileSync(path.join(tmpDir, 'package.json'), JSON.stringify(pkgJson), 'utf8');
 
   return tmpDir;
 }
