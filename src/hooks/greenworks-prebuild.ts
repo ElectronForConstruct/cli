@@ -5,7 +5,7 @@ const GWHook = class extends Hook {
 
   hookName = 'pre-build';
 
-  name = 'onPreBuild';
+  name = 'greenworks';
 
   run = (args: unknown) => Promise.resolve(true);
 };

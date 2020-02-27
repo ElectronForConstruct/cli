@@ -34,6 +34,11 @@ export interface ProjectSettings {
   version: string;
 }
 
+export interface InternalSettings {
+  settings: Settings;
+  configFilePath: string;
+}
+
 export interface RawSettings {
   electron?: string;
   errorLogging?: boolean;
@@ -57,6 +62,10 @@ export interface ProfileSettings {
 
 export type Settings = RawSettings & ProfileSettings
 
+export interface SetupDirOptions {
+  clearCache?: boolean;
+}
+
 export interface CliObject {
   name: string;
   shortcut?: string;
@@ -65,11 +74,11 @@ export interface CliObject {
   boolean?: boolean;
 }
 
-export type moduleRun = (args: mri.Argv, settings: Settings) => Promise<boolean> | boolean
+export type moduleRun = (args: mri.Argv) => Promise<boolean> | boolean
 export type hookRun = (hookArguments: unknown) => Promise<boolean>
-export type onPreBuild = (args: mri.Argv, settings: any, tmpdir: string)
+export type onPreBuild = (args: mri.Argv, tmpdir: string)
   => Promise<boolean>
-export type onPostBuild = (args: mri.Argv, settings: any, out: string)
+export type onPostBuild = (args: mri.Argv, out: string)
   => Promise<boolean>
-export type onPostInstaller = (args: mri.Argv, settings: any, folder: string)
+export type onPostInstaller = (args: mri.Argv, folder: string)
   => Promise<boolean>

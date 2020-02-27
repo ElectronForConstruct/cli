@@ -27,12 +27,12 @@ const _appendScript = src => new Promise((resolve) => {
  *
  */
 
-if (settings.debug.showConfig) {
+if (settings.debug && settings.debug.showConfig) {
   console.log(settings);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  if (settings.developer.overlay) {
+  if (settings.developer && settings.developer.overlay) {
     const { overlay } = settings.developer;
 
     const parent = document.createElement('span');
@@ -68,17 +68,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // enable devtool
   Promise.resolve()
     .then(() => {
-      Vue.config.productionTip = false;
-      Vue.config.devtools = false;
-
-      console.log('adding vue');
-
       return _appendScript('https://cdn.jsdelivr.net/gh/ElectronForConstruct/construct-devtool/dist/construct-devtool.min.js');
     })
     .then(() => {
       const dt = document.createElement('construct-devtool');
       document.body.append(dt);
-      console.log('adding devtool');
     });
 });
 

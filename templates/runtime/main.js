@@ -29,7 +29,9 @@ console.log(path.resolve('.'));
 const url = args[2] || __dirname;
 const isURL = url.includes('http');
 
-if (settings.debug.showConfig) {
+console.log('settings', settings);
+
+if (settings.debug && settings.debug.showConfig) {
   console.log(settings);
 }
 
@@ -105,7 +107,7 @@ function createWindow() {
     });
   }
 
-  if (settings.developer.showChromeDevTools) {
+  if (settings.developer && settings.developer.showChromeDevTools) {
     mainWindow.webContents.openDevTools();
   }
 

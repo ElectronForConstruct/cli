@@ -1,11 +1,10 @@
 import logger from 'signale';
 import mri from 'mri';
 import pkg from '../utils/readPkg';
-import { Settings } from '../models';
 import CynModule from '../classes/cynModule';
 
 import Build from './build';
-import Preview from './preview';
+import Run from './run';
 
 const { version } = pkg;
 
@@ -13,19 +12,27 @@ const longest = (arr: string[]): number => arr.reduce(
   (a, b) => (a.length > b.length ? a : b),
 ).length;
 
-export default class extends CynModule {
+export default class Help extends CynModule {
   name = 'help';
 
-  description = 'Display this help';
+  description = 'Display this help. Use \'cyn help <command>\' for help on a specific command';
 
-  run = (args: mri.Argv, settings: Settings): boolean => {
+  run = (args: mri.Argv): boolean => {
     logger.log(`Cyn CLI v${version}\n`);
 
-    const commands = [new Build(), new Preview()];
+    const commands: [
+      CynModule,
+      CynModule,
+      CynModule,
+    ] = [
+      new Build(),
+      new Run(),
+      new Help(),
+    ];
 
     if (args._.length === 2) {
       const helpCommand = args._[1];
-      const cmd: CynModule | undefined = commands.find((c) => c.name === helpCommand);
+      const cmd = commands.find((c) => c.name === helpCommand);
 
       if (cmd) {
         const cliArgsPresent = cmd.cli && Array.isArray(cmd.cli) && cmd.cli.length > 0;

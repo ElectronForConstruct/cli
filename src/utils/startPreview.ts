@@ -7,10 +7,13 @@ const logger = createLogger({
   scope: 'system',
 });
 
-export default (url: string, tmpDir: string): Promise<boolean> => new Promise((resolve, reject) => {
-  logger.info(`Starting preview ${url ? `on "${url}"` : ''}`);
+export default (
+  workingDirOrURL: string,
+  tmpDir: string,
+): Promise<boolean> => new Promise((resolve) => {
+  logger.info(`Starting preview at "${workingDirOrURL}"`);
 
-  process.chdir(tmpDir);
+  // process.chdir(tmpDir);
 
   const rootPath = path.join(tmpDir, 'node_modules', 'electron', 'dist');
 
@@ -32,7 +35,7 @@ export default (url: string, tmpDir: string): Promise<boolean> => new Promise((r
       throw new Error('Unsupported OS');
   }
 
-  const command = `${electron} ${tmpDir} ${url}`;
+  const command = `${electron} ${tmpDir} ${workingDirOrURL}`;
 
   const npmstart = exec(command);
 
@@ -50,6 +53,6 @@ export default (url: string, tmpDir: string): Promise<boolean> => new Promise((r
       return resolve(true);
     });
   } else {
-    return reject(false);
+    return resolve(false);
   }
 });

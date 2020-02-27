@@ -1,7 +1,5 @@
 const path = require('path');
 
-console.log(path.resolve(__dirname, './tsconfig.json'));
-
 module.exports = {
   'extends'      : [
     'airbnb-base',

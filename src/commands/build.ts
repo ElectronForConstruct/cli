@@ -6,12 +6,12 @@ import prettyDisplayFolders from '../utils/prettyFolder';
 import { Settings } from '../models';
 import setupDir from '../utils/setupDir';
 import CynModule from '../classes/cynModule';
+import SettingsManager from '../classes/settingsManager';
 
 export default class extends CynModule {
   name = 'build';
 
-  cli = [
-  ];
+  cli = [];
 
   description = 'Package your app for any OS';
 
@@ -31,8 +31,23 @@ export default class extends CynModule {
     win32metadata: {},
   };
 
-  run = async (args: mri.Argv, settings: Settings): Promise<boolean> => {
+  // For now only support building from a folder
+  run = async (args: mri.Argv): Promise<boolean> => {
+    // const logger = this.createLogger();
+
+    const sm = SettingsManager.getInstance();
+
+    let workingDirectoryOrURL = args._[1];
+
+    if (!workingDirectoryOrURL) {
+      workingDirectoryOrURL = process.cwd();
+    }
+
+    // ---- TODO this is shared with preview ^^^
+
     const logger = this.createLogger();
+
+    const { settings } = sm;
 
     logger.info('Build started...');
 
@@ -48,14 +63,13 @@ export default class extends CynModule {
       buildSettings.electronVersion = settings.electron;
     }
 
-    // resolve out directory and delete it
+    // resolve out directory
     if (buildSettings.out && !path.isAbsolute(buildSettings.out)) {
       buildSettings.out = path.join(process.cwd(), buildSettings.out);
     }
 
     // setup directories
-    // const zipFile = args.zip ? args.zip : null;
-    const tempDir = await setupDir(settings, 'build');
+    const tempDir = await setupDir('build');
 
     // set src dir to tmpdir
     buildSettings.dir = tempDir;
@@ -83,6 +97,9 @@ export default class extends CynModule {
     }
 
     buildSettings.quiet = true;
+    buildSettings.author = 'Me';
+
+    console.log('buildSettings', buildSettings);
 
     // ////////////////////////////
 

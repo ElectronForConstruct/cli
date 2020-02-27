@@ -2,13 +2,11 @@ import mri from 'mri';
 import { cosmiconfig } from 'cosmiconfig';
 import CommandManager from './classes/commandManager';
 import HookManager from './classes/hooksManager';
+import SettingsManager from './classes/settingsManager';
 
 import hooks from './hooks';
-import { Settings } from './models';
 
 async function app(): Promise<void> {
-  let settings: Settings = {};
-
   const alias = {
     h: 'help',
     p: 'profile',
@@ -21,14 +19,11 @@ async function app(): Promise<void> {
 
   const cm = CommandManager.getInstance();
   const hm = HookManager.getInstance();
+  const sm = SettingsManager.getInstance();
 
   // --- Load config
 
-  const explorerSync = cosmiconfig('cyn');
-  const config = await explorerSync.search();
-  if (config) {
-    settings = config.config;
-  }
+  await sm.loadConfig();
 
   // --- Load hooks
 
@@ -49,7 +44,11 @@ async function app(): Promise<void> {
     default: commandWrapper.default,
   });
 
-  await commandWrapper.command.run(args, settings);
+  if (args.config) {
+    await sm.loadConfig(args.config);
+  }
+
+  await commandWrapper.command.run(args);
 }
 
 export default app;

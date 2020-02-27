@@ -1,4 +1,4 @@
-import preview from './preview';
+import run from './run';
 import build from './build';
 import help from './help';
 // import debug from './debug';
@@ -8,6 +8,6 @@ export {
   build,
   help,
   // debug,
-  preview,
+  run,
   // plugin,
 };

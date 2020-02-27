@@ -5,7 +5,7 @@ const GWHook = class extends Hook {
 
   hookName = 'post-build';
 
-  name = 'onPostBuild';
+  name = 'greenworks';
 
   run = (args: unknown) => Promise.resolve(true);
 };
