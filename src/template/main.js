@@ -91,8 +91,10 @@ function createWindow() {
   const ses = mainWindow.webContents.session;
   ses.clearStorageData({
     storages: ['cachestorage', 'serviceworkers'],
-  }, () => {
+  }).then (() => {
     console.log('storage cleared');
+  }).catch(e => {
+    console.log('Error clearing cache:', e)
   });
 
   if (isURL) {
