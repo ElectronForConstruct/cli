@@ -1,3 +1,5 @@
+export default {};
+
 // import * as path from 'path';
 // import fs from 'fs-extra';
 // import got from 'got';

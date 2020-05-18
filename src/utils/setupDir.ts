@@ -26,20 +26,26 @@ async function setupDir(
   }
   await fs.ensureDir(tmpDir);
 
+  console.log('tmpDir', tmpDir);
+
   // Prepare template
   await fs.copy(path.join(__dirname, '..', '..', 'templates', 'runtime'), tmpDir);
+
+  // Fill package.json
+  const pkgJSONPath = path.join(tmpDir, 'package.json');
+  const pkgJSONData = await fs.readFile(pkgJSONPath, 'utf8');
+  const pkgJSON = JSON.parse(pkgJSONData);
+
+  pkgJSON.author = settings.project?.author;
+
+  await fs.writeFile(pkgJSONPath, JSON.stringify(pkgJSON), 'utf8');
+
 
   // Generate configuration
   await fs.writeFile(path.join(tmpDir, 'config.js'), `module.exports=${JSON.stringify(settings)}`, 'utf8');
 
   // Install dependencies
-  if (mode === 'build') {
-    await installPkg([], tmpDir);
-  } else if (electron) {
-    await installPkg([`electron@${electron}`], tmpDir, true);
-  } else {
-    await installPkg(['electron'], tmpDir, true);
-  }
+  await installPkg([`electron@${electron}`], tmpDir, true);
 
   return tmpDir;
 }

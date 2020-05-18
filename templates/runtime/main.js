@@ -1,5 +1,6 @@
 // eslint-disable-next-line
 const electron = require('electron');
+const fs = require('fs-extra');
 
 const { app, BrowserWindow } = electron;
 // const fs = require('fs');
@@ -21,6 +22,11 @@ let mainWindow;
 
 // eslint-disable-next-line
 const args = global.args = process.argv;
+
+const cache = path.resolve(path.join('.', '.cache'));
+
+fs.ensureDirSync(cache)
+app.setPath('userData', cache);
 
 console.log(args);
 console.log(__dirname);
@@ -74,6 +80,8 @@ function createWindow() {
   const defaultConfig = {
     webPreferences: {
       nodeIntegration: true,
+      nodeIntegrationInWorker: true,
+      nodeIntegrationInSubFrames: true,
       preload: path.join(__dirname, 'preload.js'),
     },
   };
@@ -85,8 +93,10 @@ function createWindow() {
   const ses = mainWindow.webContents.session;
   ses.clearStorageData({
     storages: ['cachestorage', 'serviceworkers'],
-  }, () => {
+  }).then(() => {
     console.log('storage cleared');
+  }).catch(e => {
+    console.log('Error clearing cache:', e);
   });
 
   if (isURL) {

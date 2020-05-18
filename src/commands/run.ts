@@ -1,44 +1,36 @@
-import path from 'path';
-import mri from 'mri';
 import setupDir from '../utils/setupDir';
 import startPreview from '../utils/startPreview';
-import CynModule from '../classes/cynModule';
 import SettingsManager from '../classes/settingsManager';
+import { dispatchHook } from '../classes/hooksManager';
 
-export default class extends CynModule {
-  name = 'preview';
+// cli = [
+//   {
+//     description: 'Clear the cache of the project',
+//     name: 'clear-cache',
+//     boolean: true,
+//   },
+// ];
 
-  description = 'Preview your app';
+export default async function run(options: any): Promise<boolean> {
+  // const logger = this.createLogger();
 
-  cli = [
-    {
-      description: 'Clear the cache of the project',
-      name: 'clear-cache',
-      boolean: true,
-    },
-  ];
+  const sm = SettingsManager.getInstance();
 
-  run = async (args: mri.Argv): Promise<boolean> => {
-    // const logger = this.createLogger();
+  let workingDirectoryOrURL = options.path;
 
-    const sm = SettingsManager.getInstance();
+  if (!workingDirectoryOrURL) {
+    workingDirectoryOrURL = process.cwd();
+  }
 
-    let workingDirectoryOrURL = args._[1];
+  // ----
 
-    if (!workingDirectoryOrURL) {
-      workingDirectoryOrURL = process.cwd();
-    }
+  await sm.loadConfig(workingDirectoryOrURL);
 
-    // ----
+  const tempDir = await setupDir('preview');
 
-    await sm.loadConfig(workingDirectoryOrURL);
+  await dispatchHook('pre-build', tempDir);
+  await dispatchHook('post-build', [tempDir]);
 
-    const tempDir = await setupDir('preview');
-
-    await this.dispatchHook('pre-build', tempDir);
-    await this.dispatchHook('post-build', [tempDir]);
-
-    await startPreview(workingDirectoryOrURL, tempDir);
-    return true;
-  };
+  await startPreview(workingDirectoryOrURL, tempDir);
+  return true;
 }

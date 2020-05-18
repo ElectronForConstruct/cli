@@ -11,6 +11,7 @@ async function installPackages(
 ): Promise<boolean> {
   return new Promise((resolve) => {
     const yarn = path.join(__dirname, '..', '..', '3rd-party', 'yarn.js');
+
     let command = `node "${yarn}" --cwd="${cwd}"`;
     if (packages.length > 0) {
       command += ` add ${dev ? '-D' : ''} ${packages.join(' ')}`;

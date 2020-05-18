@@ -35,7 +35,7 @@ export default (
       throw new Error('Unsupported OS');
   }
 
-  const command = `${electron} ${tmpDir} ${workingDirOrURL}`;
+  const command = `"${electron}" "${tmpDir}" "${workingDirOrURL}"`;
 
   const npmstart = exec(command);
 

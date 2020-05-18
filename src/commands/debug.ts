@@ -1,9 +1,8 @@
 import { dump } from 'dumper.js';
 import mri from 'mri';
-import CynModule from '../classes/cynModule';
 import SettingsManager from '../classes/settingsManager';
 
-export default class extends CynModule {
+export default class {
   name = 'debug';
 
   description = 'Show current configuration';

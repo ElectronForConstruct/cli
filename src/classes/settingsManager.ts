@@ -34,6 +34,7 @@ export default class SettingsManager {
   async loadConfig(root: string = process.cwd()): Promise<void> {
     const explorerSync = cosmiconfig('cyn');
     const config = await explorerSync.search(root);
+    // console.log('config', config);
     if (config) {
       this.settings = config.config;
       this.path = config.filepath;

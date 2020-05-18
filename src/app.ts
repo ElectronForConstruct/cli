@@ -1,54 +1,69 @@
-import mri from 'mri';
-import { cosmiconfig } from 'cosmiconfig';
-import CommandManager from './classes/commandManager';
+// import { cosmiconfig } from 'cosmiconfig';
+import { cac } from 'cac';
 import HookManager from './classes/hooksManager';
 import SettingsManager from './classes/settingsManager';
+import build from './commands/build';
 
 import hooks from './hooks';
 
+const cli = cac();
+
 async function app(): Promise<void> {
-  const alias = {
-    h: 'help',
-    p: 'profile',
-    c: 'config',
-  };
-  const boolean = ['help', 'debug'];
+  cli
+    .option('-p, --profile <name>', 'Specify profile')
+    .option('-c, --config <path>', 'Specify path to a configuration file')
+    .option('-d, --debug', 'Output the resolved config file');
 
-  const argv = process.argv.slice(2);
-  const commandName = argv[0];
 
-  const cm = CommandManager.getInstance();
   const hm = HookManager.getInstance();
   const sm = SettingsManager.getInstance();
 
   // --- Load config
 
-  await sm.loadConfig();
+  const parsed = cli.parse();
+  let configFile;
+  if (parsed.options.config) {
+    console.log('Loading custom config');
+    configFile = parsed.options.config;
+  }
+  await sm.loadConfig(configFile);
 
   // --- Load hooks
 
   hm.registerAll(hooks);
 
-  // --- Execute
+  console.log('hm.', hm.listAll());
 
-  let commandWrapper;
-  if (commandName) {
-    commandWrapper = await cm.getCommand(commandName);
-  } else {
-    commandWrapper = await cm.getCommand('help');
-  }
+  // Make commands
 
-  const args = mri(argv, {
-    alias: { ...alias, ...commandWrapper.alias },
-    boolean: [...boolean, ...commandWrapper.boolean],
-    default: commandWrapper.default,
-  });
+  cli.command('')
+    .action(() => {
+      cli.outputHelp();
+    });
 
-  if (args.config) {
-    await sm.loadConfig(args.config);
-  }
+  cli
+    .command('build', 'Build your app')
+    .action(build);
 
-  await commandWrapper.command.run(args);
+  cli
+    .command('run', 'Preview your app without bundling')
+    .action((files, options) => {
+      console.log(files, options);
+      console.log('start running');
+    });
+
+  // TODO just use a flag on run or preview
+  // cli
+  // .command('debug ', 'Debug the configuration')
+  // .action((files, options) => {
+  //   console.log(files, options);
+  // });
+
+  cli.help();
+  cli.version('0.0.0');
+
+  // Run
+  cli.parse();
 }
 
 export default app;
