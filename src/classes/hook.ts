@@ -5,7 +5,5 @@ export default abstract class Hook {
 
   abstract description: string;
 
-  abstract bind: string;
-
   abstract run: hookRun;
 }

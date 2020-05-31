@@ -35,36 +35,35 @@ export default class HookManager {
     return this.hooks;
   }
 
-  dispatch(hookName: string, hookArguments: unknown): Promise<boolean[]> | boolean[] {
-    const hooks: Hook[] = this.get(hookName);
-    console.log(`mathing hooks [${hookName}]`, hooks);
-    const promises: Promise<boolean>[] = [];
-    for (let i = 0; i < hooks.length; i += 1) {
-      promises.push(hooks[i].run(hookArguments));
-    }
-    return Promise.all(promises);
-  }
-
-  get(hookName: string): Hook[] {
-    return this.hooks.filter((hook) => hook.bind === hookName);
+  get(hookName: string): Hook | undefined {
+    return this.hooks.find((hook) => hook.name === hookName);
   }
 }
 
-export function dispatchHook(
+export async function dispatchHook(
   hookName: string,
   hookArguments: unknown,
-): Promise<boolean[]> | boolean[] {
+): Promise<boolean[]> {
   const sm = SettingsManager.getInstance();
 
   const { settings } = sm;
   const { on } = settings;
   const hook = on[hookName];
-  I was here trying to dispatch hooks
   if (hook) {
     const { steps } = hook;
     console.log('Found steps');
     console.log(steps);
-    return HookManager.getInstance().dispatch(hookName, hookArguments);
+    for (let i = 0; i < steps.length; i += 1) {
+      const step = steps[i];
+      console.log('step', step);
+      const hookInst = HookManager.getInstance().get(step);
+      if (hookInst) {
+        await hookInst.run(hookArguments);
+      } else {
+        console.log(`Cannot find hook ${step}`);
+      }
+    }
+    return [];
   }
   console.log(`No hooks found for "${hookName}"`);
   return [];

@@ -39,6 +39,23 @@ export interface InternalSettings {
   configFilePath: string;
 }
 
+export interface HookSettings<T> {
+  steps: string[];
+  config: T;
+}
+
+export type BaseHookSettings = Partial<{
+  'pre-build': HookSettings<null>;
+  'build': HookSettings<BuildSettings>;
+  'post-build': HookSettings<null>;
+
+  'pre-package': HookSettings<null>;
+  'package': HookSettings<BuildSettings>;
+  'post-package': HookSettings<null>;
+}>
+
+export type HooksSettings = BaseHookSettings
+
 export interface RawSettings {
   electron?: string;
   errorLogging?: boolean;
@@ -51,9 +68,9 @@ export interface RawSettings {
   plugins?: string[];
   switches?: string[];
 
-  build?: BuildSettings;
-
   profiles?: Record<string, Settings>;
+
+  on: HooksSettings;
 }
 
 export interface ProfileSettings {
