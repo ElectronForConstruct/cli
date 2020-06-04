@@ -11,3 +11,5 @@ dashboard
 .env
 
 dist/
+
+.history/

@@ -44,7 +44,9 @@ export interface HookSettings<T> {
   config: T;
 }
 
-export type BaseHookSettings = Partial<{
+export type IHookRecord = Record<string, HookSettings<T>>
+
+export interface HookRecord extends IHookRecord {
   'pre-build': HookSettings<null>;
   'build': HookSettings<BuildSettings>;
   'post-build': HookSettings<null>;
@@ -52,7 +54,9 @@ export type BaseHookSettings = Partial<{
   'pre-package': HookSettings<null>;
   'package': HookSettings<BuildSettings>;
   'post-package': HookSettings<null>;
-}>
+}
+
+export type BaseHookSettings = Partial<HookRecord>
 
 export type HooksSettings = BaseHookSettings
 

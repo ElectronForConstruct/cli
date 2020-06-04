@@ -46,18 +46,11 @@ async function app(): Promise<void> {
     .action(build);
 
   cli
-    .command('run', 'Preview your app without bundling')
+    .command('dev', 'Preview your app without bundling')
     .action((files, options) => {
       console.log(files, options);
       console.log('start running');
     });
-
-  // TODO just use a flag on run or preview
-  // cli
-  // .command('debug ', 'Debug the configuration')
-  // .action((files, options) => {
-  //   console.log(files, options);
-  // });
 
   cli.help();
   cli.version('0.0.0');
