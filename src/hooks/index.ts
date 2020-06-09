@@ -1,7 +1,9 @@
-import gwPostBuild from './greenworks-postbuild';
-import gwPreBuild from './greenworks-prebuild';
+import gwPostBuildHook from './greenworks-postbuild';
+import gwPreBuildHook from './greenworks-prebuild';
+import packageHook from './package';
 
 export default [
-  gwPostBuild,
-  gwPreBuild,
+  packageHook,
+  gwPostBuildHook,
+  gwPreBuildHook,
 ];

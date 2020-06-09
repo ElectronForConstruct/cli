@@ -1,6 +1,7 @@
 import packager, { Options as BuildSettings } from 'electron-packager';
 import * as path from 'path';
 import fs from 'fs-extra';
+import { Settings } from '../models';
 import prettyDisplayFolders from '../utils/prettyFolder';
 import { createScopedLogger } from '../utils/console';
 
@@ -24,10 +25,14 @@ const defaultConfig: BuildSettings = {
 export default {
   description: 'Package your app',
   name: 'package',
-  run: async function run(workingDirectory: string, settings: any): Promise<boolean> {
+  run: async function run(
+    workingDirectory: string,
+    settings: Settings,
+    hookSettings: any,
+  ): Promise<boolean> {
     const logger = createScopedLogger('package');
 
-    const buildSettings: BuildSettings = { ...defaultConfig, ...settings.build };
+    const buildSettings: BuildSettings = { ...defaultConfig, ...hookSettings };
 
     if (settings.electron) {
       buildSettings.electronVersion = settings.electron;

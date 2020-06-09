@@ -26,13 +26,12 @@ async function app(): Promise<void> {
     console.log('Loading custom config');
     configFile = parsed.options.config;
   }
-  await sm.loadConfig(configFile);
+  await sm.loadConfig(parsed.options.profile, configFile);
 
   // --- Load hooks
 
+  // @ts-ignore
   hm.registerAll(hooks);
-
-  console.log('hm.', hm.listAll());
 
   // Make commands
 
@@ -47,6 +46,7 @@ async function app(): Promise<void> {
 
   cli
     .command('dev', 'Preview your app without bundling')
+    .option('-w, --watch', 'Watch for changes and restart')
     .action((files, options) => {
       console.log(files, options);
       console.log('start running');

@@ -1,3 +1,4 @@
+import { Settings } from '../models';
 import Hook from './hook';
 import SettingsManager from './settingsManager';
 
@@ -9,7 +10,7 @@ import SettingsManager from './settingsManager';
 // }
 
 export default class HookManager {
-  private static instance: HookManager;
+  private static instance: HookManager
 
   private hooks: Hook[] = [];
 
@@ -21,7 +22,6 @@ export default class HookManager {
   }
 
   register(hook: Hook): number {
-    console.log('registering', hook);
     return this.hooks.push(hook);
   }
 
@@ -42,25 +42,27 @@ export default class HookManager {
 
 export async function dispatchHook(
   hookName: string,
-  hookArguments: unknown,
+  ...hookArguments: unknown[]
 ): Promise<boolean[]> {
   const sm = SettingsManager.getInstance();
 
-  const { settings } = sm;
+  const settings = sm.computeSettings();
   const { on } = settings;
-  const hook = on[hookName];
-  if (hook) {
-    const { steps } = hook;
-    console.log('Found steps');
-    console.log(steps);
+  if (!on) {
+    console.log(`No hooks found for "${hookName}"`);
+    return [];
+  }
+  const steps = on[hookName];
+  if (steps) {
     for (let i = 0; i < steps.length; i += 1) {
       const step = steps[i];
-      console.log('step', step);
-      const hookInst = HookManager.getInstance().get(step);
+      const hookInst = HookManager.getInstance().get(step.step);
       if (hookInst) {
-        await hookInst.run(hookArguments);
+        // @ts-ignore
+        const args = [...hookArguments, settings[step.config]];
+        await hookInst.run(...args);
       } else {
-        console.log(`Cannot find hook ${step}`);
+        console.log(`Cannot find hook ${step.step}`);
       }
     }
     return [];

@@ -39,24 +39,13 @@ export interface InternalSettings {
   configFilePath: string;
 }
 
-export interface HookSettings<T> {
-  steps: string[];
-  config: T;
+export interface HookSettings {
+  step: string;
+  config: any;
 }
 
-export type IHookRecord = Record<string, HookSettings<T>>
-
-export interface HookRecord extends IHookRecord {
-  'pre-build': HookSettings<null>;
-  'build': HookSettings<BuildSettings>;
-  'post-build': HookSettings<null>;
-
-  'pre-package': HookSettings<null>;
-  'package': HookSettings<BuildSettings>;
-  'post-package': HookSettings<null>;
-}
-
-export type BaseHookSettings = Partial<HookRecord>
+export type BaseHookSettings = Record<string, (HookSettings | string)[]>
+export type ComputedBaseHookSettings = Record<string, HookSettings[]>
 
 export type HooksSettings = BaseHookSettings
 
@@ -74,7 +63,22 @@ export interface RawSettings {
 
   profiles?: Record<string, Settings>;
 
-  on: HooksSettings;
+  on?: HooksSettings;
+}
+
+export interface ComputedRawSettings {
+  electron?: string;
+  errorLogging?: boolean;
+  singleInstance?: boolean;
+  window?: WindowSettings;
+  debug?: DebugSettings;
+  developer?: DeveloperSettings;
+  overlay?: OverlaySettings;
+  project?: ProjectSettings;
+  plugins?: string[];
+  switches?: string[];
+
+  on?: ComputedBaseHookSettings;
 }
 
 export interface ProfileSettings {
@@ -96,7 +100,7 @@ export interface CliObject {
 }
 
 export type moduleRun = (args: mri.Argv) => Promise<boolean> | boolean
-export type hookRun = (hookArguments: unknown) => Promise<boolean>
+export type hookRun = (...hookArguments: unknown[]) => Promise<boolean>
 export type onPreBuild = (args: mri.Argv, tmpdir: string)
   => Promise<boolean>
 export type onPostBuild = (args: mri.Argv, out: string)
