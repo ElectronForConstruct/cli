@@ -100,7 +100,7 @@ export interface CliObject {
 }
 
 export type moduleRun = (args: mri.Argv) => Promise<boolean> | boolean
-export type hookRun = (...hookArguments: unknown[]) => Promise<boolean>
+export type hookRun = (hookArguments: unknown) => Promise<boolean>
 export type onPreBuild = (args: mri.Argv, tmpdir: string)
   => Promise<boolean>
 export type onPostBuild = (args: mri.Argv, out: string)

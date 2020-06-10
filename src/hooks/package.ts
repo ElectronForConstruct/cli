@@ -1,7 +1,6 @@
 import packager, { Options as BuildSettings } from 'electron-packager';
 import * as path from 'path';
 import fs from 'fs-extra';
-import { Settings } from '../models';
 import prettyDisplayFolders from '../utils/prettyFolder';
 import { createScopedLogger } from '../utils/console';
 
@@ -24,11 +23,17 @@ const defaultConfig: BuildSettings = {
 
 export default {
   description: 'Package your app',
-  name: 'package',
+  name: 'package_electron',
   run: async function run(
-    workingDirectory: string,
-    settings: Settings,
-    hookSettings: any,
+    {
+      workingDirectory,
+      settings,
+      hookSettings,
+    }: {
+      workingDirectory: string;
+      settings: any;
+      hookSettings: BuildSettings;
+    },
   ): Promise<boolean> {
     const logger = createScopedLogger('package');
 
@@ -89,7 +94,6 @@ export default {
           .readdirSync(out)
           .map((name: string) => path.join(out ?? '', name))
           .filter(isDirectory);
-        console.log('folders', folders);
       }
     } catch (e) {
       logger.error('An error occured while packaging your apps');

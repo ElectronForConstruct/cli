@@ -1,13 +1,6 @@
-import { Settings } from '../models';
+import deepmerge from 'deepmerge';
 import Hook from './hook';
 import SettingsManager from './settingsManager';
-
-// createLogger(interactive = false): Signale {
-//   return createLogger({
-//     scope: this.name,
-//     interactive,
-//   });
-// }
 
 export default class HookManager {
   private static instance: HookManager
@@ -42,7 +35,7 @@ export default class HookManager {
 
 export async function dispatchHook(
   hookName: string,
-  ...hookArguments: unknown[]
+  workingDirectory: string,
 ): Promise<boolean[]> {
   const sm = SettingsManager.getInstance();
 
@@ -58,9 +51,16 @@ export async function dispatchHook(
       const step = steps[i];
       const hookInst = HookManager.getInstance().get(step.step);
       if (hookInst) {
+        let hookSettings;
         // @ts-ignore
-        const args = [...hookArguments, settings[step.config]];
-        await hookInst.run(...args);
+        if (step.config) {
+          // @ts-ignore
+          hookSettings = deepmerge.all([hookInst.config ?? {}, step.config]);
+        } else {
+          hookSettings = hookInst.config ?? {};
+        }
+        const args = { workingDirectory, settings, hookSettings };
+        await hookInst.run(args);
       } else {
         console.log(`Cannot find hook ${step.step}`);
       }
