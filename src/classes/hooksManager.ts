@@ -1,4 +1,4 @@
-import deepmerge from 'deepmerge';
+import deepmerge, { all } from 'deepmerge';
 import Hook from './hook';
 import SettingsManager from './settingsManager';
 

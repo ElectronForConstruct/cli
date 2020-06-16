@@ -1,6 +1,14 @@
 import mri from 'mri';
 import { Options as BuildSettings } from 'electron-packager';
 
+export interface Asset {
+  name: string;
+  browser_download_url: string;
+}
+export interface GHRelease {
+  assets: Asset[];
+}
+
 export interface WindowSettings {
   width: number;
   height: number;
