@@ -35,7 +35,6 @@ export default class HookManager {
 
 export async function dispatchHook(
   hookName: string,
-  workingDirectory: string,
 ): Promise<boolean[]> {
   const sm = SettingsManager.getInstance();
 
@@ -45,11 +44,11 @@ export async function dispatchHook(
     console.log(`No hooks found for "${hookName}"`);
     return [];
   }
-  const steps = on[hookName];
-  if (steps) {
+  const { steps } = on[hookName];
+  if (steps && Array.isArray(steps)) {
     for (let i = 0; i < steps.length; i += 1) {
       const step = steps[i];
-      const hookInst = HookManager.getInstance().get(step.step);
+      const hookInst = HookManager.getInstance().get(step.name);
       if (hookInst) {
         let hookSettings;
         // @ts-ignore
@@ -57,12 +56,14 @@ export async function dispatchHook(
           // @ts-ignore
           hookSettings = deepmerge.all([hookInst.config ?? {}, step.config]);
         } else {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           hookSettings = hookInst.config ?? {};
         }
-        const args = { workingDirectory, settings, hookSettings };
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const args = { settings, hookSettings };
         await hookInst.run(args);
       } else {
-        console.log(`Cannot find hook ${step.step}`);
+        console.log(`Cannot find hook ${step.name}`);
       }
     }
     return [];

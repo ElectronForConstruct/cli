@@ -3,13 +3,13 @@ declare module 'github-content'
 declare module 'dumper.js' {
   const dump: {
     (
-      obj: object
+      obj: any
     ): void;
   };
 
   const dd: {
     (
-      obj: object
+      obj: any
     ): void;
   };
 

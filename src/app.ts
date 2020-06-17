@@ -1,8 +1,7 @@
 // import { cosmiconfig } from 'cosmiconfig';
 import { cac } from 'cac';
-import HookManager from './classes/hooksManager';
+import HookManager, { dispatchHook } from './classes/hooksManager';
 import SettingsManager from './classes/settingsManager';
-import build from './commands/build';
 
 import hooks from './hooks';
 
@@ -13,7 +12,6 @@ async function app(): Promise<void> {
     .option('-p, --profile <name>', 'Specify profile')
     .option('-c, --config <path>', 'Specify path to a configuration file')
     .option('-d, --debug', 'Output the resolved config file');
-
 
   const hm = HookManager.getInstance();
   const sm = SettingsManager.getInstance();
@@ -33,24 +31,18 @@ async function app(): Promise<void> {
   // @ts-ignore
   hm.registerAll(hooks);
 
-  // Make commands
+  const availableHooks = Object.entries(sm.settings.on ?? {});
+  console.log('availableHooks', availableHooks);
+  availableHooks.forEach(([key, value]) => {
+    // Make commands
 
-  cli.command('')
-    .action(() => {
-      cli.outputHelp();
-    });
+    cli.command(key, value.description)
+      .action(() => dispatchHook(key));
+  });
 
-  cli
-    .command('build', 'Build your app')
-    .action(build);
-
-  cli
-    .command('dev', 'Preview your app without bundling')
-    .option('-w, --watch', 'Watch for changes and restart')
-    .action((files, options) => {
-      console.log(files, options);
-      console.log('start running');
-    });
+  // cli
+  //   .command('dev', 'Preview your app without bundling')
+  //   .option('-w, --watch', 'Watch for changes and restart')
 
   cli.help();
   cli.version('0.0.0');

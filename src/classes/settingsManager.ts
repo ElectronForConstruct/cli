@@ -42,8 +42,8 @@ export default class SettingsManager {
     this._profile = value;
   }
 
-  computeSettings(): ComputedRawSettings {
-    let settings: ComputedRawSettings = {};
+  computeSettings(): Partial<ComputedRawSettings> {
+    let settings: Partial<ComputedRawSettings> = {};
     const { profiles, on, ...rest } = this._settings;
     if (this.profile && profiles) {
       settings = deepmerge.all([rest, profiles[this.profile]]);
@@ -54,21 +54,25 @@ export default class SettingsManager {
     if (this._settings.on) {
       settings.on = {};
       const hooks = Object.entries(this._settings.on);
-      hooks.forEach(([key, steps]) => {
+      hooks.forEach(([key, hook]) => {
+        const { steps } = hook;
+
         // @ts-ignore
-        settings.on[key] = [];
+        settings.on[key] = {};
+        settings.on[key].description = hook.description;
+        settings.on[key].steps = [];
 
         steps.forEach((step) => {
-          if (typeof step === 'string') {
-            // @ts-ignore
-            settings.on[key].push({
-              config: {},
-              step,
-            });
-          } else {
-            // @ts-ignore
-            settings.on[key].push(step);
-          }
+          // if (typeof step === 'string') {
+          //   // @ts-ignore
+          //   settings.on[key].steps.push({
+          //     config: {},
+          //     step,
+          //   });
+          // } else {
+          // @ts-ignore
+          settings.on[key].steps.push(step);
+          // }
         });
       });
     }
@@ -81,7 +85,7 @@ export default class SettingsManager {
     const config = await explorerSync.search(root);
     // console.log('config', config);
     if (config) {
-      this.settings = config.config;
+      this.settings = config.config as Partial<Settings>;
       this.path = config.filepath;
       this.profile = profile;
     }

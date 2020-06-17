@@ -17,7 +17,6 @@ async function setupDir(
   const { settings } = sm;
   const { electron } = settings;
 
-
   // create temporary directory
   const tmpDir = path.join(os.tmpdir(), `efc_${path.basename(process.cwd())}`);
 
@@ -34,12 +33,11 @@ async function setupDir(
   // Fill package.json
   const pkgJSONPath = path.join(tmpDir, 'package.json');
   const pkgJSONData = await fs.readFile(pkgJSONPath, 'utf8');
-  const pkgJSON = JSON.parse(pkgJSONData);
+  const pkgJSON = JSON.parse(pkgJSONData) as { author: string | undefined };
 
   pkgJSON.author = settings.project?.author;
 
   await fs.writeFile(pkgJSONPath, JSON.stringify(pkgJSON), 'utf8');
-
 
   // Generate configuration
   await fs.writeFile(path.join(tmpDir, 'config.js'), `module.exports=${JSON.stringify(settings)}`, 'utf8');

@@ -57,6 +57,7 @@ module.exports = {
     ],
 
     '@typescript-eslint/explicit-function-return-type': 2,
-    '@typescript-eslint/ban-ts-ignore': 0
+    '@typescript-eslint/ban-ts-comment': 0,
+    '@typescript-eslint/no-unsafe-assignment': 1
   },
 };

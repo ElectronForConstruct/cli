@@ -47,13 +47,19 @@ export interface InternalSettings {
   configFilePath: string;
 }
 
-export interface HookSettings {
-  step: string;
+export interface HookStep {
+  name: string;
   config: any;
 }
 
-export type BaseHookSettings = Record<string, (HookSettings | string)[]>
-export type ComputedBaseHookSettings = Record<string, HookSettings[]>
+export interface HookSettings {
+  description: string;
+  // steps: (string | HookStep)[]
+  steps: HookStep[]
+}
+
+export type BaseHookSettings = Record<string, HookSettings>
+export type ComputedBaseHookSettings = Record<string, HookSettings>
 
 export type HooksSettings = BaseHookSettings
 
@@ -75,16 +81,16 @@ export interface RawSettings {
 }
 
 export interface ComputedRawSettings {
-  electron?: string;
-  errorLogging?: boolean;
-  singleInstance?: boolean;
-  window?: WindowSettings;
-  debug?: DebugSettings;
-  developer?: DeveloperSettings;
-  overlay?: OverlaySettings;
-  project?: ProjectSettings;
-  plugins?: string[];
-  switches?: string[];
+  electron: string;
+  errorLogging: boolean;
+  singleInstance: boolean;
+  window: WindowSettings;
+  debug: DebugSettings;
+  developer: DeveloperSettings;
+  overlay: OverlaySettings;
+  project: ProjectSettings;
+  plugins: string[];
+  switches: string[];
 
   on?: ComputedBaseHookSettings;
 }
