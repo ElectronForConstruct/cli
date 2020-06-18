@@ -51,30 +51,28 @@ export default class SettingsManager {
       settings = rest;
     }
 
+    // if (this._settings.on) {
+    //   settings.on = {};
+    //   const hooks = Object.entries(this._settings.on);
+    //   hooks.forEach(([key, hook]) => {
+    //     const { steps } = hook;
+
+    //     // @ts-ignore
+    //     settings.on = {};
+    //     settings.on[key] = {
+    //       description: hook.description,
+    //       steps: [],
+    //     };
+
+    //     steps.forEach((step) => {
+    //       // @ts-ignore
+    //       settings.on[key].steps.push(step);
+    //     });
+    //   });
+    // }
+
     if (this._settings.on) {
-      settings.on = {};
-      const hooks = Object.entries(this._settings.on);
-      hooks.forEach(([key, hook]) => {
-        const { steps } = hook;
-
-        // @ts-ignore
-        settings.on[key] = {};
-        settings.on[key].description = hook.description;
-        settings.on[key].steps = [];
-
-        steps.forEach((step) => {
-          // if (typeof step === 'string') {
-          //   // @ts-ignore
-          //   settings.on[key].steps.push({
-          //     config: {},
-          //     step,
-          //   });
-          // } else {
-          // @ts-ignore
-          settings.on[key].steps.push(step);
-          // }
-        });
-      });
+      settings.on = this._settings.on;
     }
 
     return settings;

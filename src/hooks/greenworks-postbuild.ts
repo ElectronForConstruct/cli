@@ -2,6 +2,7 @@ import path from 'path';
 // import nodeAbi from 'node-abi'
 import fs from 'fs-extra';
 import got from 'got';
+import Hook from '../classes/hook';
 
 interface Config {
   steamId: number;
@@ -23,15 +24,13 @@ export default {
     {
       hookSettings,
       workingDirectory,
-    }: {
-      workingDirectory: string;
-      settings: any;
-      hookSettings: Config;
     },
-  ): Promise<boolean> {
-    const { steamId } = hookSettings;
+  ) {
+    const { steamId } = hookSettings as Config;
 
     await fs.writeFile(path.join(workingDirectory, 'steam_appid.txt'), steamId, 'utf8');
-    return true;
+    return {
+      sources: [],
+    };
   },
-};
+} as Hook;

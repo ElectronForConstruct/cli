@@ -3,6 +3,7 @@ import { Options as BuildSettings } from 'electron-packager';
 
 export interface Asset {
   name: string;
+  // eslint-disable-next-line camelcase
   browser_download_url: string;
 }
 export interface GHRelease {
@@ -83,6 +84,7 @@ export interface RawSettings {
 export interface ComputedRawSettings {
   electron: string;
   errorLogging: boolean;
+  clearCache: boolean
   singleInstance: boolean;
   window: WindowSettings;
   debug: DebugSettings;
@@ -113,8 +115,19 @@ export interface CliObject {
   boolean?: boolean;
 }
 
+export interface RunArguments {
+    workingDirectory: string;
+    settings: any;
+    hookSettings: unknown;
+}
+
+export interface hookRunResult {
+  error?: Error,
+  sources: string[]
+}
+
 export type moduleRun = (args: mri.Argv) => Promise<boolean> | boolean
-export type hookRun = (hookArguments: unknown) => Promise<boolean>
+export type hookRun = (hookArguments: RunArguments) => Promise<hookRunResult> | hookRunResult
 export type onPreBuild = (args: mri.Argv, tmpdir: string)
   => Promise<boolean>
 export type onPostBuild = (args: mri.Argv, out: string)

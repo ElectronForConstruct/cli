@@ -1,6 +1,7 @@
 import * as path from 'path';
 import eb, { Configuration } from 'electron-builder/out';
 import { createScopedLogger } from '../utils/console';
+import Hook from '../classes/hook';
 
 type DeepWriteable<T> = { -readonly [P in keyof T]: DeepWriteable<T[P]> };
 
@@ -33,13 +34,8 @@ export default {
     {
       workingDirectory,
       hookSettings,
-      settings,
-    }: {
-      workingDirectory: string;
-      settings: any;
-      hookSettings: DeepWriteable<Configuration>;
     },
-  ): Promise<boolean> {
+  ) {
     const logger = createScopedLogger('installer', {
       interactive: true,
     });
@@ -77,6 +73,8 @@ export default {
       logger.log('There was an error building your project:', e);
     }
 
-    return true;
+    return {
+      sources: [workingDirectory],
+    };
   },
-};
+} as Hook;

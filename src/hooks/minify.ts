@@ -2,8 +2,10 @@ import * as path from 'path';
 import fs from 'fs-extra';
 import glob from 'glob';
 import Terser from 'terser';
-import { Settings } from '../models';
+import slash from 'slash';
+import { hookRunResult } from '../models/index';
 import { createScopedLogger } from '../utils/console';
+import Hook from '../classes/hook';
 
 interface Config {
   files: string[];
@@ -17,21 +19,12 @@ export default {
   description: 'Minify source files',
   name: 'minify',
   config,
-  run: function run(
-    {
-      workingDirectory,
-      hookSettings,
-    }: {
-      workingDirectory: string;
-      settings: any;
-      hookSettings: Config;
-    },
-  ): boolean {
+  run: function run({ workingDirectory, hookSettings }): hookRunResult {
     const logger = createScopedLogger('minify', {
       interactive: true,
     });
 
-    const { files: patterns } = hookSettings;
+    const { files: patterns } = hookSettings as Config;
 
     logger.info('Minifying...');
 
@@ -40,7 +33,7 @@ export default {
     const files: string[] = [];
     patterns.forEach((pattern) => {
       const matchedFiles = glob.sync(pattern, {
-        cwd: workingDirectory,
+        cwd: slash(workingDirectory),
         nodir: true,
       });
       files.push(...matchedFiles.map((file) => path.resolve(workingDirectory, file)));
@@ -74,6 +67,8 @@ export default {
 
     logger.success(`Successfully minified ${minified} files!`);
 
-    return true;
+    return {
+      sources: [workingDirectory],
+    };
   },
-};
+} as Hook;

@@ -1,4 +1,4 @@
-import deepmerge, { all } from 'deepmerge';
+import deepmerge from 'deepmerge';
 import Hook from './hook';
 import SettingsManager from './settingsManager';
 
@@ -35,7 +35,11 @@ export default class HookManager {
 
 export async function dispatchHook(
   hookName: string,
-): Promise<boolean[]> {
+  currentStep = 0,
+  sources: string[],
+): Promise<string[]> {
+  const results: string[] = [];
+
   const sm = SettingsManager.getInstance();
 
   const settings = sm.computeSettings();
@@ -44,30 +48,32 @@ export async function dispatchHook(
     console.log(`No hooks found for "${hookName}"`);
     return [];
   }
+
   const { steps } = on[hookName];
-  if (steps && Array.isArray(steps)) {
-    for (let i = 0; i < steps.length; i += 1) {
-      const step = steps[i];
-      const hookInst = HookManager.getInstance().get(step.name);
-      if (hookInst) {
-        let hookSettings;
-        // @ts-ignore
-        if (step.config) {
-          // @ts-ignore
-          hookSettings = deepmerge.all([hookInst.config ?? {}, step.config]);
-        } else {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          hookSettings = hookInst.config ?? {};
-        }
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const args = { settings, hookSettings };
-        await hookInst.run(args);
-      } else {
-        console.log(`Cannot find hook ${step.name}`);
-      }
-    }
-    return [];
+
+  const step = steps[currentStep];
+
+  if (!step) {
+    return sources;
   }
-  console.log(`No hooks found for "${hookName}"`);
-  return [];
+
+  const hookInst = HookManager.getInstance().get(step.name);
+  if (hookInst) {
+    // @ts-ignore
+    const hookSettings = deepmerge.all([hookInst.config ?? {}, step.config ?? {}]);
+
+    for (let sourceIndex = 0; sourceIndex < sources.length; sourceIndex += 1) {
+      const source = sources[sourceIndex];
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const args = { settings, hookSettings, workingDirectory: source };
+      const { sources: nextSources } = await hookInst.run(args);
+      // console.log('nextSources', nextSources);
+      const outDirs = await dispatchHook(hookName, currentStep + 1, nextSources);
+      results.push(...outDirs);
+    }
+  } else {
+    console.log(`Cannot find hook ${step.name}`);
+  }
+  return results;
 }

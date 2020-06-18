@@ -5,16 +5,15 @@ import extract from 'extract-zip';
 import { exec } from 'child_process';
 import signale from 'signale';
 import os from 'os';
-import { Settings } from '../models';
 import { createScopedLogger } from '../utils/console';
-
+import Hook from '../classes/hook';
 
 interface Config {
-  project: string | null;
+  project: string | null
   directories: {
-    name: string;
-    channel: string;
-  }[];
+    name: string
+    channel: string
+  }[]
 }
 
 const config: Config = {
@@ -37,6 +36,13 @@ const extractZip = async (from: string, to: string): Promise<string> => {
   return to;
 };
 
+interface ItchIoLogger {
+  type: string
+  message: string
+  progress: number
+  eta: string
+}
+
 const exe = async (
   command: string,
   logger: signale.Signale<signale.DefaultMethods>,
@@ -46,9 +52,9 @@ const exe = async (
     const npmstart = exec(command);
 
     if (npmstart && npmstart.stdout && npmstart.stderr) {
-      npmstart.stdout.on('data', (data) => {
+      npmstart.stdout.on('data', (data: Buffer) => {
         try {
-          const json = JSON.parse(data.toString());
+          const json: ItchIoLogger = JSON.parse(data.toString()) as ItchIoLogger;
 
           if (json.type === 'log') {
             logger.log(json.message);
@@ -61,7 +67,7 @@ const exe = async (
         }
       });
 
-      npmstart.stderr.on('data', (data) => {
+      npmstart.stderr.on('data', (data: Buffer) => {
         logger.error(data.toString());
       });
 
@@ -76,18 +82,11 @@ export default {
   description: 'Publish to Itch.io',
   name: 'itch',
   config,
-  run: async function run(
-    {
-      hookSettings,
-    }: {
-      workingDirectory: string;
-      settings: any;
-      hookSettings: Config;
-    },
-  ): Promise<boolean> {
+  run: async function run({ hookSettings, workingDirectory }) {
     const logger = createScopedLogger('itch', {
       interactive: true,
     });
+    const fixed = createScopedLogger('itch');
 
     const itchFolderPath = path.join(process.cwd(), 'itch');
     const butler = path.join(itchFolderPath, `butler${os.platform() === 'win32' ? '.exe' : ''}`);
@@ -98,7 +97,7 @@ export default {
       const arch = os.arch();
 
       const links = [
-      // get         remote
+        // get         remote
         ['darwin-x64', 'darwin-amd64'],
         ['linux-x64', 'linux-amd64'],
         ['linux-ia32', 'linux-386'],
@@ -108,7 +107,10 @@ export default {
 
       const foundLink = links.find((link) => link[0] === `${platform}-${arch}`);
       if (!foundLink) {
-        return false;
+        return {
+          error: true,
+          sources: [],
+        };
       }
       const butlerPlatform = foundLink[1];
       const linkToDownload = `https://broth.itch.ovh/butler/${butlerPlatform}/LATEST/archive/default`;
@@ -126,25 +128,34 @@ export default {
     await exe(`${butler} upgrade -j`, logger);
     await exe(`${butler} login`, logger);
 
-    const { project, directories } = hookSettings;
+    const { project, directories } = hookSettings as Config;
     if (!project) {
       logger.error('You must specify a project in the itch configuration!');
-      return false;
+      return {
+        error: true,
+        sources: [],
+      };
     }
 
+    let uploaded = false;
     for (let i = 0; i < directories.length; i += 1) {
       const directory = directories[i];
 
-      let outDir = directory.name;
-      if (!path.isAbsolute(outDir)) {
-        outDir = path.join(process.cwd(), outDir);
-      }
+      const outDir = path.resolve(process.cwd(), directory.name);
 
-      await exe(`${butler} push ${outDir} ${project}:${directory.channel} -j`, logger);
+      if (outDir === workingDirectory) {
+        await exe(`${butler} push ${outDir} ${project}:${directory.channel} -j`, logger);
+        logger.success(`${directory.channel} uploaded successfully`);
+        uploaded = true;
+      }
     }
 
-    logger.success('Directories uploaded successfully');
+    if (!uploaded) {
+      logger.warn(`Match for "${workingDirectory}" not found. Skipping.`);
+    }
 
-    return true;
+    return {
+      sources: [workingDirectory],
+    };
   },
-};
+} as Hook;

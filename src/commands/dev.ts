@@ -28,7 +28,7 @@ export default async function run(options: any): Promise<boolean> {
 
   const tempDir = await setupDir('preview');
 
-  await dispatchHook('build', tempDir);
+  await dispatchHook('build');
 
   await startPreview(workingDirectoryOrURL, tempDir);
   return true;

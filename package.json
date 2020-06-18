@@ -58,6 +58,7 @@
     "recursive-readdir": "^2.2.2",
     "semver": "^7.3.2",
     "signale": "^1.4.0",
+    "slash": "^3.0.0",
     "source-map-support": "^0.5.19",
     "terser": "^4.8.0",
     "tmp": "^0.2.1",

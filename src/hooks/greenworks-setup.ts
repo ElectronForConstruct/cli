@@ -5,6 +5,7 @@ import fs from 'fs-extra';
 import got from 'got';
 import { createScopedLogger } from '../utils/console';
 import { GHRelease } from '../models';
+import Hook from '../classes/hook';
 
 async function request<T>(url: string): Promise<T> {
   return got(url, {
@@ -51,12 +52,8 @@ export default {
       hookSettings,
       workingDirectory,
       settings,
-    }: {
-      workingDirectory: string;
-      settings: any;
-      hookSettings: Config;
     },
-  ): Promise<boolean> {
+  ) {
     const logger = createScopedLogger('greenworks', {
       interactive: true,
     });
@@ -66,19 +63,25 @@ export default {
       sdkPath,
       localGreenworksPath,
       prebuildsVersion,
-    } = hookSettings;
+    } = hookSettings as Config;
 
     const greenworksDir = path.join(workingDirectory, 'greenworks');
     const greenworksLibsDir = path.join(greenworksDir, 'lib');
 
     if (!sdkPath) {
       logger.error('Please specify a path to your steam sdk in the configuration file');
-      return false;
+      return {
+        error: '',
+        sources: [],
+      };
     }
 
     if (!fs.existsSync(sdkPath)) {
       logger.error(`${sdkPath} does not exist! Please, specify a valid path to your steam sdk.`);
-      return false;
+      return {
+        error: '',
+        sources: [],
+      };
     }
 
     // -----------------------///
@@ -96,7 +99,10 @@ export default {
     // Generate steamId
     if (!steamId) {
       logger.error('Please specify a steam game id in the configuration file');
-      return false;
+      return {
+        error: '',
+        sources: [],
+      };
     }
 
     logger.info('Downloading greenworks');
@@ -129,7 +135,10 @@ export default {
         }
       } catch (e) {
         logger.error(`There was an error copying ${file}, are you sure steam sdk path is valid ?`);
-        return false;
+        return {
+          error: '',
+          sources: [],
+        };
       }
     }
 
@@ -146,7 +155,10 @@ export default {
         }
       } else {
         logger.error(`${localLibPath} can not be found!`);
-        return false;
+        return {
+          error: '',
+          sources: [],
+        };
       }
     } else {
       const version = settings.electron;
@@ -181,7 +193,10 @@ Please, avoid using electron from 4.0.0 to 4.0.3`);
         if (!asset) {
           logger.error(`The target ${assetName} seems not to be available
           currently. Build it yourself, or change Electron version.`);
-          return false;
+          return {
+            error: '',
+            sources: [],
+          };
         }
         const res = asset.browser_download_url;
 
@@ -198,6 +213,8 @@ Please, avoid using electron from 4.0.0 to 4.0.3`);
     }
 
     logger.success('Initialization done!');
-    return true;
+    return {
+      sources: [workingDirectory],
+    };
   },
-};
+} as Hook;
