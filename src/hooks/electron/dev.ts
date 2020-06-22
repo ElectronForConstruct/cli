@@ -1,7 +1,7 @@
-import setupDir from '../utils/setupDir';
-import startPreview from '../utils/startPreview';
-import SettingsManager from '../classes/settingsManager';
-import { dispatchHook } from '../classes/hooksManager';
+import setupDir from '../../utils/setupDir';
+import startPreview from '../../utils/startPreview';
+import SettingsManager from '../../classes/settingsManager';
+import { dispatchHook } from '../../classes/hooksManager';
 
 // cli = [
 //   {

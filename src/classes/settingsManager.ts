@@ -1,6 +1,6 @@
 import { cosmiconfig } from 'cosmiconfig';
 import deepmerge from 'deepmerge';
-import { Settings, ComputedRawSettings } from '../models';
+import { Settings, ComputedSettings } from '../models';
 
 export default class SettingsManager {
   private static instance: SettingsManager
@@ -42,37 +42,37 @@ export default class SettingsManager {
     this._profile = value;
   }
 
-  computeSettings(): Partial<ComputedRawSettings> {
-    let settings: Partial<ComputedRawSettings> = {};
-    const { profiles, on, ...rest } = this._settings;
+  computeSettings(): ComputedSettings {
+    let settings: ComputedSettings = {};
+    const { tasks, ...rest } = this._settings;
     if (this.profile && profiles) {
       settings = deepmerge.all([rest, profiles[this.profile]]);
     } else {
       settings = rest;
     }
 
-    // if (this._settings.on) {
-    //   settings.on = {};
-    //   const hooks = Object.entries(this._settings.on);
+    // if (this._settings.tasks) {
+    //   settings.tasks = {};
+    //   const hooks = Object.entries(this._settings.tasks);
     //   hooks.forEach(([key, hook]) => {
     //     const { steps } = hook;
 
     //     // @ts-ignore
-    //     settings.on = {};
-    //     settings.on[key] = {
+    //     settings.tasks = {};
+    //     settings.tasks[key] = {
     //       description: hook.description,
     //       steps: [],
     //     };
 
     //     steps.forEach((step) => {
     //       // @ts-ignore
-    //       settings.on[key].steps.push(step);
+    //       settings.tasks[key].steps.push(step);
     //     });
     //   });
     // }
 
-    if (this._settings.on) {
-      settings.on = this._settings.on;
+    if (this._settings.tasks) {
+      settings.tasks = this._settings.tasks;
     }
 
     return settings;

@@ -48,7 +48,7 @@ async function app(): Promise<void> {
   // @ts-ignore
   hm.registerAll(hooks);
 
-  const availableHooks = Object.entries(sm.settings.on ?? {});
+  const availableHooks = Object.entries(sm.settings.tasks ?? {});
   availableHooks.forEach(([key, value]) => {
     // Make commands
     cli.command(key, value.description)

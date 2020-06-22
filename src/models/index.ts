@@ -1,136 +1,106 @@
-import mri from 'mri';
-import { Options as BuildSettings } from 'electron-packager';
-
 export interface Asset {
-  name: string;
+  name: string
   // eslint-disable-next-line camelcase
-  browser_download_url: string;
+  browser_download_url: string
 }
 export interface GHRelease {
-  assets: Asset[];
+  assets: Asset[]
 }
 
 export interface WindowSettings {
-  width: number;
-  height: number;
-  fullscreen: boolean;
-  frame: boolean;
-  transparent: boolean;
-  toolbar: boolean;
-  alwaysOnTop: boolean;
+  width: number
+  height: number
+  fullscreen: boolean
+  frame: boolean
+  transparent: boolean
+  toolbar: boolean
+  alwaysOnTop: boolean
 }
 
 export interface DebugSettings {
-  showConfig: boolean;
+  showConfig: boolean
 }
 
 export interface DeveloperSettings {
-  showConstructDevTools: boolean;
-  autoClose: boolean;
-  autoReload: boolean;
-  showChromeDevTools: boolean;
+  showConstructDevTools: boolean
+  autoClose: boolean
+  autoReload: boolean
+  showChromeDevTools: boolean
 }
 
 export interface OverlaySettings {
-  position: string;
-  content: string;
+  position: string
+  content: string
 }
 
 export interface ProjectSettings {
-  name: string;
-  description: string;
-  author: string;
-  version: string;
+  name: string
+  description: string
+  author: string
+  version: string
 }
 
 export interface InternalSettings {
-  settings: Settings;
-  configFilePath: string;
+  settings: Settings
+  configFilePath: string
 }
 
 export interface HookStep {
-  name: string;
-  config: any;
+  name: string
+  config: string
 }
 
 export interface HookSettings {
-  description: string;
+  description: string
   // steps: (string | HookStep)[]
   steps: HookStep[]
 }
 
-export type BaseHookSettings = Record<string, HookSettings>
-export type ComputedBaseHookSettings = Record<string, HookSettings>
+export type HooksSettings = Record<string, HookSettings>
 
-export type HooksSettings = BaseHookSettings
-
-export interface RawSettings {
-  electron?: string;
-  errorLogging?: boolean;
-  singleInstance?: boolean;
-  window?: WindowSettings;
-  debug?: DebugSettings;
-  developer?: DeveloperSettings;
-  overlay?: OverlaySettings;
-  project?: ProjectSettings;
-  plugins?: string[];
-  switches?: string[];
-
-  profiles?: Record<string, Settings>;
-
-  on?: HooksSettings;
+export interface ComplexConfig {
+  defaults: unknown
+  [index: string]: unknown
 }
 
-export interface ComputedRawSettings {
-  electron: string;
-  errorLogging: boolean;
-  clearCache: boolean
-  singleInstance: boolean;
-  window: WindowSettings;
-  debug: DebugSettings;
-  developer: DeveloperSettings;
-  overlay: OverlaySettings;
-  project: ProjectSettings;
-  plugins: string[];
-  switches: string[];
+export type SimpleConfig = unknown
 
-  on?: ComputedBaseHookSettings;
+export interface Settings {
+  config: Record<string, ComplexConfig>
+  // config: Record<string, SimpleConfig> | Record<string, ComplexConfig>
+
+  tasks?: HooksSettings
 }
 
-export interface ProfileSettings {
-  profiles?: Record<string, Settings>;
+export interface ComputedSettings {
+  [task: string]: {
+    description: string;
+    steps: {
+      name: string;
+      config: unknown
+    }[]
+  }
 }
-
-export type Settings = RawSettings & ProfileSettings
 
 export interface SetupDirOptions {
-  clearCache?: boolean;
+  clearCache?: boolean
 }
 
 export interface CliObject {
-  name: string;
-  shortcut?: string;
-  description?: string;
-  default?: string;
-  boolean?: boolean;
+  name: string
+  shortcut?: string
+  description?: string
+  default?: string
+  boolean?: boolean
 }
 
 export interface RunArguments {
-    workingDirectory: string;
-    settings: any;
-    hookSettings: unknown;
+  workingDirectory: string
+  settings: unknown
+  hookSettings: unknown
 }
 
 export interface hookRunResult {
   error?: Error,
   sources: string[]
 }
-
-export type moduleRun = (args: mri.Argv) => Promise<boolean> | boolean
-export type hookRun = (hookArguments: RunArguments) => Promise<hookRunResult> | hookRunResult
-export type onPreBuild = (args: mri.Argv, tmpdir: string)
-  => Promise<boolean>
-export type onPostBuild = (args: mri.Argv, out: string)
-  => Promise<boolean>
-export type onPostInstaller = (args: mri.Argv, folder: string)
-  => Promise<boolean>
