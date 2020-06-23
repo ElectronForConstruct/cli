@@ -72,14 +72,16 @@ export interface Settings {
   tasks?: HooksSettings
 }
 
+export interface ComputedTask {
+  description: string;
+  steps: {
+    name: string;
+    config: unknown
+  }[]
+}
+
 export interface ComputedSettings {
-  [task: string]: {
-    description: string;
-    steps: {
-      name: string;
-      config: unknown
-    }[]
-  }
+  [task: string]: ComputedTask
 }
 
 export interface SetupDirOptions {

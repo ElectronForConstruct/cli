@@ -1,6 +1,9 @@
 import { cosmiconfig } from 'cosmiconfig';
 import deepmerge from 'deepmerge';
-import { Settings, ComputedSettings } from '../models';
+import {
+  ComputedTask,
+  HookSettings, ComplexConfig, Settings, ComputedSettings,
+} from '../models/index';
 
 export default class SettingsManager {
   private static instance: SettingsManager
@@ -42,38 +45,56 @@ export default class SettingsManager {
     this._profile = value;
   }
 
+  private resolveConfig(
+    task: HookSettings,
+    config: Record<string, ComplexConfig> | undefined,
+  ): unknown {
+    const resultConfig = {};
+
+    return resultConfig;
+  }
+
   computeSettings(): ComputedSettings {
-    let settings: ComputedSettings = {};
-    const { tasks, ...rest } = this._settings;
-    if (this.profile && profiles) {
-      settings = deepmerge.all([rest, profiles[this.profile]]);
-    } else {
-      settings = rest;
+    const settings: ComputedSettings = {};
+    const { tasks, config } = this._settings;
+
+    if (!tasks) {
+      throw new Error('No tasks found');
     }
 
-    // if (this._settings.tasks) {
-    //   settings.tasks = {};
-    //   const hooks = Object.entries(this._settings.tasks);
-    //   hooks.forEach(([key, hook]) => {
-    //     const { steps } = hook;
+    const taskEntries = Object.entries(tasks);
 
-    //     // @ts-ignore
-    //     settings.tasks = {};
-    //     settings.tasks[key] = {
-    //       description: hook.description,
-    //       steps: [],
-    //     };
+    taskEntries.forEach(([taskName, task]) => {
+      const computedTask: ComputedTask = { ...task };
+      console.log('key', taskName);
+      console.log('task', task);
 
-    //     steps.forEach((step) => {
-    //       // @ts-ignore
-    //       settings.tasks[key].steps.push(step);
-    //     });
-    //   });
-    // }
+      const { steps } = task;
+      steps.forEach((step, index) => {
+        console.log('step', step);
+        const { name, config: stepConfig } = step;
 
-    if (this._settings.tasks) {
-      settings.tasks = this._settings.tasks;
-    }
+        // Check if config key exist
+        if (!config || (config && !config[stepConfig] && !config[stepConfig].defaults)) {
+          throw new Error(`No config entry "${stepConfig}" found for ${taskName}`);
+        }
+        // Get the default key
+        let computedSettings: any = !config[stepConfig].defaults as any;
+        // Merge default with current profile
+        if (this.profile) {
+          computedSettings = deepmerge.all([computedSettings, config[stepConfig][this.profile]]);
+        }
+
+        computedSettings = deepmerge.all([]);
+        computedTask.steps[index].config = computedSettings;
+      });
+
+      // const resolvedConfig = this.resolveConfig(task, config);
+
+      settings[taskName] = task;
+    });
+
+    console.log('finalSettings', JSON.stringify(settings, null, 2));
 
     return settings;
   }

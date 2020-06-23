@@ -43,13 +43,13 @@ export async function dispatchHook(
   const sm = SettingsManager.getInstance();
 
   const settings = sm.computeSettings();
-  const { on } = settings;
-  if (!on) {
+  const { tasks } = settings;
+  if (!tasks) {
     console.log(`No hooks found for "${hookName}"`);
     return [];
   }
 
-  const { steps } = on[hookName];
+  const { steps } = tasks[hookName];
 
   const step = steps[currentStep];
 
