@@ -28,23 +28,23 @@ export default {
   config,
   run: function run(
     {
-      hookSettings,
+      taskSettings,
     }: {
       workingDirectory: string;
       settings: any;
-      hookSettings: Config;
+      taskSettings: Config;
     },
   ): boolean {
     const logger = createScopedLogger('itch', {
       interactive: true,
     });
 
-    if (!hookSettings.enable) {
+    if (!taskSettings.enable) {
       logger.info('crash reporter is not enabled.');
       return true;
     }
 
-    if (!hookSettings.companyName || !hookSettings.submitURL) {
+    if (!taskSettings.companyName || !taskSettings.submitURL) {
       throw new Error('"crash-reporter.companyName" and "crash-reporter.submitURL" are required in order to enable the crash reporter');
     }
 

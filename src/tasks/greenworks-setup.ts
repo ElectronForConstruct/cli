@@ -2,10 +2,11 @@ import path from 'path';
 // @ts-ignore
 import abis from 'modules-abi';
 import fs from 'fs-extra';
-import got from 'got';
+import got, { Progress } from 'got';
+import { Signale } from 'signale';
 import { createScopedLogger } from '../utils/console';
 import { GHRelease } from '../models';
-import Hook from '../classes/hook';
+import Task from '../classes/Task';
 
 async function request<T>(url: string): Promise<T> {
   return got(url, {
@@ -15,11 +16,13 @@ async function request<T>(url: string): Promise<T> {
   }).json();
 }
 
-async function downloadFile(url: string, mypath: string, logger: any): Promise<any> {
+async function downloadFile(url: string, mypath: string, logger: Signale): Promise<any> {
   return new Promise((resolve) => {
     const stream = got.stream(url);
     stream
-      .on('downloadProgress', (progress) => logger.log(`${Math.round(progress.percent * 100)}%`))
+      .on('downloadProgress', (progress: Progress): void => {
+        logger.log(`${Math.round(progress.percent * 100)}%`);
+      })
       .pipe(fs.createWriteStream(
         mypath,
       ))
@@ -49,7 +52,7 @@ export default {
   config,
   run: async function run(
     {
-      hookSettings,
+      taskSettings,
       workingDirectory,
       settings,
     },
@@ -63,7 +66,9 @@ export default {
       sdkPath,
       localGreenworksPath,
       prebuildsVersion,
-    } = hookSettings as Config;
+    } = taskSettings as Config;
+
+    const { electron } = settings as any;
 
     const greenworksDir = path.join(workingDirectory, 'greenworks');
     const greenworksLibsDir = path.join(greenworksDir, 'lib');
@@ -161,11 +166,12 @@ export default {
         };
       }
     } else {
-      const version = settings.electron;
-      const abi = abis.getAbi(version, 'electron');
+      const electronVersion: string = electron;
+      // eslint-disable-next-line
+      const abi: string = abis.getAbi(electronVersion, 'electron');
 
-      if (version[0] === '4' && abi === '64') {
-        logger.error(`Electron version ${version} found - aborting due to known ABI issue
+      if (electronVersion[0] === '4' && abi === '64') {
+        logger.error(`Electron version ${electronVersion} found - aborting due to known ABI issue
 More information about this issue can be found at https://github.com/lgeiger/node-abi/issues/54
 Please, avoid using electron from 4.0.0 to 4.0.3`);
         throw new Error('Invalid Electron version');
@@ -217,4 +223,4 @@ Please, avoid using electron from 4.0.0 to 4.0.3`);
       sources: [workingDirectory],
     };
   },
-} as Hook;
+} as Task;

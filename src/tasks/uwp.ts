@@ -19,11 +19,11 @@ export default {
   run: async function run(
     {
       workingDirectory,
-      hookSettings,
+      taskSettings,
     }: {
       workingDirectory: string;
       settings: any;
-      hookSettings: Config;
+      taskSettings: Config;
     },
   ): Promise<boolean> {
     const logger = createScopedLogger('uwp', {

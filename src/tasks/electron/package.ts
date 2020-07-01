@@ -3,7 +3,7 @@ import * as path from 'path';
 import fs from 'fs-extra';
 import prettyDisplayFolders from '../../utils/prettyFolder';
 import { createScopedLogger } from '../../utils/console';
-import Hook from '../../classes/hook';
+import Task from '../../classes/task';
 
 interface PkgJSON {
   devDependencies: Record<string, string>
@@ -31,10 +31,10 @@ export default {
     ],
     win32metadata: {},
   },
-  run: async function run({ workingDirectory, hookSettings }) {
+  run: async function run({ workingDirectory, taskSettings }) {
     const logger = createScopedLogger('package');
 
-    const buildSettings: BuildSettings = hookSettings as BuildSettings;
+    const buildSettings: BuildSettings = taskSettings as BuildSettings;
 
     console.log('workingDirectory', workingDirectory);
     const pkgPath = path.join(workingDirectory, 'package.json');
@@ -107,4 +107,4 @@ export default {
       sources: [],
     };
   },
-} as Hook;
+} as Task;

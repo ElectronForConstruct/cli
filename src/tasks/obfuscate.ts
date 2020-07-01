@@ -20,18 +20,18 @@ export default {
   run: function run(
     {
       workingDirectory,
-      hookSettings,
+      taskSettings,
     }: {
       workingDirectory: string;
       settings: any;
-      hookSettings: Config;
+      taskSettings: Config;
     },
   ): boolean {
     const logger = createScopedLogger('minify', {
       interactive: true,
     });
 
-    const { files: patterns } = hookSettings;
+    const { files: patterns } = taskSettings;
 
     logger.info('Minifying...');
 

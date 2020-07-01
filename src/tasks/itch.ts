@@ -6,7 +6,7 @@ import { exec } from 'child_process';
 import signale from 'signale';
 import os from 'os';
 import { createScopedLogger } from '../utils/console';
-import Hook from '../classes/hook';
+import Task from '../classes/Task';
 
 interface Config {
   project: string | null
@@ -82,7 +82,7 @@ export default {
   description: 'Publish to Itch.io',
   name: 'itch',
   config,
-  run: async function run({ hookSettings, workingDirectory }) {
+  run: async function run({ taskSettings, workingDirectory }) {
     const logger = createScopedLogger('itch', {
       interactive: true,
     });
@@ -128,7 +128,7 @@ export default {
     await exe(`${butler} upgrade -j`, logger);
     await exe(`${butler} login`, logger);
 
-    const { project, directories } = hookSettings as Config;
+    const { project, directories } = taskSettings as Config;
     if (!project) {
       logger.error('You must specify a project in the itch configuration!');
       return {
@@ -158,4 +158,4 @@ export default {
       sources: [workingDirectory],
     };
   },
-} as Hook;
+} as Task;

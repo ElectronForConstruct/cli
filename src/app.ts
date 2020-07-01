@@ -2,10 +2,10 @@
 import { cac } from 'cac';
 import { cwd } from 'process';
 import { dump } from 'dumper.js';
-import HookManager, { dispatchHook } from './classes/hooksManager';
+import TaskManager, { dispatchTask } from './classes/tasksManager';
 import SettingsManager from './classes/settingsManager';
 
-import hooks from './hooks';
+import Tasks from './tasks';
 
 const cli = cac();
 
@@ -30,7 +30,7 @@ async function app(): Promise<void> {
     .option('-w, --watch', 'Watch for changes and restart')
     .option('-d, --debug', 'Output the resolved config file');
 
-  const hm = HookManager.getInstance();
+  const hm = TaskManager.getInstance();
   const sm = SettingsManager.getInstance();
 
   // --- Load config
@@ -43,23 +43,23 @@ async function app(): Promise<void> {
   }
   await sm.loadConfig(parsed.options.profile, configFile);
 
-  // --- Load hooks
+  // --- Load Tasks
 
   // @ts-ignore
-  hm.registerAll(hooks);
+  hm.registerAll(Tasks);
 
-  const availableHooks = Object.entries(sm.settings.tasks ?? {});
-  availableHooks.forEach(([key, value]) => {
+  const availableTasks = Object.entries(sm.settings.tasks ?? {});
+  availableTasks.forEach(([key, value]) => {
     // Make commands
     cli.command(key, value.description)
       .action(async (args: Args) => {
-        const { settings } = sm;
+        const settings = sm.computeSettings();
 
         if (args.debug) {
           dump(settings);
         }
 
-        const outputDirs = await dispatchHook(key, 0, [cwd()]);
+        const outputDirs = await dispatchTask(key, settings, 0, [cwd()]);
         console.log('outputDirs', outputDirs);
       });
   });

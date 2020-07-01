@@ -18,7 +18,7 @@ export default {};
 //   return body.version;
 // }
 //
-// export const hooks = [];
+// export const Tasks = [];
 // export const command = class Plugin extends CynModule {
 //   name = 'plugin';
 //

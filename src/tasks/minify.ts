@@ -3,9 +3,9 @@ import fs from 'fs-extra';
 import glob from 'glob';
 import Terser from 'terser';
 import slash from 'slash';
-import { hookRunResult } from '../models/index';
+import { TaskRunResult } from '../models/index';
 import { createScopedLogger } from '../utils/console';
-import Hook from '../classes/hook';
+import Task from '../classes/task';
 
 interface Config {
   files: string[];
@@ -19,12 +19,12 @@ export default {
   description: 'Minify source files',
   name: 'minify',
   config,
-  run: function run({ workingDirectory, hookSettings }): hookRunResult {
+  run: function run({ workingDirectory, taskSettings }): TaskRunResult {
     const logger = createScopedLogger('minify', {
       interactive: true,
     });
 
-    const { files: patterns } = hookSettings as Config;
+    const { files: patterns } = taskSettings as Config;
 
     logger.info('Minifying...');
 
@@ -71,4 +71,4 @@ export default {
       sources: [workingDirectory],
     };
   },
-} as Hook;
+} as Task;

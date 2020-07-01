@@ -2,8 +2,9 @@ import { cosmiconfig } from 'cosmiconfig';
 import deepmerge from 'deepmerge';
 import {
   ComputedTask,
-  HookSettings, ComplexConfig, Settings, ComputedSettings,
+  taskSettings, ComplexConfig, Settings, ComputedSettings,
 } from '../models/index';
+import TaskManager from './tasksManager';
 
 export default class SettingsManager {
   private static instance: SettingsManager
@@ -45,15 +46,6 @@ export default class SettingsManager {
     this._profile = value;
   }
 
-  private resolveConfig(
-    task: HookSettings,
-    config: Record<string, ComplexConfig> | undefined,
-  ): unknown {
-    const resultConfig = {};
-
-    return resultConfig;
-  }
-
   computeSettings(): ComputedSettings {
     const settings: ComputedSettings = {};
     const { tasks, config } = this._settings;
@@ -66,35 +58,40 @@ export default class SettingsManager {
 
     taskEntries.forEach(([taskName, task]) => {
       const computedTask: ComputedTask = { ...task };
-      console.log('key', taskName);
-      console.log('task', task);
 
       const { steps } = task;
       steps.forEach((step, index) => {
-        console.log('step', step);
         const { name, config: stepConfig } = step;
 
         // Check if config key exist
-        if (!config || (config && !config[stepConfig] && !config[stepConfig].defaults)) {
+        if (!config || !config?.[stepConfig]) {
           throw new Error(`No config entry "${stepConfig}" found for ${taskName}`);
         }
+        // Set default config
+        const baseConfig = TaskManager.getInstance().get(name)?.config ?? {};
+        let computedSettings: any = baseConfig;
+
         // Get the default key
-        let computedSettings: any = !config[stepConfig].defaults as any;
+        computedSettings = deepmerge.all([computedSettings, config[stepConfig].defaults ?? {}]);
+
         // Merge default with current profile
         if (this.profile) {
-          computedSettings = deepmerge.all([computedSettings, config[stepConfig][this.profile]]);
+          computedSettings = deepmerge.all(
+            [
+              computedSettings,
+              config[stepConfig]?.[this.profile] ?? {},
+            ],
+          );
         }
 
-        computedSettings = deepmerge.all([]);
-        computedTask.steps[index].config = computedSettings;
+        // computedSettings = deepmerge.all([]);
+        computedTask.steps[index].config = { ...computedSettings };
       });
 
       // const resolvedConfig = this.resolveConfig(task, config);
 
-      settings[taskName] = task;
+      settings[taskName] = { ...task };
     });
-
-    console.log('finalSettings', JSON.stringify(settings, null, 2));
 
     return settings;
   }

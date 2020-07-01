@@ -1,7 +1,7 @@
 import * as path from 'path';
 import eb, { Configuration } from 'electron-builder/out';
 import { createScopedLogger } from '../utils/console';
-import Hook from '../classes/hook';
+import Task from '../classes/Task';
 
 type DeepWriteable<T> = { -readonly [P in keyof T]: DeepWriteable<T[P]> };
 
@@ -32,42 +32,46 @@ export default {
   config,
   run: async function run(
     {
+      settings,
       workingDirectory,
-      hookSettings,
+      taskSettings,
     },
   ) {
     const logger = createScopedLogger('installer', {
       interactive: true,
     });
 
+    let { electronVersion, directories } = taskSettings as DeepWriteable<Configuration>;
+    const { electron } = settings as any;
+
     // todo https://www.electron.build/#pack-only-in-a-distributable-format
 
-    if (settings.electron) {
-      hookSettings.electronVersion = settings.electron;
+    if (electron) {
+      electronVersion = electron;
     }
 
-    if (!hookSettings.directories) {
-      hookSettings.directories = {};
+    if (!directories) {
+      directories = {};
     }
 
-    hookSettings.directories.app = workingDirectory;
+    directories.app = workingDirectory;
 
-    if (!path.isAbsolute(hookSettings.directories.output ?? '')) {
-      hookSettings.directories.output = path.join(process.cwd(), hookSettings.directories.output ?? '');
+    if (!path.isAbsolute(directories.output ?? '')) {
+      directories.output = path.join(process.cwd(), directories.output ?? '');
     }
-    if (!path.isAbsolute(hookSettings.directories.app)) {
-      hookSettings.directories.app = path.join(process.cwd(), hookSettings.directories.app);
+    if (!path.isAbsolute(directories.app)) {
+      directories.app = path.join(process.cwd(), directories.app);
     }
-    if (!path.isAbsolute(hookSettings.directories.buildResources ?? '')) {
-      hookSettings.directories.buildResources = path.join(
+    if (!path.isAbsolute(directories.buildResources ?? '')) {
+      directories.buildResources = path.join(
         process.cwd(),
-        hookSettings.directories.buildResources ?? '',
+        directories.buildResources ?? '',
       );
     }
 
     try {
       // @ts-ignore
-      const appPaths = await eb.build({ config: hookSettings });
+      const appPaths = await eb.build({ config: taskSettings });
       console.log('appPaths', appPaths);
     } catch (e) {
       logger.log('There was an error building your project:', e);
@@ -77,4 +81,4 @@ export default {
       sources: [workingDirectory],
     };
   },
-} as Hook;
+} as Task;

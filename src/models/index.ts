@@ -45,18 +45,18 @@ export interface InternalSettings {
   configFilePath: string
 }
 
-export interface HookStep {
+export interface TaskStep {
   name: string
   config: string
 }
 
-export interface HookSettings {
+export interface taskSettings {
   description: string
-  // steps: (string | HookStep)[]
-  steps: HookStep[]
+  // steps: (string | TaskStep)[]
+  steps: TaskStep[]
 }
 
-export type HooksSettings = Record<string, HookSettings>
+export type TasksSettings = Record<string, taskSettings>
 
 export interface ComplexConfig {
   defaults: unknown
@@ -69,7 +69,7 @@ export interface Settings {
   config: Record<string, ComplexConfig>
   // config: Record<string, SimpleConfig> | Record<string, ComplexConfig>
 
-  tasks?: HooksSettings
+  tasks?: TasksSettings
 }
 
 export interface ComputedTask {
@@ -99,10 +99,20 @@ export interface CliObject {
 export interface RunArguments {
   workingDirectory: string
   settings: unknown
-  hookSettings: unknown
+  taskSettings: unknown
 }
 
-export interface hookRunResult {
+export interface TaskRunResult {
   error?: Error,
   sources: string[]
 }
+
+export interface SetupConfig {
+  version: string;
+  clearCache: boolean;
+  project: {
+    author: string;
+  },
+}
+
+export type TaskRun = (TaskArguments: RunArguments) => Promise<TaskRunResult> | TaskRunResult

@@ -2,7 +2,9 @@ import { exec } from 'child_process';
 import * as path from 'path';
 import { createScopedLogger } from './console';
 
-const logger = createScopedLogger('system');
+const logger = createScopedLogger('system', {
+  interactive: true,
+});
 
 async function installPackages(
   packages: string[] = [],
@@ -10,6 +12,7 @@ async function installPackages(
   dev = false,
 ): Promise<boolean> {
   return new Promise((resolve) => {
+    logger.await('Installing packages');
     const yarn = path.join(__dirname, '..', '..', '3rd-party', 'yarn.js');
 
     let command = `node "${yarn}" --cwd="${cwd}"`;
@@ -19,14 +22,13 @@ async function installPackages(
 
     const yarnCmd = exec(command);
 
-
     if (yarnCmd && yarnCmd.stderr && yarnCmd.stdout) {
       yarnCmd.stdout.on('data', (data) => {
-        logger.info(data.toString().trim());
+        // logger.info(data.toString().trim());
       });
 
       yarnCmd.stderr.on('data', (data) => {
-        logger.info(data.toString().trim());
+        // logger.info(data.toString().trim());
       });
     }
 
