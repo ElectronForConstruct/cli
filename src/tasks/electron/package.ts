@@ -1,15 +1,38 @@
 import packager, { Options as BuildSettings } from 'electron-packager';
 import * as path from 'path';
 import fs from 'fs-extra';
+import util from 'util';
 import prettyDisplayFolders from '../../utils/prettyFolder';
 import { createScopedLogger } from '../../utils/console';
 import Task from '../../classes/task';
+
+const a: any[] = [];
 
 interface PkgJSON {
   devDependencies: Record<string, string>
   version: string
   name: string
   author: string
+}
+
+function hookStdout(callback) {
+  const boundProcessStdout = process.stdout.write.bind(process.stdout);
+  const boundProcessStderr = process.stderr.write.bind(process.stderr);
+
+  process.stdout.write = (string, encoding, fd) => {
+    // boundProcessStdout(string, encoding, fd);
+    callback(string, encoding, fd, false);
+  };
+
+  process.stderr.write = (string, encoding, fd) => {
+    // boundProcessStderr(string, encoding, fd);
+    callback(string, encoding, fd, true);
+  };
+
+  return () => {
+    process.stdout.write = boundProcessStdout;
+    process.stderr.write = boundProcessStderr;
+  };
 }
 
 export default {
@@ -75,7 +98,18 @@ export default {
     try {
       logger.start('Packaging started');
 
-      await packager(buildSettings);
+      // const log: string[] = [];
+      // const unhook = hookStdout((string: string) => {
+      //   log.push(string);
+      // });
+
+      const result = await packager(buildSettings);
+      console.log('result', result);
+
+      // unhook();
+      // log.forEach((line: string) => {
+      //   logger.log(line.replace('\n', '').trim());
+      // });
 
       const isDirectory = (source: string): boolean => fs.lstatSync(source).isDirectory();
 
