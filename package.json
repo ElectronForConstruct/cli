@@ -7,6 +7,6 @@
     "bootstrap": "lerna bootstrap",
     "build": "lerna run build",
     "watch": "lerna run watch --stream",
-    "release": "lerna publish --access public"
+    "release": "lerna publish"
   }
 }
