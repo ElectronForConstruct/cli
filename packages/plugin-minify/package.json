@@ -1,6 +1,6 @@
 {
   "name": "@cyn/plugin-minify",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "> TODO: description",
   "author": "Quentin Goinaud <armaldio@gmail.com>",
   "homepage": "",
@@ -26,7 +26,7 @@
     "typescript": "^3.9.7"
   },
   "dependencies": {
-    "@cyn/utils": "^1.0.0",
+    "@cyn/utils": "^0.0.1",
     "fs-extra": "^9.0.1",
     "glob": "^7.1.6",
     "slash": "^3.0.0",
