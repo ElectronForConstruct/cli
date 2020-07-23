@@ -4,7 +4,7 @@
   "description": "> TODO: description",
   "author": "Quentin Goinaud <armaldio@gmail.com>",
   "homepage": "",
-  "license": "ISC",
+  "license": "MIT",
   "main": "dist/index.js",
   "directories": {
     "lib": "lib"
