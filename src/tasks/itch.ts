@@ -110,7 +110,7 @@ export default {
 
       if (outDir === workingDirectory) {
         logger.log('Publishing to itch...');
-        await exe(`${butler} push ${outDir} ${project}:${directory.channel} -j`, logger);
+        await exe(`${butler} push ${outDir} ${project}:${directory.channel} -j`, true);
         logger.success(`${directory.channel} uploaded successfully`);
         uploaded = true;
       }

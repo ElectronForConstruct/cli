@@ -56,6 +56,7 @@ export async function dispatchTask(
     return sources;
   }
 
+  console.log(`Step: ${step.name}`);
   const TaskInst = TaskManager.getInstance().get(step.name);
   if (TaskInst) {
     // @ts-ignore

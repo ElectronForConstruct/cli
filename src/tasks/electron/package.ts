@@ -6,8 +6,6 @@ import prettyDisplayFolders from '../../utils/prettyFolder';
 import { createScopedLogger } from '../../utils/console';
 import Task from '../../classes/task';
 
-const a: any[] = [];
-
 interface PkgJSON {
   devDependencies: Record<string, string>
   version: string
@@ -15,25 +13,25 @@ interface PkgJSON {
   author: string
 }
 
-function hookStdout(callback) {
-  const boundProcessStdout = process.stdout.write.bind(process.stdout);
-  const boundProcessStderr = process.stderr.write.bind(process.stderr);
+// function hookStdout(callback) {
+//   const boundProcessStdout = process.stdout.write.bind(process.stdout);
+//   const boundProcessStderr = process.stderr.write.bind(process.stderr);
 
-  process.stdout.write = (string, encoding, fd) => {
-    // boundProcessStdout(string, encoding, fd);
-    callback(string, encoding, fd, false);
-  };
+//   process.stdout.write = (string, encoding, fd) => {
+//     // boundProcessStdout(string, encoding, fd);
+//     callback(string, encoding, fd, false);
+//   };
 
-  process.stderr.write = (string, encoding, fd) => {
-    // boundProcessStderr(string, encoding, fd);
-    callback(string, encoding, fd, true);
-  };
+//   process.stderr.write = (string, encoding, fd) => {
+//     // boundProcessStderr(string, encoding, fd);
+//     callback(string, encoding, fd, true);
+//   };
 
-  return () => {
-    process.stdout.write = boundProcessStdout;
-    process.stderr.write = boundProcessStderr;
-  };
-}
+//   return () => {
+//     process.stdout.write = boundProcessStdout;
+//     process.stderr.write = boundProcessStderr;
+//   };
+// }
 
 export default {
   description: 'Package your app',
