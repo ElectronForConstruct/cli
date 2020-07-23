@@ -1,6 +1,5 @@
 {
   "name": "cyn",
-  "private": false,
   "devDependencies": {
     "lerna": "^3.22.1"
   },
@@ -8,6 +7,6 @@
     "bootstrap": "lerna bootstrap",
     "build": "lerna run build",
     "watch": "lerna run watch --stream",
-    "release": "lerna publish"
+    "release": "lerna publish --access public"
   }
 }
