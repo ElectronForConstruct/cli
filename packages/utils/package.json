@@ -22,5 +22,8 @@
   "dependencies": {
     "signale": "^1.4.0",
     "typescript": "^3.9.7"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

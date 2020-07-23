@@ -32,5 +32,8 @@
     "slash": "^3.0.0",
     "terser": "^4.8.0",
     "typescript": "^3.9.7"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
