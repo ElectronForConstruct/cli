@@ -5,6 +5,9 @@
   "author": "Quentin Goinaud <armaldio@gmail.com>",
   "homepage": "",
   "license": "MIT",
+  "bin": {
+    "create-plugin": "dist/index.js"
+  },
   "main": "dist/index.js",
   "directories": {
     "lib": "lib"

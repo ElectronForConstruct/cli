@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import * as path from 'path'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
