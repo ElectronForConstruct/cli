@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "packages\\cli"
+		},
+		{
+			"path": "packages\\create-plugin"
+		},
+		{
+			"path": "packages\\plugin-minify"
+		},
+		{
+			"path": "packages\\utils"
+		}
+	],
+	"settings": {}
+}

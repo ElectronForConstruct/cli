@@ -1,4 +1,3 @@
-// import { cosmiconfig } from 'cosmiconfig';
 import { cac } from 'cac';
 import { cwd } from 'process';
 import { dump } from 'dumper.js';
