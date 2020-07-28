@@ -116,3 +116,17 @@ export interface SetupConfig {
 }
 
 export type TaskRun = (TaskArguments: RunArguments) => Promise<TaskRunResult> | TaskRunResult
+
+export interface Args {
+  p: string;
+  profile: string
+
+  c: string;
+  config: string
+
+  d: boolean
+  debug: boolean
+
+  w: boolean
+  watch: boolean
+}

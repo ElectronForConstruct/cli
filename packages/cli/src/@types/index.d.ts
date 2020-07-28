@@ -29,3 +29,11 @@ declare module 'launch-editor' {
 
 declare module 'prompt-confirm'
 declare module 'yarn'
+
+declare module 'download-tarball' {
+  function download({
+    url: string,
+    dir: string,
+  }): Promise<any>;
+  export = download
+}

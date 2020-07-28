@@ -2,26 +2,17 @@
 import { cac } from 'cac';
 import { cwd } from 'process';
 import { dump } from 'dumper.js';
+import fs from 'fs';
+import path from 'path';
 import TaskManager, { dispatchTask } from './classes/tasksManager';
 import SettingsManager from './classes/settingsManager';
 
+import add from './commands/add';
+
 import Tasks from './tasks';
+import { Args } from './models';
 
 const cli = cac();
-
-interface Args {
-  p: string;
-  profile: string
-
-  c: string;
-  config: string
-
-  d: boolean
-  debug: boolean
-
-  w: boolean
-  watch: boolean
-}
 
 async function app(): Promise<void> {
   cli
@@ -51,7 +42,8 @@ async function app(): Promise<void> {
   const availableTasks = Object.entries(sm.settings.tasks ?? {});
   availableTasks.forEach(([key, value]) => {
     // Make commands
-    cli.command(key, value.description)
+    cli
+      .command(key, value.description)
       .action(async (args: Args) => {
         const settings = sm.computeSettings();
 
@@ -64,8 +56,25 @@ async function app(): Promise<void> {
       });
   });
 
+  // Load local commands and override any command made by the user
+  const commands = [add];
+  commands.forEach(({ name, description, callback }) => {
+    cli
+      .command(name, description)
+      .action(callback);
+  });
+
   cli.help();
-  cli.version('0.0.0');
+
+  let pkg: any = {};
+  try {
+    pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8'));
+  } catch (error) {
+    console.log('Error reading package.json file');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  cli.version(pkg?.version ?? '0.0.0');
 
   // Run
   cli.parse();
