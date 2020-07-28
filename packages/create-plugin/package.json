@@ -20,7 +20,8 @@
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "watch": "tsc --project tsconfig.json --watch",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "prepare" : "npm run build"
   },
   "devDependencies": {
     "@types/node": "^14.0.24",
