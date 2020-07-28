@@ -15,7 +15,7 @@
   "preferGlobal": true,
   "files": [
     "dist",
-    "template"
+    "template/**/*"
   ],
   "scripts": {
     "build": "tsc --project tsconfig.json",
