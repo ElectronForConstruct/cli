@@ -9,13 +9,10 @@
     "create-plugin": "dist/index.js"
   },
   "main": "dist/index.js",
-  "directories": {
-    "lib": "lib"
-  },
   "preferGlobal": true,
   "files": [
     "dist",
-    "template/**/*"
+    "template"
   ],
   "scripts": {
     "build": "tsc --project tsconfig.json",
