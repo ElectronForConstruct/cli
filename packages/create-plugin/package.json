@@ -1,6 +1,6 @@
 {
   "name": "@cyn/create-plugin",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "> TODO: description",
   "author": "Quentin Goinaud <armaldio@gmail.com>",
   "homepage": "",
@@ -21,7 +21,7 @@
     "build": "tsc --project tsconfig.json",
     "watch": "tsc --project tsconfig.json --watch",
     "start": "node dist/index.js",
-    "prepare" : "npm run build"
+    "prepare": "npm run build"
   },
   "devDependencies": {
     "@types/node": "^14.0.24",
