@@ -12,8 +12,10 @@
   "directories": {
     "lib": "lib"
   },
+  "preferGlobal": true,
   "files": [
-    "dist"
+    "dist",
+    "template"
   ],
   "scripts": {
     "build": "tsc --project tsconfig.json",

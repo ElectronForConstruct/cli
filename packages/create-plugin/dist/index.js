@@ -30,12 +30,14 @@ const plop_1 = require("plop");
 const minimist_1 = __importDefault(require("minimist"));
 const args = process.argv.slice(2);
 const argv = minimist_1.default(args);
+console.log('argv', argv);
 plop_1.Plop.launch({
     cwd: argv.cwd,
     configPath: path.join(__dirname, 'plopfile.js'),
     require: argv.require,
     completion: argv.completion
 }, (env) => {
+    console.log('process.cwd()', process.cwd());
     const options = {
         ...env,
         dest: process.cwd()

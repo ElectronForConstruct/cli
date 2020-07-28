@@ -1,6 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function default_1(plop) {
+    const basePath = plop.getPlopfilePath();
+    const destBasePath = plop.getDestBasePath();
+    console.log('basePath', basePath);
+    console.log('destBasePath', destBasePath);
     plop.setGenerator('plugin', {
         description: 'Create a new Cyn plugin',
         prompts: [{

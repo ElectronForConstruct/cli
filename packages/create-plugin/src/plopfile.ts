@@ -3,6 +3,11 @@
 import {NodePlopAPI} from 'plop';
 
 export default function (plop: NodePlopAPI): any {
+    const basePath = plop.getPlopfilePath()
+    const destBasePath = plop.getDestBasePath()
+
+    console.log('basePath', basePath)
+    console.log('destBasePath', destBasePath)
     plop.setGenerator('plugin', {
         description: 'Create a new Cyn plugin',
         prompts: [{
