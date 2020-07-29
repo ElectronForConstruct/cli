@@ -1,17 +1,28 @@
 import { cac } from 'cac';
 import { cwd } from 'process';
 import { dump } from 'dumper.js';
-import fs from 'fs';
+import fs from 'fs-extra';
 import path from 'path';
 import TaskManager, { dispatchTask } from './classes/tasksManager';
 import SettingsManager from './classes/settingsManager';
 
 import add from './commands/add';
+import remove from './commands/remove';
 
 import Tasks from './tasks';
 import { Args } from './models';
 
 const cli = cac();
+
+async function importPlugin(pluginName: string): Promise<any> {
+  const absolutePathTask = path.join(process.cwd(), '.cyn', 'plugins', pluginName, 'package', 'dist', 'index.js');
+  const exists = await fs.pathExists(absolutePathTask);
+  if (exists) {
+    return import(absolutePathTask);
+  }
+  console.error(`Impossible to find plugin "${pluginName}". Please ensure it's installed with "cyn add ${pluginName}"`);
+  return null;
+}
 
 async function app(): Promise<void> {
   cli
@@ -35,8 +46,26 @@ async function app(): Promise<void> {
 
   // --- Load Tasks
 
-  // @ts-ignore
-  hm.registerAll(Tasks);
+  const { plugins } = sm.settings;
+
+  const taskToLoad: Promise<any>[] = [];
+  if (plugins && Array.isArray(plugins) && plugins.length > 0) {
+    for (let index = 0; index < plugins?.length ?? 0; index += 1) {
+      const pluginName = plugins[index];
+
+      taskToLoad.push(importPlugin(pluginName));
+    }
+  }
+
+  let externalTasks = await Promise.all(taskToLoad);
+  externalTasks = externalTasks
+    .filter((taskSetup) => taskSetup !== null)
+    .map((taskSetup) => taskSetup.default.tasks)
+    .reduce((acc, value) => acc.concat(value), []);
+
+  const allTasks = Tasks.concat(externalTasks);
+
+  hm.registerAll(allTasks);
 
   const availableTasks = Object.entries(sm.settings.tasks ?? {});
   availableTasks.forEach(([key, value]) => {
@@ -56,7 +85,7 @@ async function app(): Promise<void> {
   });
 
   // Load local commands and override any command made by the user
-  const commands = [add];
+  const commands = [add, remove];
   commands.forEach(({ name, description, callback }) => {
     cli
       .command(name, description)

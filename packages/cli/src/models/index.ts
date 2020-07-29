@@ -70,6 +70,8 @@ export interface Settings {
   // config: Record<string, SimpleConfig> | Record<string, ComplexConfig>
 
   tasks?: TasksSettings
+  extends?: string[]
+  plugins?: string[]
 }
 
 export interface ComputedTask {

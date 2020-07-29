@@ -12,12 +12,14 @@ export default {
     const [, packageName, packageVersion] = matches;
 
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    const response:any = await got(`https://registry.npmjs.org/${packageName}`).json();
+    const npmURL = `https://registry.npmjs.org/${packageName}`;
+    console.log('fetching', npmURL);
+    const response:any = await got(npmURL).json();
     const version = packageVersion || response['dist-tags'].latest;
 
     const URL: string = response.versions[version].dist.tarball;
 
-    const destPath = path.join(process.cwd(), '.cyn', 'plugins', packageName, version);
+    const destPath = path.join(process.cwd(), '.cyn', 'plugins', packageName);
 
     const directoryExists = await fs.pathExists(destPath);
     if (!directoryExists) {

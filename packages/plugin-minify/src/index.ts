@@ -17,6 +17,7 @@ const config: Config = {
 
 export default {
     name: 'minify',
+    description: 'Provide tasks to minify your app',
     tasks: [{
         description: 'Minify source files',
         name: 'minify',
