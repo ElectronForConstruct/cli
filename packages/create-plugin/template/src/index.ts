@@ -1,4 +1,3 @@
-import path from 'path';
 import { createScopedLogger } from '@cyn/utils';
 
 interface Config {
@@ -18,6 +17,7 @@ export default {
       name: '{{ name }}',
       config,
       run({ workingDirectory }: { workingDirectory: string }): any {
+        const logger = createScopedLogger()
           console.log('Just passing by!')
           return {
               sources: [workingDirectory],

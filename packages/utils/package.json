@@ -13,11 +13,11 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts"
+    "build": "ncc build src/index.ts -o dist"
   },
   "devDependencies": {
     "@types/signale": "^1.4.1",
-    "tsup": "^3.1.2"
+    "@zeit/ncc": "^0.22.3"
   },
   "dependencies": {
     "signale": "^1.4.0",
