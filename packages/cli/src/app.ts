@@ -15,13 +15,23 @@ import { Args } from './models';
 const cli = cac();
 
 async function importPlugin(pluginName: string): Promise<any> {
-  const absolutePathTask = path.join(process.cwd(), '.cyn', 'plugins', pluginName, 'package', 'dist', 'index.js');
-  const exists = await fs.pathExists(absolutePathTask);
-  if (exists) {
-    return import(absolutePathTask);
+  const basePath = path.join(process.cwd(), '.cyn', 'plugins', pluginName, 'package');
+  const paths = [
+    path.join(basePath, 'index.js'),
+    path.join(basePath, 'dist', 'index.js'),
+    // read package.json 'main'
+  ];
+
+  for (let index = 0; index < paths.length; index += 1) {
+    const testPath = paths[index];
+
+    const exists = await fs.pathExists(testPath);
+    if (exists) {
+      return import(testPath);
+    }
   }
-  console.error(`Impossible to find plugin "${pluginName}". Please ensure it's installed with "cyn add ${pluginName}"`);
-  return null;
+
+  throw new Error(`Impossible to find plugin "${pluginName}". Please ensure it's installed with "cyn add ${pluginName}"`);
 }
 
 async function app(): Promise<void> {
