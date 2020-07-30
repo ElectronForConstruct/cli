@@ -5,10 +5,6 @@
   "devDependencies": {
     "lerna": "^3.22.1"
   },
-  "workspaces": [
-    "packages/*",
-    "packages/plugins/*"
-  ],
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "build": "lerna run build",
