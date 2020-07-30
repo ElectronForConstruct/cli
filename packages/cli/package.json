@@ -1,6 +1,6 @@
 {
   "name": "@cyn/cli",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "A command-line tool to manage your Construct Electron projects",
   "scripts": {
     "build": "tsc",
