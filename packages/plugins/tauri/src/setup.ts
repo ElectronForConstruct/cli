@@ -1,10 +1,9 @@
 import * as path from 'path';
 import os from 'os';
 import fs from 'fs-extra';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import init from 'tauri/dist/api/init';
-import Task from '../../classes/task';
-import { SetupConfig } from '../../models';
 
 const config: any = {
 };
@@ -13,12 +12,14 @@ export default {
   description: 'Setup the directory',
   name: 'tauri/setup',
   config,
-  run: async function run({ workingDirectory, taskSettings }) {
-    const settings = taskSettings as SetupConfig;
+  run: async function run({ workingDirectory, taskSettings }: any) {
+    const settings = taskSettings as any;
 
     const tmpDir = path.join(os.tmpdir(), `cyn_tauri_${path.basename(process.cwd())}`);
     console.log('tmpDir', tmpDir);
     await fs.ensureDir(tmpDir);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     const done = await init({
       directory: tmpDir,
       force: false,
@@ -51,4 +52,4 @@ export default {
       sources: [tmpDir],
     };
   },
-} as Task;
+}

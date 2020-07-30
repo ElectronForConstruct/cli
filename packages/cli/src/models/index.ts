@@ -109,14 +109,6 @@ export interface TaskRunResult {
   sources: string[]
 }
 
-export interface SetupConfig {
-  version: string;
-  clearCache: boolean;
-  project: {
-    author: string;
-  },
-}
-
 export type TaskRun = (TaskArguments: RunArguments) => Promise<TaskRunResult> | TaskRunResult
 
 export interface Args {

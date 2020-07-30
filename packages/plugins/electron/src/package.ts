@@ -1,10 +1,8 @@
 import packager, { Options as BuildSettings } from 'electron-packager';
-import * as path from 'path';
+import path from 'path';
 import fs from 'fs-extra';
-import util from 'util';
 import { createScopedLogger } from '@cyn/utils';
-import prettyDisplayFolders from '../../utils/prettyFolder';
-import Task from '../../classes/task';
+import prettyDisplayFolders from './prettyFolder';
 
 interface PkgJSON {
   devDependencies: Record<string, string>
@@ -52,7 +50,7 @@ export default {
     ],
     win32metadata: {},
   },
-  run: async function run({ workingDirectory, taskSettings }) {
+  run: async function run({ workingDirectory, taskSettings }: any) {
     const logger = createScopedLogger('package');
 
     const buildSettings: BuildSettings = taskSettings as BuildSettings;
@@ -89,6 +87,7 @@ export default {
     }
 
     // buildSettings.quiet = true;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     buildSettings.author = pkgJson.author;
 
@@ -139,4 +138,4 @@ export default {
       sources: [],
     };
   },
-} as Task;
+}

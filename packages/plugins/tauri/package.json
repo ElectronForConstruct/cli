@@ -1,5 +1,5 @@
 {
-  "name": "cyn-plugin-{{ name }}",
+  "name": "@cyn/plugin-tauri",
   "version": "0.0.1",
   "description": "> TODO: description",
   "author": "Me",
@@ -17,12 +17,13 @@
     "@types/node": "^14.0.24",
     "@typescript-eslint/eslint-plugin": "^3.7.0",
     "@typescript-eslint/parser": "^3.7.0",
-    "eslint": "^7.5.0",
     "@zeit/ncc": "^0.22.3",
+    "eslint": "^7.5.0",
     "typescript": "^3.9.7"
   },
   "dependencies": {
-    "@cyn/utils": "^0.0.2"
+    "@cyn/utils": "^0.0.2",
+    "tauri": "^0.11.0"
   },
   "publishConfig": {
     "access": "public"

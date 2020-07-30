@@ -1,5 +1,4 @@
 import { createScopedLogger } from '@cyn/utils';
-import Task from '../../classes/task';
 
 export default {
   description: 'Package your app',
@@ -20,7 +19,7 @@ export default {
     ],
     win32metadata: {},
   },
-  run: function run({ workingDirectory, taskSettings }) {
+  run: function run({ workingDirectory, taskSettings }: any) {
     const logger = createScopedLogger('package');
 
     const buildSettings: any = taskSettings as any;
@@ -29,4 +28,4 @@ export default {
       sources: [],
     };
   },
-} as Task;
+}

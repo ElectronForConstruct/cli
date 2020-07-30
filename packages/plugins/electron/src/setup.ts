@@ -1,7 +1,5 @@
-import * as path from 'path';
-import setupDir from '../../utils/setupDir';
-import Task from '../../classes/task';
-import { SetupConfig } from '../../models';
+import setupDir from './setupDir';
+import SetupConfig from './models';
 
 const config: SetupConfig = {
   version: '8.2.4',
@@ -15,12 +13,12 @@ export default {
   description: 'Setup the directory',
   name: 'electron/setup',
   config,
-  run: async function run({ workingDirectory, taskSettings }) {
+  run: async function run({ workingDirectory, taskSettings }: any) {
     const settings = taskSettings as SetupConfig;
     const tempDir = await setupDir('build', settings);
 
     return {
       sources: [tempDir],
     };
-  },
-} as Task;
+  }
+}

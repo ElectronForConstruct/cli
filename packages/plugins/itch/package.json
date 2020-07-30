@@ -1,5 +1,5 @@
 {
-  "name": "@cyn/plugin-minify",
+  "name": "@cyn/plugin-itch",
   "version": "0.0.2",
   "description": "> TODO: description",
   "author": "Me",
@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "build": "ncc build src/index.ts -o dist",
-    "prepare": "npm run build"
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "@types/node": "^14.0.24",
@@ -22,11 +22,7 @@
     "typescript": "^3.9.7"
   },
   "dependencies": {
-    "@cyn/utils": "^0.0.2",
-    "fs-extra": "^9.0.1",
-    "glob": "^7.1.6",
-    "slash": "^3.0.0",
-    "terser": "^4.8.0"
+    "@cyn/utils": "^0.0.2"
   },
   "publishConfig": {
     "access": "public"
