@@ -106,6 +106,14 @@
     lodash "^4.17.19"
     to-fast-properties "^2.0.0"
 
+"@cyn/utils@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@cyn/utils/-/utils-0.0.2.tgz#08221e6e552fe242b4f17e2395527187bffbe1a2"
+  integrity sha512-mhE+VfHC3aSC+FaCq9ayproIYAqwEV2+C7RCDbd9+db3qM5J0BLPskqJryYz7Rkui1vxyLG2p/j9m2Ld8pdWdQ==
+  dependencies:
+    signale "^1.4.0"
+    typescript "^3.9.7"
+
 "@develar/schema-utils@~2.6.5":
   version "2.6.5"
   resolved "https://registry.yarnpkg.com/@develar/schema-utils/-/schema-utils-2.6.5.tgz#3ece22c5838402419a6e0425f85742b961d9b6c6"

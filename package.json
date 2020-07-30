@@ -6,7 +6,8 @@
     "lerna": "^3.22.1"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "packages/plugins/*"
   ],
   "scripts": {
     "bootstrap": "lerna bootstrap",
