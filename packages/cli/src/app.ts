@@ -1,3 +1,4 @@
+import { createScopedLogger } from '@cyn/utils';
 import { cac } from 'cac';
 import { cwd } from 'process';
 import { dump } from 'dumper.js';
@@ -6,33 +7,14 @@ import path from 'path';
 import TaskManager, { dispatchTask } from './classes/tasksManager';
 import SettingsManager from './classes/settingsManager';
 
-import add from './commands/add';
-import remove from './commands/remove';
+import add from './utils/add';
 
 import Tasks from './tasks';
 import { Args } from './models';
 
 const cli = cac();
 
-async function importPlugin(pluginName: string): Promise<any> {
-  const basePath = path.join(process.cwd(), '.cyn', 'plugins', pluginName, 'package');
-  const paths = [
-    path.join(basePath, 'index.js'),
-    path.join(basePath, 'dist', 'index.js'),
-    // read package.json 'main'
-  ];
-
-  for (let index = 0; index < paths.length; index += 1) {
-    const testPath = paths[index];
-
-    const exists = await fs.pathExists(testPath);
-    if (exists) {
-      return import(testPath);
-    }
-  }
-
-  throw new Error(`Impossible to find plugin "${pluginName}". Please ensure it's installed with "cyn add ${pluginName}"`);
-}
+const logger = createScopedLogger('system');
 
 async function app(): Promise<void> {
   cli
@@ -63,15 +45,23 @@ async function app(): Promise<void> {
     for (let index = 0; index < plugins?.length ?? 0; index += 1) {
       const pluginName = plugins[index];
 
-      taskToLoad.push(importPlugin(pluginName));
+      taskToLoad.push(add(pluginName));
     }
   }
 
   let externalTasks = await Promise.all(taskToLoad);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   externalTasks = externalTasks
     .filter((taskSetup) => taskSetup !== null)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     .map((taskSetup) => taskSetup.default.tasks)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     .reduce((acc, value) => acc.concat(value), []);
+
+  // console.log('externalTasks', externalTasks);
+  externalTasks.forEach((task) => {
+    logger.info(`Task found: ${task.name}`);
+  });
 
   const allTasks = Tasks.concat(externalTasks);
 
@@ -95,7 +85,7 @@ async function app(): Promise<void> {
   });
 
   // Load local commands and override any command made by the user
-  const commands = [add, remove];
+  const commands: any[] = [];
   commands.forEach(({ name, description, callback }) => {
     cli
       .command(name, description)
