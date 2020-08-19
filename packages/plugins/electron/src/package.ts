@@ -2,7 +2,7 @@ import packager, { Options as BuildSettings } from 'electron-packager';
 import path from 'path';
 import fs from 'fs-extra';
 import { createScopedLogger } from '@cyn/utils';
-import prettyDisplayFolders from './prettyFolder';
+import prettyDisplayFolders from './utils/prettyFolder';
 
 interface PkgJSON {
   devDependencies: Record<string, string>
@@ -49,6 +49,7 @@ export default {
       /node_modules\/app-builder-lib/,
     ],
     win32metadata: {},
+    tmpdir: path.join(process.cwd(), '.cyn', 'tmp')
   },
   run: async function run({ workingDirectory, taskSettings }: any) {
     const logger = createScopedLogger('package');

@@ -2,7 +2,10 @@ import { createScopedLogger } from '@cyn/utils';
 import download from 'download-tarball';
 import got from 'got';
 import path from 'path';
+import slash from 'slash';
 import fs from 'fs-extra';
+
+const isPathRegex = /(\\\\?([^\\/]*[\\/])*)([^\\/]+)$/;
 
 const logger = createScopedLogger('system', {
   interactive: true,
@@ -13,56 +16,69 @@ const getCurrentVersion = async (packageName: string, overrideVersion: string): 
   const npmURL = `https://registry.npmjs.org/${packageName}`;
   logger.await(`Fetching ${npmURL}`);
   const response:any = await got(npmURL).json();
-  return response.versions[overrideVersion ?? response['dist-tags'].latest] as any;
+  return response.versions[overrideVersion ?? response['dist-tags'].latest];
 };
 
 const add = async (plugin: string): Promise<any> => {
-  const matches = /^(.+?)(?:@(.*?))?$/.exec(plugin);
+  const isPath = isPathRegex.test(plugin);
 
-  // @ts-ignore
-  const [, packageName, packageVersion] = matches;
+  let packageBasePath;
+  let packageJSONPath;
 
-  logger.info(`Detected plugin "${plugin}"`);
-
-  const destPath = path.join(process.cwd(), '.cyn', 'plugins', packageName);
-
-  const versionInfos = await getCurrentVersion(packageName, packageVersion);
-
-  let mustDownload = false;
-
-  const packageBasePath = path.join(destPath, 'package');
-  const packageJSONPath = path.join(packageBasePath, 'package.json');
-
-  const directoryExists = await fs.pathExists(destPath);
-  // If directory does not exist, must download it
-  if (!directoryExists) {
-    mustDownload = true;
+  if (isPath) {
+    console.log('plugin', plugin);
+    packageBasePath = (slash(plugin));
+    console.log('packageBasePath', packageBasePath);
+    packageJSONPath = path.join(packageBasePath, 'package.json');
+    console.log('packageJSONPath &&', packageJSONPath);
   } else {
+    const matches = /^(.+?)(?:@(.*?))?$/.exec(plugin);
+
+    // @ts-ignore
+    const [, packageName, packageVersion] = matches;
+
+    logger.info(`Detected plugin "${plugin}"`);
+
+    const destPath = path.join(process.cwd(), '.cyn', 'plugins', packageName);
+
+    const versionInfos = await getCurrentVersion(packageName, packageVersion);
+
+    let mustDownload = false;
+
+    packageBasePath = path.join(destPath, 'package');
+    packageJSONPath = path.join(packageBasePath, 'package.json');
+
+    const directoryExists = await fs.pathExists(destPath);
+    // If directory does not exist, must download it
+    if (!directoryExists) {
+      mustDownload = true;
+    } else {
     // Otherwise, read the package.JSON to check if
     // pkg version match fetched version
 
-    const packageJSONRaw = await fs.readFile(packageJSONPath, 'utf8');
-    const packageJSON = JSON.parse(packageJSONRaw);
+      const packageJSONRaw = await fs.readFile(packageJSONPath, 'utf8');
+      const packageJSON = JSON.parse(packageJSONRaw);
 
-    if (!versionInfos) {
-      throw new Error('Version does not exist!')
+      if (!versionInfos) {
+        throw new Error('Version does not exist!');
+      }
+
+      if (packageJSON.version !== versionInfos.version) {
+        mustDownload = true;
+      } else {
+        logger.success('Versions matched');
+      }
     }
 
-    if (packageJSON.version !== versionInfos.version) {
-      mustDownload = true;
-    } else {
-      logger.success('Versions matched');
+    if (mustDownload) {
+      const URL: string = versionInfos.dist.tarball;
+      logger.await('Downloading plugin');
+      await download({
+        url: URL,
+        dir: destPath,
+      });
+      logger.success('Plugin Downloaded');
     }
-  }
-
-  if (mustDownload) {
-    const URL: string = versionInfos.dist.tarball;
-    logger.await('Downloading plugin');
-    await download({
-      url: URL,
-      dir: destPath,
-    });
-    logger.success('Plugin Downloaded');
   }
 
   const packageJSONRaw = await fs.readFile(packageJSONPath, 'utf8');
@@ -81,7 +97,7 @@ const add = async (plugin: string): Promise<any> => {
     const exists = await fs.pathExists(testPath);
     if (exists) {
       const importedPlugin = await import(testPath);
-      logger.success(`Plugin "${packageName}" imported`);
+      logger.success(`Plugin "${packageJSON.name}" imported`);
       return importedPlugin;
     }
   }

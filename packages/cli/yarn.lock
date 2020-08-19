@@ -98,6 +98,14 @@
     lodash "^4.17.19"
     to-fast-properties "^2.0.0"
 
+"@cyn/utils@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@cyn/utils/-/utils-0.0.4.tgz#7cd2e801fba06432807857358ed6eb278e1ff79f"
+  integrity sha512-Svdm4eFCGrRbzqTflcU3iHKhEYroaHzYabXHi7+GR0eK//cQuKuHJzMcUHOqvzhYzEAYhVVlNnXJYnD4J6/2dg==
+  dependencies:
+    signale "^1.4.0"
+    typescript "^3.9.7"
+
 "@develar/schema-utils@~2.6.5":
   version "2.6.5"
   resolved "https://registry.yarnpkg.com/@develar/schema-utils/-/schema-utils-2.6.5.tgz#3ece22c5838402419a6e0425f85742b961d9b6c6"

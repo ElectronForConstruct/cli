@@ -1,10 +1,13 @@
 import { cosmiconfig } from 'cosmiconfig';
 import deepmerge from 'deepmerge';
+import path from 'path';
 import {
   ComputedTask,
   taskSettings, ComplexConfig, Settings, ComputedSettings,
 } from '../models/index';
 import TaskManager from './tasksManager';
+
+const defaultConfigPath = path.join(process.cwd(), '.cynrc.yml');
 
 export default class SettingsManager {
   private static instance: SettingsManager
@@ -96,9 +99,9 @@ export default class SettingsManager {
     return settings;
   }
 
-  async loadConfig(profile = '', root: string = process.cwd()): Promise<void> {
+  async loadConfig(profile = '', directPath: string = defaultConfigPath): Promise<void> {
     const explorerSync = cosmiconfig('cyn');
-    const config = await explorerSync.search(root);
+    const config = await explorerSync.load(directPath);
     // console.log('config', config);
     if (config) {
       this.settings = config.config as Partial<Settings>;

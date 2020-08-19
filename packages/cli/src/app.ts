@@ -96,7 +96,7 @@ async function app(): Promise<void> {
 
   let pkg: any = {};
   try {
-    pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8'));
+    pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
   } catch (error) {
     console.log('Error reading package.json file');
   }

@@ -3,3 +3,5 @@ yarn-error.log
 *.tgz
 
 cyn.code-workspace
+
+packages/plugins/electron/dist/
