@@ -4,4 +4,4 @@ yarn-error.log
 
 cyn.code-workspace
 
-packages/plugins/electron/dist/
+**/dist/**/*
