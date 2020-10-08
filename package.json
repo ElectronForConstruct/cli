@@ -9,7 +9,7 @@
     "bootstrap": "lerna bootstrap",
     "build": "lerna run build",
     "watch": "lerna run watch --stream",
-    "prerelease": "npm test && npx lerna version --no-push",
+    "prerelease": "npx lerna version --no-push",
     "release": "npx lerna publish from-git --yes"
   }
 }
