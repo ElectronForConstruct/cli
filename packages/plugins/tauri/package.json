@@ -10,7 +10,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "ncc build src/index.ts -o dist",
+    "build": "tsc",
+    "watch": "tsc -w",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {

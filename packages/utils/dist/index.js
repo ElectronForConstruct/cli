@@ -1,19 +1,15 @@
-"use strict";Object.defineProperty(exports, "__esModule", {value: true});// src/index.ts
-
-
-var _signale = require('signale');
-const createLogger = (options) => {
-  const log = new (0, _signale.Signale)(options);
-  log.config({
-    displayLabel: false
-  });
-  return log;
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createScopedLogger = exports.createLogger = void 0;
+const signale_1 = require("signale");
+exports.createLogger = (options) => {
+    const log = new signale_1.Signale(options);
+    log.config({
+        displayLabel: false,
+    });
+    return log;
 };
-const createScopedLogger = (scope, options = {}) => {
-  options.scope = scope;
-  return createLogger(options);
+exports.createScopedLogger = (scope, options = {}) => {
+    options.scope = scope;
+    return exports.createLogger(options);
 };
-
-
-
-exports.createLogger = createLogger; exports.createScopedLogger = createScopedLogger;

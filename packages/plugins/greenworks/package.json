@@ -6,10 +6,12 @@
   "homepage": "",
   "license": "MIT",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
+    "build": "tsc",
     "watch": "tsc -w",
     "prepublishOnly": "npm run build"
   },

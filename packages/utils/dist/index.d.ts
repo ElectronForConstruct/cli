@@ -1,6 +1,3 @@
-import { SignaleOptions, Signale } from 'signale';
-
-declare const createLogger: (options: SignaleOptions) => Signale;
-declare const createScopedLogger: (scope: string, options?: SignaleOptions) => Signale;
-
-export { createLogger, createScopedLogger };
+import { Signale, SignaleOptions } from 'signale';
+export declare const createLogger: (options: SignaleOptions) => Signale;
+export declare const createScopedLogger: (scope: string, options?: SignaleOptions) => Signale;
