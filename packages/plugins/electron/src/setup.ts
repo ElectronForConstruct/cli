@@ -15,7 +15,7 @@ const getMethods = (obj: any) => {
 }
 
 const config: SetupConfig = {
-  version: '9.2.0',
+  version: '10.1.2',
   clearCache: true,
   project: {
     author: 'Me',
@@ -26,19 +26,20 @@ export default {
   description: 'Setup the directory',
   name: 'electron/setup',
   config,
-  run: async function run({ workingDirectory, taskSettings }: any) {
+  run: async function run({ taskSettings }: any) {
 
     const settings = taskSettings as SetupConfig;
+    // console.log('settings', settings)
     // create temporary directory
     const tmpDir = path.join(process.cwd(), 'tmp', `efc_${path.basename(process.cwd())}`);
     // const tmpDir = path.join(os.tmpdir(), `efc_${path.basename(process.cwd())}`);
 
-    if (taskSettings.clearCache) {
+    if (settings.clearCache) {
       await fs.remove(tmpDir);
     }
     await fs.ensureDir(tmpDir);
 
-    console.log('tmpDir', tmpDir);
+    // console.log('tmpDir', tmpDir);
 
     // Prepare template
     await fs.copy(path.join(__dirname, '..', 'templates', 'runtime'), tmpDir);
@@ -48,7 +49,7 @@ export default {
     const pkgJSONData = await fs.readFile(pkgJSONPath, 'utf8');
     const pkgJSON = JSON.parse(pkgJSONData) as { author: string | undefined };
 
-    pkgJSON.author = taskSettings.project.author;
+    pkgJSON.author = settings.project.author;
 
     await fs.writeFile(pkgJSONPath, JSON.stringify(pkgJSON), 'utf8');
 
@@ -57,7 +58,7 @@ export default {
 
     // Install dependencies
     await installPkg([
-      ['electron', taskSettings.version]
+      ['electron', settings.version]
     ], tmpDir, true);
 
     return {

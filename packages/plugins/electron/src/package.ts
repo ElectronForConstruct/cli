@@ -56,7 +56,7 @@ export default {
 
     const buildSettings: BuildSettings = taskSettings as BuildSettings;
 
-    console.log('workingDirectory', workingDirectory);
+    // console.log('workingDirectory', workingDirectory);
     const pkgPath = path.join(workingDirectory, 'package.json');
     const pkgRawContent = await fs.readFile(pkgPath, 'utf8');
     const pkgJson = JSON.parse(pkgRawContent) as PkgJSON;
@@ -87,7 +87,7 @@ export default {
       buildSettings.win32metadata.CompanyName = pkgJson.author;
     }
 
-    // buildSettings.quiet = true;
+    buildSettings.quiet = true;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     buildSettings.author = pkgJson.author;
@@ -102,7 +102,7 @@ export default {
       // });
 
       const result = await packager(buildSettings);
-      console.log('result', result);
+      // console.log('result', result);
 
       // unhook();
       // log.forEach((line: string) => {

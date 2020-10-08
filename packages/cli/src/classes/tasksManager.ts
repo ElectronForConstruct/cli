@@ -1,7 +1,9 @@
 import deepmerge from 'deepmerge';
+import { createScopedLogger } from '@cyn/utils';
 import Task from './task';
-import SettingsManager from './settingsManager';
 import { ComputedSettings } from '../models';
+
+const logger = createScopedLogger('system');
 
 export default class TaskManager {
   private static instance: TaskManager
@@ -44,7 +46,7 @@ export async function dispatchTask(
 
   const task = settings[taskName];
   if (!task) {
-    console.log(`No Tasks found for "${taskName}"`);
+    logger.info(`No Tasks found for "${taskName}"`);
     return [];
   }
 
@@ -56,7 +58,7 @@ export async function dispatchTask(
     return sources;
   }
 
-  console.log(`Step: ${step.name}`);
+  logger.start(`Step: ${step.name}`);
   const TaskInst = TaskManager.getInstance().get(step.name);
   if (TaskInst) {
     // @ts-ignore
@@ -73,7 +75,7 @@ export async function dispatchTask(
       results.push(...outDirs);
     }
   } else {
-    console.log(`Cannot find Task ${step.name}`);
+    logger.error(`Cannot find Task ${step.name}`);
   }
   return results;
 }

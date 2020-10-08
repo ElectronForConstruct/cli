@@ -5,13 +5,19 @@ import path from 'path';
 import slash from 'slash';
 import fs from 'fs-extra';
 
+interface PackageJSON {
+  name: string;
+  version: string;
+  main: string;
+}
+
 const isPathRegex = /(\\\\?([^\\/]*[\\/])*)([^\\/]+)$/;
 
 const logger = createScopedLogger('system', {
-  interactive: true,
+  interactive: false,
 });
 
-const getCurrentVersion = async (packageName: string, overrideVersion: string): Promise<string> => {
+const getCurrentVersion = async (packageName: string, overrideVersion: string): Promise<any> => {
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   const npmURL = `https://registry.npmjs.org/${packageName}`;
   logger.await(`Fetching ${npmURL}`);
@@ -26,22 +32,21 @@ const add = async (plugin: string): Promise<any> => {
   let packageJSONPath;
 
   if (isPath) {
-    console.log('plugin', plugin);
     packageBasePath = (slash(plugin));
-    console.log('packageBasePath', packageBasePath);
     packageJSONPath = path.join(packageBasePath, 'package.json');
-    console.log('packageJSONPath &&', packageJSONPath);
   } else {
     const matches = /^(.+?)(?:@(.*?))?$/.exec(plugin);
 
     // @ts-ignore
-    const [, packageName, packageVersion] = matches;
+    const [, name, packageVersion] = matches;
+
+    const pkgName = name as string;
 
     logger.info(`Detected plugin "${plugin}"`);
 
-    const destPath = path.join(process.cwd(), '.cyn', 'plugins', packageName);
+    const destPath = path.join(process.cwd(), '.cyn', 'plugins', pkgName);
 
-    const versionInfos = await getCurrentVersion(packageName, packageVersion);
+    const versionInfos = await getCurrentVersion(pkgName, packageVersion);
 
     let mustDownload = false;
 
@@ -63,6 +68,8 @@ const add = async (plugin: string): Promise<any> => {
         throw new Error('Version does not exist!');
       }
 
+      console.log('versionInfos', versionInfos);
+
       if (packageJSON.version !== versionInfos.version) {
         mustDownload = true;
       } else {
@@ -81,8 +88,12 @@ const add = async (plugin: string): Promise<any> => {
     }
   }
 
+  if (!fs.existsSync(packageJSONPath)) {
+    throw new Error(`Plugin "${plugin}" not found`);
+  }
+
   const packageJSONRaw = await fs.readFile(packageJSONPath, 'utf8');
-  const packageJSON = JSON.parse(packageJSONRaw);
+  const packageJSON: PackageJSON = JSON.parse(packageJSONRaw);
 
   const paths = [
     path.join(packageBasePath, packageJSON.main),
@@ -102,7 +113,7 @@ const add = async (plugin: string): Promise<any> => {
     }
   }
 
-  throw new Error(`Unable to find plugin "${packageName}". Please ensure it's installed with "cyn add ${packageName}"`);
+  throw new Error(`Unable to find plugin "${plugin}".`);
 };
 
 export default add;

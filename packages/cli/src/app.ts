@@ -9,8 +9,8 @@ import SettingsManager from './classes/settingsManager';
 
 import add from './utils/add';
 
-import Tasks from './tasks';
 import { Args } from './models';
+import Task from './classes/task';
 
 const cli = cac();
 
@@ -55,17 +55,15 @@ async function app(): Promise<void> {
     .filter((taskSetup) => taskSetup !== null)
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     .map((taskSetup) => taskSetup.default.tasks)
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    // eslint-disable-next-line
     .reduce((acc, value) => acc.concat(value), []);
 
   // console.log('externalTasks', externalTasks);
-  externalTasks.forEach((task) => {
+  externalTasks.forEach((task: Task) => {
     logger.info(`Task found: ${task.name}`);
   });
 
-  const allTasks = Tasks.concat(externalTasks);
-
-  hm.registerAll(allTasks);
+  hm.registerAll(externalTasks);
 
   const availableTasks = Object.entries(sm.settings.tasks ?? {});
   availableTasks.forEach(([key, value]) => {
@@ -80,7 +78,7 @@ async function app(): Promise<void> {
         }
 
         const outputDirs = await dispatchTask(key, settings, 0, [cwd()]);
-        console.log('outputDirs', outputDirs);
+        // console.log('outputDirs', outputDirs);
       });
   });
 

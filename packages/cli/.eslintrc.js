@@ -60,6 +60,7 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 2,
     '@typescript-eslint/ban-ts-comment': 0,
     '@typescript-eslint/no-unsafe-assignment': 1,
-    '@typescript-eslint/no-unsafe-member-access': 0
+    '@typescript-eslint/no-unsafe-member-access': 0,
+    '@typescript-eslint/no-unsafe-return': 1
   },
 };

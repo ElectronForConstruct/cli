@@ -1,12 +1,3 @@
-export interface Asset {
-  name: string
-  // eslint-disable-next-line camelcase
-  browser_download_url: string
-}
-export interface GHRelease {
-  assets: Asset[]
-}
-
 export interface WindowSettings {
   width: number
   height: number
@@ -40,11 +31,6 @@ export interface ProjectSettings {
   version: string
 }
 
-export interface InternalSettings {
-  settings: Settings
-  configFilePath: string
-}
-
 export interface TaskStep {
   name: string
   config: string
@@ -72,6 +58,11 @@ export interface Settings {
   tasks?: TasksSettings
   extends?: string[]
   plugins?: string[]
+}
+
+export interface InternalSettings {
+  settings: Settings
+  configFilePath: string
 }
 
 export interface ComputedTask {

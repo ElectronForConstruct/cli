@@ -67,22 +67,23 @@ export default class SettingsManager {
         const { name, config: stepConfig } = step;
 
         // Check if config key exist
-        if (!config || !config?.[stepConfig]) {
-          throw new Error(`No config entry "${stepConfig}" found for ${taskName}`);
+        if (!config || !config?.[name]) {
+        // if (!config || !config?.[stepConfig]) {
+          throw new Error(`No config entry "${name}" found for ${taskName}`);
         }
         // Set default config
         const baseConfig = TaskManager.getInstance().get(name)?.config ?? {};
         let computedSettings: any = baseConfig;
 
         // Get the default key
-        computedSettings = deepmerge.all([computedSettings, config[stepConfig].defaults ?? {}]);
+        computedSettings = deepmerge.all([computedSettings, config[name].defaults ?? {}]);
 
         // Merge default with current profile
         if (this.profile) {
           computedSettings = deepmerge.all(
             [
               computedSettings,
-              config[stepConfig]?.[this.profile] ?? {},
+              config[name]?.[this.profile] ?? {},
             ],
           );
         }
