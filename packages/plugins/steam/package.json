@@ -1,6 +1,6 @@
 {
   "name": "@cyn/plugin-steam",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "> TODO: description",
   "author": "Me",
   "homepage": "",
@@ -23,7 +23,7 @@
     "typescript": "^3.9.7"
   },
   "dependencies": {
-    "@cyn/utils": "^0.0.4"
+    "@cyn/utils": "^0.1.0"
   },
   "publishConfig": {
     "access": "public"
