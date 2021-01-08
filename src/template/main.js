@@ -72,11 +72,12 @@ function createWindow() {
   const defaultConfig = {
     webPreferences: {
       nodeIntegration: true,
+      enableRemoteModule: true,
       preload: path.join(__dirname, 'preload.js'),
     },
   };
 
-  const finalConfig = Object.assign({}, window, defaultConfig);
+  const finalConfig = { ...window, ...defaultConfig };
 
   mainWindow = new BrowserWindow(finalConfig);
 
@@ -91,10 +92,10 @@ function createWindow() {
   const ses = mainWindow.webContents.session;
   ses.clearStorageData({
     storages: ['cachestorage', 'serviceworkers'],
-  }).then (() => {
+  }).then(() => {
     console.log('storage cleared');
-  }).catch(e => {
-    console.log('Error clearing cache:', e)
+  }).catch((e) => {
+    console.log('Error clearing cache:', e);
   });
 
   if (isURL) {

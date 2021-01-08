@@ -22,7 +22,7 @@ module.exports = async (fullPath) => {
       break;
 
     case 'linux':
-      assetUrl = body.assets.find(asset => asset.name === 'preview.linux').browser_download_url;
+      assetUrl = body.assets.find(asset => asset.name === 'preview-linux').browser_download_url;
       exeName = 'preview';
       break;
 
