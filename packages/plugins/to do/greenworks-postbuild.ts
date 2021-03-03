@@ -30,7 +30,7 @@ export default {
 
     await fs.writeFile(path.join(workingDirectory, 'steam_appid.txt'), steamId, 'utf8');
     return {
-      sources: [],
+      source: workingDirectory,
     };
   },
 } as Task;

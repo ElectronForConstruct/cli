@@ -20,7 +20,7 @@ export default {
           const logger = createScopedLogger('{{ name }}')
           logger.info('Just passing by!')
           return {
-              sources: [workingDirectory],
+              source: workingDirectory,
           };
       },
   }]

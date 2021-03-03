@@ -11,7 +11,8 @@
     "lib": "lib"
   },
   "files": [
-    "dist"
+    "dist",
+    "lib"
   ],
   "scripts": {
     "build": "tsc",
@@ -23,6 +24,7 @@
     "@zeit/ncc": "^0.22.3"
   },
   "dependencies": {
+    "listr2": "^3.3.3",
     "signale": "^1.4.0",
     "typescript": "^4.0.3"
   },

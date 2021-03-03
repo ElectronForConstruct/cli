@@ -1,13 +1,14 @@
 import { cosmiconfig } from 'cosmiconfig';
 import deepmerge from 'deepmerge';
 import path from 'path';
+import fs from 'fs-extra';
 import {
   ComputedTask,
   taskSettings, ComplexConfig, Settings, ComputedSettings,
 } from '../models/index';
 import TaskManager from './tasksManager';
 
-const defaultConfigPath = path.join(process.cwd(), '.cynrc.yml');
+const defaultConfigPath = path.join(process.cwd(), 'cyn.yml');
 
 export default class SettingsManager {
   private static instance: SettingsManager
@@ -51,7 +52,7 @@ export default class SettingsManager {
 
   computeSettings(): ComputedSettings {
     const settings: ComputedSettings = {};
-    const { tasks, config } = this._settings;
+    const { tasks } = this._settings;
 
     if (!tasks) {
       throw new Error('No tasks found');
@@ -67,23 +68,23 @@ export default class SettingsManager {
         const { name, config: stepConfig } = step;
 
         // Check if config key exist
-        if (!config || !config?.[name]) {
+        if (!stepConfig) {
         // if (!config || !config?.[stepConfig]) {
           throw new Error(`No config entry "${name}" found for ${taskName}`);
         }
         // Set default config
-        const baseConfig = TaskManager.getInstance().get(name)?.config ?? {};
-        let computedSettings: any = baseConfig;
+        let computedSettings: any = TaskManager.getInstance().get(name)?.config ?? {};
 
         // Get the default key
-        computedSettings = deepmerge.all([computedSettings, config[name].defaults ?? {}]);
+        computedSettings = deepmerge.all([computedSettings, stepConfig ?? {}]);
 
         // Merge default with current profile
         if (this.profile) {
           computedSettings = deepmerge.all(
             [
               computedSettings,
-              config[name]?.[this.profile] ?? {},
+              // @ts-ignore
+              stepConfig?.[this.profile] ?? {},
             ],
           );
         }
@@ -102,12 +103,14 @@ export default class SettingsManager {
 
   async loadConfig(profile = '', directPath: string = defaultConfigPath): Promise<void> {
     const explorerSync = cosmiconfig('cyn');
-    const config = await explorerSync.load(directPath);
-    // console.log('config', config);
-    if (config) {
-      this.settings = config.config as Partial<Settings>;
-      this.path = config.filepath;
-      this.profile = profile;
+    const exists = await fs.pathExists(directPath);
+    if (exists) {
+      const config = await explorerSync.load(directPath);
+      if (config) {
+        this.settings = config.config as Partial<Settings>;
+        this.path = config.filepath;
+        this.profile = profile;
+      }
     }
   }
 }

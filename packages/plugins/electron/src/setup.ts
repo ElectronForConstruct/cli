@@ -62,7 +62,7 @@ export default {
     ], tmpDir, true);
 
     return {
-      sources: [tmpDir],
+      source: tmpDir,
     };
   }
 }

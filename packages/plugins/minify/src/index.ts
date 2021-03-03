@@ -83,7 +83,7 @@ export default {
             logger.success(`Successfully minified ${minified} files!`);
 
             return {
-                sources: [workingDirectory],
+                source: workingDirectory,
             };
         },
     }]

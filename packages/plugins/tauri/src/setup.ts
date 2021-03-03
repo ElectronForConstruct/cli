@@ -1,55 +1,68 @@
-import * as path from 'path';
+import path from 'path';
 import os from 'os';
 import fs from 'fs-extra';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import init from 'tauri/dist/api/init';
+import { createScopedLogger, Ctx, Task, TaskManagerFactory, yarn } from '@cyn/utils';
+import execa from 'execa'
 
-const config: any = {
-};
+const logger = createScopedLogger('tauri/setup', {
+  interactive: false,
+});
 
-export default {
-  description: 'Setup the directory',
-  name: 'tauri/setup',
-  config,
-  run: async function run({ workingDirectory, taskSettings }: any) {
-    const settings = taskSettings as any;
+export default class TauriSetup extends Task {
+  description = 'Setup the directory'
+  id = 'tauri/setup'
+  config = {}
 
-    const tmpDir = path.join(os.tmpdir(), `cyn_tauri_${path.basename(process.cwd())}`);
-    console.log('tmpDir', tmpDir);
-    await fs.ensureDir(tmpDir);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    const done = await init({
-      directory: tmpDir,
-      force: false,
-      logging: true,
-    });
-    console.log('done', done);
+  private tasks = TaskManagerFactory<Ctx>()
 
-    const dest = path.join(tmpDir, 'app');
-    await fs.ensureDir(dest);
+  async run(mainCtx: Ctx, task) {
+    this.tasks.ctx = mainCtx
 
-    const ignore = [
-      'dist', '.cache', '.cyn', '.cynrc.yml',
-    ].map((entry) => path.resolve(process.cwd(), entry));
+    this.tasks.add(
+      [
+        {
+          title: 'Tauri setup',
+          task: async (ctx: Ctx, task): Promise<void> => {
+            const tmpDir = path.join(os.tmpdir(), `cyn_tauri_${path.basename(process.cwd())}`);
 
-    await fs.copy(process.cwd(), dest, {
-      filter: (src) => !ignore.includes(src),
-    });
+            // copy input folder to temp
+            const output = path.join(tmpDir)
+            const input = path.join(process.cwd(), ctx.workingDirectory)
+            task.output = 'output' + output
+            task.output = 'input' + input
+            await fs.copy(input, output, { overwrite: true, recursive: true });
 
-    const dir = path.join(tmpDir);
-    process.chdir(dir);
+            process.chdir(tmpDir);
 
-    console.log('process.cwd()', process.cwd());
+            // Ensure folder is ready for tauri
+            await fs.ensureDir(path.join(tmpDir, 'src-tauri'));
 
-    // const info = require('tauri/dist/api/info');
+            // Create config file
+            await fs.writeFile(path.join(tmpDir, 'src-tauri', 'tauri.conf.json'), JSON.stringify(ctx.taskSettings, null, 2))
 
-    // const infos = await info();
-    // console.log('infos', infos);
+            // add tauri package
+            const yarnAddTauriCmd = execa('node', [yarn, 'add', 'tauri', '--cwd=' + output])
+            yarnAddTauriCmd.stdout?.pipe(task.stdout())
+            await yarnAddTauriCmd
 
-    return {
-      sources: [tmpDir],
-    };
-  },
+            // Init tauri
+            const tauriDepsInstallCmd = execa('node', [yarn, 'tauri', 'deps', 'install', '--directory=' + output])
+            tauriDepsInstallCmd.stdout?.pipe(task.stdout())
+            await tauriDepsInstallCmd
+
+            // const info = require('tauri/dist/api/info');
+
+            // const infos = await info();
+            // logger.info('infos', infos);
+
+            ctx.workingDirectory = tmpDir
+            mainCtx.workingDirectory = tmpDir
+          },
+        }
+      ],
+      { exitOnError: true, concurrent: false, ctx: mainCtx }
+    )
+
+    return this.tasks.runAll()
+  }
 }

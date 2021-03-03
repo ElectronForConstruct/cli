@@ -51,7 +51,7 @@ export default {
 
 
         return {
-            sources: [workingDirectory],
+            source: workingDirectory,
         };
     },
 }

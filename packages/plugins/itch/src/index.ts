@@ -102,7 +102,7 @@ export default {
       logger.error('You must specify a project in the itch configuration!');
       return {
         error: true,
-        sources: [],
+        source: workingDirectory,
       };
     }
 
@@ -127,7 +127,7 @@ export default {
     }
 
     return {
-      sources: [workingDirectory],
+      source: workingDirectory,
     };
   },
 }

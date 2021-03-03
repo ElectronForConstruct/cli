@@ -11,8 +11,6 @@ interface PackageJSON {
   main: string;
 }
 
-const isPathRegex = /(\\\\?([^\\/]*[\\/])*)([^\\/]+)$/;
-
 const logger = createScopedLogger('system', {
   interactive: false,
 });
@@ -26,13 +24,15 @@ const getCurrentVersion = async (packageName: string, overrideVersion: string): 
 };
 
 const add = async (plugin: string): Promise<any> => {
-  const isPath = isPathRegex.test(plugin);
+  logger.info('plugin', plugin);
+  const directoryExists = await fs.pathExists(plugin);
+  logger.info('directoryExists', directoryExists);
 
   let packageBasePath;
   let packageJSONPath;
 
-  if (isPath) {
-    packageBasePath = (slash(plugin));
+  if (directoryExists) {
+    packageBasePath = slash(plugin);
     packageJSONPath = path.join(packageBasePath, 'package.json');
   } else {
     const matches = /^(.+?)(?:@(.*?))?$/.exec(plugin);
@@ -53,7 +53,6 @@ const add = async (plugin: string): Promise<any> => {
     packageBasePath = path.join(destPath, 'package');
     packageJSONPath = path.join(packageBasePath, 'package.json');
 
-    const directoryExists = await fs.pathExists(destPath);
     // If directory does not exist, must download it
     if (!directoryExists) {
       mustDownload = true;
@@ -68,7 +67,7 @@ const add = async (plugin: string): Promise<any> => {
         throw new Error('Version does not exist!');
       }
 
-      console.log('versionInfos', versionInfos);
+      logger.info('versionInfos', versionInfos);
 
       if (packageJSON.version !== versionInfos.version) {
         mustDownload = true;
@@ -102,12 +101,18 @@ const add = async (plugin: string): Promise<any> => {
     // read package.json 'main'
   ];
 
+  logger.info('here');
+
   for (let index = 0; index < paths.length; index += 1) {
     const testPath = paths[index];
 
+    logger.info('testPath', testPath);
+
     const exists = await fs.pathExists(testPath);
     if (exists) {
+      logger.info('ok');
       const importedPlugin = await import(testPath);
+      logger.info('importedPlugin');
       logger.success(`Plugin "${packageJSON.name}" imported`);
       return importedPlugin;
     }

@@ -1,6 +1,6 @@
 import deepmerge from 'deepmerge';
-import { createScopedLogger } from '@cyn/utils';
-import Task from './task';
+import { Task, createScopedLogger, Ctx } from '@cyn/utils';
+import { Listr } from 'listr2';
 import { ComputedSettings } from '../models';
 
 const logger = createScopedLogger('system');
@@ -32,50 +32,64 @@ export default class TaskManager {
   }
 
   get(taskName: string): Task | undefined {
-    return this.tasks.find((task) => task.name === taskName);
+    return this.tasks.find((task) => task.id === taskName);
   }
 }
 
-export async function dispatchTask(
+export function startTasks(
   taskName: string,
   settings: ComputedSettings,
-  currentStep = 0,
-  sources: string[],
-): Promise<string[]> {
-  const results: string[] = [];
+  source: string,
+): Promise<any> | any {
+  console.log('settings', settings);
 
   const task = settings[taskName];
   if (!task) {
     logger.info(`No Tasks found for "${taskName}"`);
-    return [];
+    return '';
   }
 
   const { steps } = task;
 
-  const step = steps[currentStep];
+  const context: Ctx = {
+    workingDirectory: source,
+    settings,
+    taskSettings: {},
+  };
+  const tasks = new Listr<Ctx>(
+    [],
+    {
+      renderer: 'verbose',
+      ctx: context,
+    },
+  );
 
-  if (!step) {
-    return sources;
-  }
-
-  logger.start(`Step: ${step.name}`);
-  const TaskInst = TaskManager.getInstance().get(step.name);
-  if (TaskInst) {
-    // @ts-ignore
-    const taskSettings = deepmerge.all([TaskInst.config ?? {}, step.config ?? {}]);
-
-    for (let sourceIndex = 0; sourceIndex < sources.length; sourceIndex += 1) {
-      const source = sources[sourceIndex];
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const args = { settings, taskSettings, workingDirectory: source };
-      const { sources: nextSources } = await TaskInst.run(args);
-      // console.log('nextSources', nextSources);
-      const outDirs = await dispatchTask(taskName, settings, currentStep + 1, nextSources);
-      results.push(...outDirs);
+  // eslint-disable-next-line no-restricted-syntax
+  for (const step of steps) {
+    if (!step) {
+      return source;
     }
-  } else {
-    logger.error(`Cannot find Task ${step.name}`);
+
+    const TaskInst = TaskManager.getInstance().get(step.name);
+    if (TaskInst) {
+    // @ts-ignore
+      const taskSettings = deepmerge.all([TaskInst.config ?? {}, step.config ?? {}]);
+
+      tasks.add({
+        title: `Step: ${step.name}`,
+        task: async (ctx, t) => {
+          ctx.taskSettings = taskSettings;
+
+          const resultCtx = await TaskInst.run(ctx, t);
+          console.log('resultCtx', resultCtx);
+          // ctx = { ...resultCtx };
+          return ctx;
+        },
+      });
+    } else {
+      logger.error(`Cannot find Task ${step.name}`);
+    }
   }
-  return results;
+
+  return tasks.run();
 }

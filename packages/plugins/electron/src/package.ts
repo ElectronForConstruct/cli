@@ -11,6 +11,7 @@ interface PkgJSON {
   author: string
 }
 
+
 // function hookStdout(callback) {
 //   const boundProcessStdout = process.stdout.write.bind(process.stdout);
 //   const boundProcessStderr = process.stderr.write.bind(process.stderr);
@@ -127,7 +128,7 @@ export default {
         }
 
         return {
-          sources: folders,
+          source: folders,
         };
       }
     } catch (e) {
@@ -136,7 +137,7 @@ export default {
     }
 
     return {
-      sources: [],
+      source: workingDirectory,
     };
   },
 }

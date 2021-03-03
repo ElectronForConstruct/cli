@@ -93,7 +93,7 @@ export default {
       logger.error('Please specify a path to your steam sdk in the configuration file');
       return {
         error: '',
-        sources: [],
+        source: workingDirectory,
       };
     }
 
@@ -101,7 +101,7 @@ export default {
       logger.error(`${steamSDKPath} does not exist! Please, specify a valid path to your steam sdk.`);
       return {
         error: '',
-        sources: [],
+        source: workingDirectory,
       };
     }
 
@@ -122,7 +122,7 @@ export default {
       logger.error('Please specify a steam game id in the configuration file');
       return {
         error: '',
-        sources: [],
+        source: workingDirectory,
       };
     }
 
@@ -161,7 +161,7 @@ export default {
         logger.error(e);
         return {
           error: '',
-          sources: [],
+          source: workingDirectory,
         };
       }
     }
@@ -181,7 +181,7 @@ export default {
         logger.error(`${localLibPath} can not be found!`);
         return {
           error: '',
-          sources: [],
+          source: workingDirectory,
         };
       }
     } else {
@@ -221,7 +221,7 @@ Please, avoid using electron from 4.0.0 to 4.0.3`);
           currently. Build it yourself, or change Electron version.`);
           return {
             error: '',
-            sources: [],
+            source: workingDirectory,
           };
         }
         const res = asset.browser_download_url;
@@ -240,7 +240,7 @@ Please, avoid using electron from 4.0.0 to 4.0.3`);
 
     logger.success('Initialization done!');
     return {
-      sources: [workingDirectory],
+      source: workingDirectory,
     };
   },
 }

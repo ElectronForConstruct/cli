@@ -1,9 +1,9 @@
 import { createScopedLogger } from '@cyn/utils';
 
-export default {
-  description: 'Package your app',
-  name: 'electron/package',
-  config: {
+export default class TauriPackage {
+  description = 'Package your app'
+  id = 'tauri/package'
+  config = {
     // electronVersion: '8.0.0',
     dir: process.cwd(),
     asar: true,
@@ -18,14 +18,15 @@ export default {
       /node_modules\/app-builder-lib/,
     ],
     win32metadata: {},
-  },
-  run: function run({ workingDirectory, taskSettings }: any) {
+  }
+
+  async run({ workingDirectory, taskSettings }: any) {
     const logger = createScopedLogger('package');
 
     const buildSettings: any = taskSettings as any;
 
     return {
-      sources: [],
+      source: workingDirectory,
     };
-  },
+  }
 }

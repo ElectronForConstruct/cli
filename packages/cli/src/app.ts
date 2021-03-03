@@ -1,16 +1,28 @@
-import { createScopedLogger } from '@cyn/utils';
+import { createScopedLogger, Task } from '@cyn/utils';
 import { cac } from 'cac';
-import { cwd } from 'process';
+import { Listr } from 'listr2';
 import { dump } from 'dumper.js';
 import fs from 'fs-extra';
 import path from 'path';
-import TaskManager, { dispatchTask } from './classes/tasksManager';
+import TaskManager, { startTasks } from './classes/tasksManager';
 import SettingsManager from './classes/settingsManager';
 
 import add from './utils/add';
 
 import { Args } from './models';
-import Task from './classes/task';
+
+interface Ctx {
+  /* some variables for internal use */
+}
+
+const tasks = new Listr<Ctx>(
+  [
+    /* tasks */
+  ],
+  {
+    /* options */
+  },
+);
 
 const cli = cac();
 
@@ -31,56 +43,82 @@ async function app(): Promise<void> {
   const parsed = cli.parse();
   let configFile;
   if (parsed.options.config) {
-    console.log('Loading custom config');
+    logger.info('Loading custom config');
     configFile = parsed.options.config;
   }
   await sm.loadConfig(parsed.options.profile, configFile);
 
+  logger.info('sm.settings', sm.settings);
+
   // --- Load Tasks
 
-  const { plugins } = sm.settings;
+  if (sm.settings?.plugins) {
+    const { plugins } = sm.settings;
 
-  const taskToLoad: Promise<any>[] = [];
-  if (plugins && Array.isArray(plugins) && plugins.length > 0) {
-    for (let index = 0; index < plugins?.length ?? 0; index += 1) {
-      const pluginName = plugins[index];
+    const taskToLoad: Promise<any>[] = [];
+    if (plugins && Array.isArray(plugins) && plugins.length > 0) {
+      for (let index = 0; index < plugins?.length ?? 0; index += 1) {
+        const pluginName = plugins[index];
 
-      taskToLoad.push(add(pluginName));
+        const importedTask = await add(pluginName);
+        taskToLoad.push(importedTask);
+      }
     }
+
+    logger.info('after');
+
+    console.log('taskToLoad', taskToLoad);
+
+    const externalTasks: (typeof Task)[] = await Promise.all(taskToLoad);
+    // eslint-disable-next-line
+    const madeExternalTasks: Task[] = externalTasks
+      .filter((taskSetup) => taskSetup !== null)
+      // @ts-ignore
+      .map((taskSetup) => taskSetup.default.tasks)
+      // flatten
+      // eslint-disable-next-line
+      .reduce((acc, value) => acc.concat(value), [])
+      // @ts-ignore
+      // eslint-disable-next-line
+      .map((TaskSetting: typeof Task) => new TaskSetting());
+
+    console.log('madeExternalTasks', madeExternalTasks);
+
+    // logger.info('externalTasks', externalTasks);
+    madeExternalTasks.forEach((task: Task) => {
+      console.log('task', task);
+      logger.info(`Task found: ${task.id}`);
+    });
+
+    hm.registerAll(madeExternalTasks);
   }
 
-  let externalTasks = await Promise.all(taskToLoad);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  externalTasks = externalTasks
-    .filter((taskSetup) => taskSetup !== null)
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    .map((taskSetup) => taskSetup.default.tasks)
-    // eslint-disable-next-line
-    .reduce((acc, value) => acc.concat(value), []);
+  if (sm.settings?.tasks) {
+    const availableTasks = Object.entries(sm.settings.tasks ?? {});
+    availableTasks.forEach(([key, value]) => {
+      // Make commands
+      cli
+        .command(key, value.description)
+        .action(async (args: Args) => {
+          const settings = sm.computeSettings();
 
-  // console.log('externalTasks', externalTasks);
-  externalTasks.forEach((task: Task) => {
-    logger.info(`Task found: ${task.name}`);
-  });
+          if (args.debug) {
+            dump(settings);
+          }
 
-  hm.registerAll(externalTasks);
+          try {
+            const outputDirs = await startTasks(key, settings, sm.settings.input ?? './src');
+          } catch (e) {
+            // it will collect all the errors encountered if { exitOnError: false }
+            // is set as an option but will not throw them
+            // elsewise it will throw the first error encountered as expected
+            console.error(e);
+          }
 
-  const availableTasks = Object.entries(sm.settings.tasks ?? {});
-  availableTasks.forEach(([key, value]) => {
-    // Make commands
-    cli
-      .command(key, value.description)
-      .action(async (args: Args) => {
-        const settings = sm.computeSettings();
-
-        if (args.debug) {
-          dump(settings);
-        }
-
-        const outputDirs = await dispatchTask(key, settings, 0, [cwd()]);
-        // console.log('outputDirs', outputDirs);
-      });
-  });
+          // logger.info('outputDirs', outputDirs);
+        });
+    });
+  }
 
   // Load local commands and override any command made by the user
   const commands: any[] = [];
@@ -96,7 +134,7 @@ async function app(): Promise<void> {
   try {
     pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
   } catch (error) {
-    console.log('Error reading package.json file');
+    logger.info('Error reading package.json file');
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

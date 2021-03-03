@@ -14,7 +14,7 @@ export default {
   run: async function run({ workingDirectory, taskSettings }: any) {
 
     return {
-      sources: [workingDirectory],
+      source: workingDirectory,
     };
   },
 }

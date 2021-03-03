@@ -31,9 +31,9 @@ export interface ProjectSettings {
   version: string
 }
 
-export interface TaskStep {
+export interface TaskStep<T = unknown> {
   name: string
-  config: string
+  config: T
 }
 
 export interface taskSettings {
@@ -45,19 +45,21 @@ export interface taskSettings {
 export type TasksSettings = Record<string, taskSettings>
 
 export interface ComplexConfig {
-  defaults: unknown
   [index: string]: unknown
 }
 
 export type SimpleConfig = unknown
 
 export interface Settings {
-  config: Record<string, ComplexConfig>
+  // config: Record<string, ComplexConfig>
   // config: Record<string, SimpleConfig> | Record<string, ComplexConfig>
 
   tasks?: TasksSettings
-  extends?: string[]
+  // extends?: string[]
   plugins?: string[]
+
+  // Root source folder
+  input: string;
 }
 
 export interface InternalSettings {
@@ -88,19 +90,6 @@ export interface CliObject {
   default?: string
   boolean?: boolean
 }
-
-export interface RunArguments {
-  workingDirectory: string
-  settings: unknown
-  taskSettings: unknown
-}
-
-export interface TaskRunResult {
-  error?: Error,
-  sources: string[]
-}
-
-export type TaskRun = (TaskArguments: RunArguments) => Promise<TaskRunResult> | TaskRunResult
 
 export interface Args {
   p: string;
