@@ -44,9 +44,6 @@ export default {
 
         const settings = taskSettings as any;
 
-        console.log('settings', settings)
-
-
         // ./builder/steamcmd.exe +login "account" "password" +run_app_build ..\scripts\[build_script_name].vdf +quit
 
 

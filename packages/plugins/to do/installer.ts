@@ -72,7 +72,6 @@ export default {
     try {
       // @ts-ignore
       const appPaths = await eb.build({ config: taskSettings });
-      console.log('appPaths', appPaths);
     } catch (e) {
       logger.log('There was an error building your project:', e);
     }

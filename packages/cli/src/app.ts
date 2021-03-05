@@ -67,8 +67,6 @@ async function app(): Promise<void> {
 
     logger.info('after');
 
-    console.log('taskToLoad', taskToLoad);
-
     const externalTasks: (typeof Task)[] = await Promise.all(taskToLoad);
     // eslint-disable-next-line
     const madeExternalTasks: Task[] = externalTasks
@@ -82,11 +80,7 @@ async function app(): Promise<void> {
       // eslint-disable-next-line
       .map((TaskSetting: typeof Task) => new TaskSetting());
 
-    console.log('madeExternalTasks', madeExternalTasks);
-
-    // logger.info('externalTasks', externalTasks);
     madeExternalTasks.forEach((task: Task) => {
-      console.log('task', task);
       logger.info(`Task found: ${task.id}`);
     });
 
@@ -114,8 +108,6 @@ async function app(): Promise<void> {
             // elsewise it will throw the first error encountered as expected
             console.error(e);
           }
-
-          // logger.info('outputDirs', outputDirs);
         });
     });
   }

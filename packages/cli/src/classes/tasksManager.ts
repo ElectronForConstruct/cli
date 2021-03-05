@@ -41,8 +41,6 @@ export function startTasks(
   settings: ComputedSettings,
   source: string,
 ): Promise<any> | any {
-  console.log('settings', settings);
-
   const task = settings[taskName];
   if (!task) {
     logger.info(`No Tasks found for "${taskName}"`);
@@ -59,7 +57,7 @@ export function startTasks(
   const tasks = new Listr<Ctx>(
     [],
     {
-      renderer: 'verbose',
+      // renderer: 'verbose',
       ctx: context,
     },
   );
@@ -77,13 +75,12 @@ export function startTasks(
 
       tasks.add({
         title: `Step: ${step.name}`,
-        task: async (ctx, t) => {
+        task: (ctx, t) => {
           ctx.taskSettings = taskSettings;
 
-          const resultCtx = await TaskInst.run(ctx, t);
-          console.log('resultCtx', resultCtx);
+          const resultCtx = TaskInst.run(t);
           // ctx = { ...resultCtx };
-          return ctx;
+          return resultCtx;
         },
       });
     } else {

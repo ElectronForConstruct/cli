@@ -72,9 +72,6 @@ export default {
     taskSettings,
     workingDirectory
   } : { workingDirectory: string, taskSettings: Config }): Promise<any> {
-    console.log('taskSettings', taskSettings)
-    console.log('workingDirectory', workingDirectory)
-
     const {
       steamId,
       sdkPath,
@@ -84,7 +81,6 @@ export default {
     } = taskSettings;
 
     const steamSDKPath = path.resolve(sdkPath)
-    console.log('steamSDKPath', steamSDKPath)
 
     const greenworksDir = path.join(workingDirectory, 'greenworks');
     const greenworksLibsDir = path.join(greenworksDir, 'lib');
@@ -202,7 +198,6 @@ Please, avoid using electron from 4.0.0 to 4.0.3`);
         release = `tags/v${prebuildsVersion}`;
       }
       const url = `https://api.github.com/repos/ElectronForConstruct/greenworks-prebuilds/releases/${release}`;
-      console.log('url', url)
       const content = await this.request<GHRelease>(url);
 
       const platforms = ['darwin', 'win32', 'linux'];

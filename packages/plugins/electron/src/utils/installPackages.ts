@@ -23,8 +23,6 @@ async function installPackages(
       })
     }
 
-    // console.log('command', command)
-
     const yarnCmd = exec(command);
 
     if (yarnCmd && yarnCmd.stderr && yarnCmd.stdout) {

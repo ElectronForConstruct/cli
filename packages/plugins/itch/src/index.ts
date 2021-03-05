@@ -49,7 +49,6 @@ const exe = async (
               logger.info(`Uploading ${Math.round(json.progress * 100)}% - ${json.eta}s`);
             }
           }
-          // logger.log(data.toString());
         } catch (e) {
           //
         }
@@ -95,8 +94,6 @@ export default {
       logger.error('Butler not found');
     }
 
-    // console.log('workingDirectory', workingDirectory);
-
     const { project, directories } = taskSettings as Config;
     if (!project) {
       logger.error('You must specify a project in the itch configuration!');
@@ -105,8 +102,6 @@ export default {
         source: workingDirectory,
       };
     }
-
-    // console.log('directories', directories);
 
     let uploaded = false;
     for (let i = 0; i < directories.length; i += 1) {

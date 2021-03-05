@@ -13,6 +13,10 @@ const logger = createScopedLogger('tauri/setup', {
   interactive: false,
 });
 
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export default class TauriDev extends Task {
   description = 'Start tauri in dev mode'
   id = 'tauri/dev'
@@ -20,49 +24,22 @@ export default class TauriDev extends Task {
 
   private tasks = TaskManagerFactory<Ctx>()
 
-  async run(mainCtx: Ctx, task) {
-    this.tasks.ctx = mainCtx
-    
-    this.tasks.add(
+  async run(mainTask) {
+    return mainTask.newListr(
       [
         {
           title: 'Tauri dev',
           task: async (ctx: Ctx, task): Promise<void> => {
 
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-          const settings = ctx.taskSettings as any;
+            // task.output = 'workingDirectory' + mainCtx.workingDirectory
 
-          console.log('ctx.workingDirectory', ctx.workingDirectory)
-          console.log('mainCtx.workingDirectory', mainCtx.workingDirectory)
-
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-
-          task.output = 'workingDirectory' + mainCtx.workingDirectory
-          // const serve = handler(workingDirectory)
-
-          // return new Promise((resolve, reject) => {
-          //   connect()
-          //   .use(serve)
-          //   .listen(3000, async () => {
-          //     logger.info('Server running on 3000...');
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-              const tauriDevCmd = execa('node', [yarn, 'tauri', 'dev', '--cwd=' + ctx.workingDirectory])
-              tauriDevCmd.stdout?.pipe(task.stdout())
-              const { stdout } = await tauriDevCmd
-
-                // distDir: 'https://preview.construct.net/#v69kfz9s',
-                // devPath: 'http://localhost:7000',
-              ctx.source = ctx.workingDirectory
-            // })
-          // });
-        },
-      }
+            const tauriDevCmd = execa('node', [yarn, 'tauri', 'dev'], { cwd: ctx.workingDirectory })
+            tauriDevCmd.stdout?.pipe(task.stdout())
+            tauriDevCmd.stderr?.pipe(task.stdout())
+            await tauriDevCmd
+          },
+        }
       ],
-      { exitOnError: true, concurrent: false, ctx: mainCtx }
     )
-
-    return this.tasks.runAll()
   }
 }

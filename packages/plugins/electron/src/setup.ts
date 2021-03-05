@@ -29,7 +29,6 @@ export default {
   run: async function run({ taskSettings }: any) {
 
     const settings = taskSettings as SetupConfig;
-    // console.log('settings', settings)
     // create temporary directory
     const tmpDir = path.join(process.cwd(), 'tmp', `efc_${path.basename(process.cwd())}`);
     // const tmpDir = path.join(os.tmpdir(), `efc_${path.basename(process.cwd())}`);
@@ -38,8 +37,6 @@ export default {
       await fs.remove(tmpDir);
     }
     await fs.ensureDir(tmpDir);
-
-    // console.log('tmpDir', tmpDir);
 
     // Prepare template
     await fs.copy(path.join(__dirname, '..', 'templates', 'runtime'), tmpDir);

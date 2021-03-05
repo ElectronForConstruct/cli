@@ -6,11 +6,25 @@ import path from 'path'
 import { ListrBaseClassOptions, ListrTaskWrapper, Manager } from 'listr2';
 
 export const createLogger = (options: SignaleOptions): Signale => {
+  // @ts-ignore
+  return {
+    log() {
+
+    },
+    info() {
+
+    },
+    success() {
+      
+    }
+  }
+  /**
   const log = new Signale(options);
   log.config({
     displayLabel: false,
   });
   return log;
+   */
 };
 
 export const createScopedLogger = (scope: string, options: SignaleOptions = {}): Signale => {
