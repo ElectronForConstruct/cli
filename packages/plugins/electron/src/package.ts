@@ -1,7 +1,6 @@
 import packager, { Options as BuildSettings } from 'electron-packager';
 import path from 'path';
 import fs from 'fs-extra';
-import { createScopedLogger } from '@cyn/utils';
 import prettyDisplayFolders from './utils/prettyFolder';
 
 interface PkgJSON {
@@ -53,8 +52,6 @@ export default {
     tmpdir: path.join(process.cwd(), '.cyn', 'tmp')
   },
   run: async function run({ workingDirectory, taskSettings }: any) {
-    const logger = createScopedLogger('package');
-
     const buildSettings: BuildSettings = taskSettings as BuildSettings;
 
     const pkgPath = path.join(workingDirectory, 'package.json');
@@ -94,7 +91,7 @@ export default {
 
     // Package for real
     try {
-      logger.start('Packaging started');
+      // logger.start('Packaging started');
 
       // const log: string[] = [];
       // const unhook = hookStdout((string: string) => {
@@ -112,7 +109,7 @@ export default {
           .map((name: string) => path.join(out ?? '', name))
           .filter(isDirectory);
 
-        logger.success('Files packed successfully!');
+        // logger.success('Files packed successfully!');
 
         if (Array.isArray(folders)) {
           prettyDisplayFolders(folders);
@@ -125,8 +122,8 @@ export default {
         };
       }
     } catch (e) {
-      logger.error('An error occurred while packaging your apps');
-      logger.error(e);
+      // logger.error('An error occurred while packaging your apps');
+      // logger.error(e);
     }
 
     return {

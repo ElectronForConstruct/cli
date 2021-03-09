@@ -2,7 +2,6 @@ import * as path from 'path';
 import fs from 'fs-extra';
 import glob from 'glob';
 import obfuscator from 'javascript-obfuscator';
-import { createScopedLogger } from '@cyn/utils';
 import { Settings } from '../models';
 
 interface Config {
@@ -27,13 +26,9 @@ export default {
       taskSettings: Config;
     },
   ): boolean {
-    const logger = createScopedLogger('minify', {
-      interactive: true,
-    });
-
     const { files: patterns } = taskSettings;
 
-    logger.info('Minifying...');
+    // logger.info('Minifying...');
 
     let obfuscated = 0;
 
@@ -79,16 +74,16 @@ export default {
 
         fs.writeFileSync(file, code, 'utf8');
         obfuscated += 1;
-        logger.await(`Minified ${file}`);
+        // logger.await(`Minified ${file}`);
         return true;
       } catch (e) {
-        logger.error(`Failed minifying ${file}`);
+        // logger.error(`Failed minifying ${file}`);
         return false;
       }
       return true;
     });
 
-    logger.success(`Successfully obfuscated ${obfuscated} files!`);
+    // logger.success(`Successfully obfuscated ${obfuscated} files!`);
 
     return true;
   },

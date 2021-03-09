@@ -1,5 +1,3 @@
-import { createScopedLogger } from '@cyn/utils';
-
 interface Config {
   key1: string[];
   key2: number;
@@ -17,8 +15,7 @@ export default {
       name: '{{ name }}',
       config,
       run({ workingDirectory }: { workingDirectory: string }): any {
-          const logger = createScopedLogger('{{ name }}')
-          logger.info('Just passing by!')
+          // logger.info('Just passing by!')
           return {
               source: workingDirectory,
           };

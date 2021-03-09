@@ -1,6 +1,5 @@
 import * as path from 'path';
 import eb, { Configuration } from 'electron-builder/out';
-import { createScopedLogger } from '@cyn/utils';
 import Task from '../classes/Task';
 
 type DeepWriteable<T> = { -readonly [P in keyof T]: DeepWriteable<T[P]> };
@@ -37,10 +36,6 @@ export default {
       taskSettings,
     },
   ) {
-    const logger = createScopedLogger('installer', {
-      interactive: true,
-    });
-
     let { electronVersion, directories } = taskSettings as DeepWriteable<Configuration>;
     const { electron } = settings as any;
 
@@ -73,7 +68,7 @@ export default {
       // @ts-ignore
       const appPaths = await eb.build({ config: taskSettings });
     } catch (e) {
-      logger.log('There was an error building your project:', e);
+      // logger.log('There was an error building your project:', e);
     }
 
     return {

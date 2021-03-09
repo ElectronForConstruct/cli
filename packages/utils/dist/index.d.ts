@@ -1,7 +1,4 @@
-import { Signale, SignaleOptions } from 'signale';
-import { ListrBaseClassOptions, ListrTaskWrapper, Manager } from 'listr2';
-export declare const createLogger: (options: SignaleOptions) => Signale;
-export declare const createScopedLogger: (scope: string, options?: SignaleOptions) => Signale;
+import { ListrBaseClassOptions, ListrTask, Manager } from 'listr2';
 export declare const yarn: string;
 export declare function TaskManagerFactory<T = any>(override?: ListrBaseClassOptions): Manager<T>;
 export interface RunArguments {
@@ -13,14 +10,14 @@ export interface TaskRunResult {
     error?: Error;
     source: string;
 }
-export declare abstract class Task {
-    abstract id: string;
-    abstract description: string;
-    abstract config?: any;
-    abstract run(ctx: Ctx, task: ListrTaskWrapper<Ctx, any>): void;
+export interface Plugin<SETTINGS> {
+    id: string;
+    description: string;
+    config?: Partial<Ctx<SETTINGS>>;
+    tasks: ListrTask<Ctx<SETTINGS>, any>[];
 }
-export interface Ctx {
+export interface Ctx<SETTINGS> {
     workingDirectory: string;
     settings: any;
-    taskSettings: any;
+    taskSettings: SETTINGS;
 }

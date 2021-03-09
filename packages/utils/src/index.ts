@@ -1,36 +1,7 @@
-import {
-  Signale,
-  SignaleOptions,
-} from 'signale';
 import path from 'path'
-import { ListrBaseClassOptions, ListrTaskWrapper, Manager } from 'listr2';
-
-export const createLogger = (options: SignaleOptions): Signale => {
-  // @ts-ignore
-  return {
-    log() {
-
-    },
-    info() {
-
-    },
-    success() {
-      
-    }
-  }
-  /**
-  const log = new Signale(options);
-  log.config({
-    displayLabel: false,
-  });
-  return log;
-   */
-};
-
-export const createScopedLogger = (scope: string, options: SignaleOptions = {}): Signale => {
-  options.scope = scope;
-  return createLogger(options);
-};
+import { Listr, ListrBaseClassOptions, ListrTask, ListrTaskWrapper, Manager } from 'listr2';
+import { DefaultRenderer } from 'listr2/dist/renderer/default.renderer';
+import { Promisable } from 'type-fest';
 
 export const yarn = path.join(__dirname, '..', 'lib', 'yarn.js')
 
@@ -57,18 +28,20 @@ export interface TaskRunResult {
   source: string
 }
 
-export abstract class Task {
-  abstract id: string;
-
-  abstract description: string;
-
-  abstract config?: any = {};
-
-  abstract run(ctx: Ctx, task: ListrTaskWrapper<Ctx, any>): void;
+export interface Plugin<SETTINGS> {
+  id: string;
+  description: string;
+  config?: Partial<Ctx<SETTINGS>>;
+  tasks: ListrTask<Ctx<SETTINGS>, any>[];
 }
 
-export interface Ctx {
+export interface Ctx<SETTINGS> {
   workingDirectory: string;
   settings: any;
-  taskSettings: any;
+  taskSettings: SETTINGS;
 }
+
+// export async function createPlugin <SETTINGS>(task: Task<SETTINGS>): Promise<() => ListrTask<SETTINGS, any>> {
+//   // @ts-ignore
+//   return (t) => t.newListr(task.tasks)
+// }

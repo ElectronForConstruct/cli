@@ -2,7 +2,6 @@ import * as path from 'path';
 import fs from 'fs-extra';
 import glob from 'glob';
 import crypto from 'crypto';
-import { createScopedLogger } from '@cyn/utils';
 
 interface Config {
   filename: string,
@@ -37,13 +36,9 @@ export default {
       taskSettings: Config
     },
   ): boolean {
-    const logger = createScopedLogger('minify', {
-      interactive: true,
-    });
-
     const { files: patterns, filename } = taskSettings;
 
-    logger.info('Minifying...');
+    // logger.info('Minifying...');
 
     const obfuscated = 0;
     const checksums: { file: string; checksum: string; }[] = [];
@@ -63,7 +58,7 @@ export default {
         const checksum = generateChecksum(content);
         checksums.push({ file, checksum });
       } catch (e) {
-        logger.error(`Failed minifying ${file}`);
+        // logger.error(`Failed minifying ${file}`);
         return false;
       }
       return true;
@@ -71,7 +66,7 @@ export default {
 
     fs.writeFileSync(path.join(workingDirectory, filename), JSON.stringify(checksums, null, '  '), 'utf8');
 
-    logger.success(`Successfully obfuscated ${obfuscated} files!`);
+    // logger.success(`Successfully obfuscated ${obfuscated} files!`);
 
     return true;
   },

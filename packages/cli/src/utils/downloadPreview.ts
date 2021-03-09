@@ -4,7 +4,6 @@ import * as path from 'path';
 import got from 'got';
 import { promisify } from 'util';
 import * as stream from 'stream';
-import { createScopedLogger } from '@cyn/utils';
 
 const pipeline = promisify(stream.pipeline);
 
@@ -12,14 +11,13 @@ interface ReleaseAsset {
   url: string;
   id: number;
   name: string;
+  // eslint-disable-next-line camelcase
   browser_download_url: string;
 }
 
 interface ReleaseResultBody {
   assets: ReleaseAsset[];
 }
-
-const logger = createScopedLogger('system');
 
 export default async function (fullPath: string): Promise<boolean> {
   const body: ReleaseResultBody = await got
@@ -32,7 +30,6 @@ export default async function (fullPath: string): Promise<boolean> {
       },
     )
     .json();
-
 
   let assetUrl = '';
   let exeName = '';
@@ -54,7 +51,7 @@ export default async function (fullPath: string): Promise<boolean> {
       break;
 
     default:
-      logger.log('No preview script available for your platform');
+      // logger.log('No preview script available for your platform');
   }
 
   if (assetUrl !== '') {

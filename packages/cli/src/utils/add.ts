@@ -1,4 +1,3 @@
-import { createScopedLogger } from '@cyn/utils';
 import download from 'download-tarball';
 import got from 'got';
 import path from 'path';
@@ -11,22 +10,18 @@ interface PackageJSON {
   main: string;
 }
 
-const logger = createScopedLogger('system', {
-  interactive: false,
-});
-
 const getCurrentVersion = async (packageName: string, overrideVersion: string): Promise<any> => {
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   const npmURL = `https://registry.npmjs.org/${packageName}`;
-  logger.await(`Fetching ${npmURL}`);
+  // logger.await(`Fetching ${npmURL}`);
   const response:any = await got(npmURL).json();
   return response.versions[overrideVersion ?? response['dist-tags'].latest];
 };
 
 const add = async (plugin: string): Promise<any> => {
-  logger.info('plugin', plugin);
+  // logger.info('plugin', plugin);
   const directoryExists = await fs.pathExists(plugin);
-  logger.info('directoryExists', directoryExists);
+  // logger.info('directoryExists', directoryExists);
 
   let packageBasePath;
   let packageJSONPath;
@@ -42,7 +37,7 @@ const add = async (plugin: string): Promise<any> => {
 
     const pkgName = name as string;
 
-    logger.info(`Detected plugin "${plugin}"`);
+    // logger.info(`Detected plugin "${plugin}"`);
 
     const destPath = path.join(process.cwd(), '.cyn', 'plugins', pkgName);
 
@@ -67,23 +62,23 @@ const add = async (plugin: string): Promise<any> => {
         throw new Error('Version does not exist!');
       }
 
-      logger.info('versionInfos', versionInfos);
+      // logger.info('versionInfos', versionInfos);
 
       if (packageJSON.version !== versionInfos.version) {
         mustDownload = true;
       } else {
-        logger.success('Versions matched');
+        // logger.success('Versions matched');
       }
     }
 
     if (mustDownload) {
       const URL: string = versionInfos.dist.tarball;
-      logger.await('Downloading plugin');
+      // logger.await('Downloading plugin');
       await download({
         url: URL,
         dir: destPath,
       });
-      logger.success('Plugin Downloaded');
+      // logger.success('Plugin Downloaded');
     }
   }
 
@@ -101,19 +96,19 @@ const add = async (plugin: string): Promise<any> => {
     // read package.json 'main'
   ];
 
-  logger.info('here');
+  // logger.info('here');
 
   for (let index = 0; index < paths.length; index += 1) {
     const testPath = paths[index];
 
-    logger.info('testPath', testPath);
+    // logger.info('testPath', testPath);
 
     const exists = await fs.pathExists(testPath);
     if (exists) {
-      logger.info('ok');
+      // logger.info('ok');
       const importedPlugin = await import(testPath);
-      logger.info('importedPlugin');
-      logger.success(`Plugin "${packageJSON.name}" imported`);
+      // logger.info('importedPlugin');
+      // logger.success(`Plugin "${packageJSON.name}" imported`);
       return importedPlugin;
     }
   }

@@ -6,7 +6,6 @@ import { exec } from 'child_process';
 import signale from 'signale';
 import os from 'os';
 import { settings } from 'cluster';
-import { createScopedLogger } from '@cyn/utils';
 import { Settings } from '../models';
 
 interface Config {
@@ -34,12 +33,8 @@ export default {
       taskSettings: Config;
     },
   ): boolean {
-    const logger = createScopedLogger('itch', {
-      interactive: true,
-    });
-
     if (!taskSettings.enable) {
-      logger.info('crash reporter is not enabled.');
+      // logger.info('crash reporter is not enabled.');
       return true;
     }
 

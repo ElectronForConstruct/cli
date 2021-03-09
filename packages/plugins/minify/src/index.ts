@@ -3,9 +3,6 @@ import fs from 'fs-extra';
 import glob from 'glob';
 import Terser from 'terser';
 import slash from 'slash';
-import {
-    createScopedLogger
-} from '@cyn/utils';
 
 interface Config {
     files: string[];
@@ -30,15 +27,12 @@ export default {
             workingDirectory: string,
             taskSettings: Config
         }): any {
-            const logger = createScopedLogger('minify', {
-                interactive: true,
-            });
 
             const {
                 files: patterns
             } = taskSettings as Config;
 
-            logger.info('Minifying...');
+            // logger.info('Minifying...');
 
             let minified = 0;
 
@@ -71,16 +65,16 @@ export default {
 
                     fs.writeFileSync(file, code, 'utf8');
                     minified += 1;
-                    logger.await(`Minified ${file}`);
+                    // logger.await(`Minified ${file}`);
                     return true;
                 } catch (e) {
-                    logger.error(`Failed minifying ${file}`);
+                    // logger.error(`Failed minifying ${file}`);
                     return false;
                 }
                 return true;
             });
 
-            logger.success(`Successfully minified ${minified} files!`);
+            // logger.success(`Successfully minified ${minified} files!`);
 
             return {
                 source: workingDirectory,

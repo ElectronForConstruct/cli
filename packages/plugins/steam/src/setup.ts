@@ -1,5 +1,3 @@
-import { createScopedLogger } from '@cyn/utils';
-
 interface AppBuild {
     name: string;
     appid: string;
@@ -40,8 +38,6 @@ export default {
     name: 'steam/setup',
     config,
     run({ workingDirectory, taskSettings }: { workingDirectory: any, taskSettings: any }): any {
-        const logger = createScopedLogger('steam')
-
         const settings = taskSettings as any;
 
         // ./builder/steamcmd.exe +login "account" "password" +run_app_build ..\scripts\[build_script_name].vdf +quit

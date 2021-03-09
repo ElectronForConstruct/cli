@@ -2,7 +2,6 @@ import * as path from 'path';
 // @ts-ignore
 import convertToWindowsStore from 'electron-windows-store';
 import fs from 'fs-extra';
-import { createScopedLogger } from '@cyn/utils';
 
 interface Config {
   files: string[];
@@ -26,12 +25,8 @@ export default {
       taskSettings: Config;
     },
   ): Promise<boolean> {
-    const logger = createScopedLogger('uwp', {
-      interactive: true,
-    });
-
     if (workingDirectory.includes('win32')) {
-      logger.info('Appx packaging started...');
+      // logger.info('Appx packaging started...');
 
       // create output directory
       const appxOutput = path.join(workingDirectory, '..', 'appx');

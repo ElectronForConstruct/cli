@@ -1,5 +1,3 @@
-import { createScopedLogger } from '@cyn/utils';
-
 export default class TauriPackage {
   description = 'Package your app'
   id = 'tauri/package'
@@ -21,8 +19,6 @@ export default class TauriPackage {
   }
 
   async run({ workingDirectory, taskSettings }: any) {
-    const logger = createScopedLogger('package');
-
     const buildSettings: any = taskSettings as any;
 
     return {

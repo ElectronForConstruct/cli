@@ -6,16 +6,8 @@
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { Task, createScopedLogger, yarn, TaskManagerFactory, Ctx } from '@cyn/utils';
+import { Task, yarn, TaskManagerFactory, Ctx } from '@cyn/utils';
 import execa from 'execa';
-
-const logger = createScopedLogger('tauri/setup', {
-  interactive: false,
-});
-
-function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 export default class TauriDev extends Task {
   description = 'Start tauri in dev mode'
@@ -38,7 +30,10 @@ export default class TauriDev extends Task {
             tauriDevCmd.stderr?.pipe(task.stdout())
             await tauriDevCmd
           },
-        }
+          options: {
+            bottomBar: 5
+          }
+        },
       ],
     )
   }

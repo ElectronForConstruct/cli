@@ -1,4 +1,4 @@
-import { createScopedLogger, Task } from '@cyn/utils';
+import { Task } from '@cyn/utils';
 import { cac } from 'cac';
 import { Listr } from 'listr2';
 import { dump } from 'dumper.js';
@@ -26,8 +26,6 @@ const tasks = new Listr<Ctx>(
 
 const cli = cac();
 
-const logger = createScopedLogger('system');
-
 async function app(): Promise<void> {
   cli
     .option('-p, --profile <name>', 'Specify profile')
@@ -43,12 +41,12 @@ async function app(): Promise<void> {
   const parsed = cli.parse();
   let configFile;
   if (parsed.options.config) {
-    logger.info('Loading custom config');
+    // logger.info('Loading custom config');
     configFile = parsed.options.config;
   }
   await sm.loadConfig(parsed.options.profile, configFile);
 
-  logger.info('sm.settings', sm.settings);
+  // logger.info('sm.settings', sm.settings);
 
   // --- Load Tasks
 
@@ -65,11 +63,11 @@ async function app(): Promise<void> {
       }
     }
 
-    logger.info('after');
+    // logger.info('after');
 
-    const externalTasks: (typeof Task)[] = await Promise.all(taskToLoad);
+    const externalTasks: Task<unknown>[] = await Promise.all(taskToLoad);
     // eslint-disable-next-line
-    const madeExternalTasks: Task[] = externalTasks
+    const madeExternalTasks: Task<any>[] = externalTasks
       .filter((taskSetup) => taskSetup !== null)
       // @ts-ignore
       .map((taskSetup) => taskSetup.default.tasks)
@@ -80,8 +78,8 @@ async function app(): Promise<void> {
       // eslint-disable-next-line
       .map((TaskSetting: typeof Task) => new TaskSetting());
 
-    madeExternalTasks.forEach((task: Task) => {
-      logger.info(`Task found: ${task.id}`);
+    madeExternalTasks.forEach((task: Task<unknown>) => {
+      // logger.info(`Task found: ${task.id}`);
     });
 
     hm.registerAll(madeExternalTasks);
@@ -126,7 +124,7 @@ async function app(): Promise<void> {
   try {
     pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
   } catch (error) {
-    logger.info('Error reading package.json file');
+    // logger.info('Error reading package.json file');
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

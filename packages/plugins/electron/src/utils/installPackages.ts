@@ -1,10 +1,5 @@
 import { exec } from 'child_process';
 import * as path from 'path';
-import { createScopedLogger } from '@cyn/utils';
-
-const logger = createScopedLogger('system', {
-  interactive: true,
-});
 
 async function installPackages(
   packages: string[][] = [],
@@ -29,23 +24,23 @@ async function installPackages(
       yarnCmd.stdout.on('data', (data) => {
         const lines = data.toString().trim().split('\n')
         lines.forEach((line: string) => {
-          logger.info(line);
+          // logger.info(line);
         });
       });
 
       yarnCmd.stderr.on('data', (data) => {
         const lines = data.toString().trim().split('\n')
         lines.forEach((line: string) => {
-          logger.info(line);
+          // logger.info(line);
         });
       });
     }
 
     yarnCmd.on('exit', (code) => {
       if (code === 0) {
-        logger.success('Packages installed successfully');
+        // logger.success('Packages installed successfully');
       } else {
-        logger.error(`There was an error installing packages: ${code}`);
+        // logger.error(`There was an error installing packages: ${code}`);
       }
       resolve(true);
     });

@@ -1,14 +1,12 @@
 import deepmerge from 'deepmerge';
-import { Task, createScopedLogger, Ctx } from '@cyn/utils';
+import { Task, Ctx } from '@cyn/utils';
 import { Listr } from 'listr2';
 import { ComputedSettings } from '../models';
-
-const logger = createScopedLogger('system');
 
 export default class TaskManager {
   private static instance: TaskManager
 
-  private tasks: Task[] = [];
+  private tasks: Task<any>[] = [];
 
   static getInstance(): TaskManager {
     if (!TaskManager.instance) {
@@ -17,21 +15,21 @@ export default class TaskManager {
     return TaskManager.instance;
   }
 
-  register(task: Task): number {
+  register(task: Task<any>): number {
     return this.tasks.push(task);
   }
 
-  registerAll(tasks: Task[]): void {
+  registerAll(tasks: Task<any>[]): void {
     for (let i = 0; i < tasks.length; i += 1) {
       this.register(tasks[i]);
     }
   }
 
-  listAll(): Task[] {
+  listAll(): Task<any>[] {
     return this.tasks;
   }
 
-  get(taskName: string): Task | undefined {
+  get(taskName: string): Task<any> | undefined {
     return this.tasks.find((task) => task.id === taskName);
   }
 }
@@ -43,18 +41,18 @@ export function startTasks(
 ): Promise<any> | any {
   const task = settings[taskName];
   if (!task) {
-    logger.info(`No Tasks found for "${taskName}"`);
+    // logger.info(`No Tasks found for "${taskName}"`);
     return '';
   }
 
   const { steps } = task;
 
-  const context: Ctx = {
+  const context: Ctx<unknown> = {
     workingDirectory: source,
     settings,
     taskSettings: {},
   };
-  const tasks = new Listr<Ctx>(
+  const tasks = new Listr<Ctx<unknown>>(
     [],
     {
       // renderer: 'verbose',
@@ -75,16 +73,19 @@ export function startTasks(
 
       tasks.add({
         title: `Step: ${step.name}`,
+        // @ts-ignore
         task: (ctx, t) => {
           ctx.taskSettings = taskSettings;
 
-          const resultCtx = TaskInst.run(t);
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+          const { tasks: instanceTasks } = TaskInst;
           // ctx = { ...resultCtx };
-          return resultCtx;
+          return t.newListr(instanceTasks);
         },
       });
     } else {
-      logger.error(`Cannot find Task ${step.name}`);
+      // logger.error(`Cannot find Task ${step.name}`);
     }
   }
 
