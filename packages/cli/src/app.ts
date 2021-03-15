@@ -1,10 +1,10 @@
-import { Task } from '@cyn/utils';
+import { Plugin, Module } from '@cyn/utils';
 import { cac } from 'cac';
 import { Listr } from 'listr2';
 import { dump } from 'dumper.js';
 import fs from 'fs-extra';
 import path from 'path';
-import TaskManager, { startTasks } from './classes/tasksManager';
+import ModuleManaher, { startTasks } from './classes/tasksManager';
 import SettingsManager from './classes/settingsManager';
 
 import add from './utils/add';
@@ -12,6 +12,7 @@ import add from './utils/add';
 import { Args } from './models';
 
 interface Ctx {
+  dummy: boolean
   /* some variables for internal use */
 }
 
@@ -33,7 +34,7 @@ async function app(): Promise<void> {
     .option('-w, --watch', 'Watch for changes and restart')
     .option('-d, --debug', 'Output the resolved config file');
 
-  const hm = TaskManager.getInstance();
+  const mm = ModuleManaher.getInstance();
   const sm = SettingsManager.getInstance();
 
   // --- Load config
@@ -53,36 +54,37 @@ async function app(): Promise<void> {
   if (sm.settings?.plugins) {
     const { plugins } = sm.settings;
 
-    const taskToLoad: Promise<any>[] = [];
+    const pluginsToLoad: Promise<any>[] = [];
     if (plugins && Array.isArray(plugins) && plugins.length > 0) {
       for (let index = 0; index < plugins?.length ?? 0; index += 1) {
         const pluginName = plugins[index];
 
-        const importedTask = await add(pluginName);
-        taskToLoad.push(importedTask);
+        const importedPlugin = await add(pluginName);
+        pluginsToLoad.push(importedPlugin);
       }
     }
 
     // logger.info('after');
 
-    const externalTasks: Task<unknown>[] = await Promise.all(taskToLoad);
+    const externalPlugins: Plugin[] = (
+      await Promise.all(pluginsToLoad)
+    );
+
     // eslint-disable-next-line
-    const madeExternalTasks: Task<any>[] = externalTasks
-      .filter((taskSetup) => taskSetup !== null)
-      // @ts-ignore
-      .map((taskSetup) => taskSetup.default.tasks)
+    const madeExternalModules = externalPlugins
+      .filter((plugin) => plugin !== null)
+      .map((plugin) => plugin.modules)
       // flatten
       // eslint-disable-next-line
       .reduce((acc, value) => acc.concat(value), [])
-      // @ts-ignore
-      // eslint-disable-next-line
-      .map((TaskSetting: typeof Task) => new TaskSetting());
 
-    madeExternalTasks.forEach((task: Task<unknown>) => {
-      // logger.info(`Task found: ${task.id}`);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    madeExternalModules.forEach((task) => {
+      const name: string = task?.id ?? 'No Title';
+      console.log(`Found module ${name}`);
     });
 
-    hm.registerAll(madeExternalTasks);
+    mm.registerAll(madeExternalModules);
   }
 
   if (sm.settings?.tasks) {

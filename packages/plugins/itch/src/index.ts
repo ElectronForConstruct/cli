@@ -1,13 +1,8 @@
 import * as path from 'path';
-import os from 'os';
-// import fs from 'fs-extra';
+import fs from 'fs-extra';
 import execa from 'execa'
-import { Ctx, Plugin, createPlugin } from '@cyn/utils';
-
-const config: Config = {
-  project: null,
-  directories: [],
-};
+import { Plugin, Module } from '@cyn/utils';
+import envPaths from 'env-paths';
 
 interface ItchIoLogger {
   type: string
@@ -63,61 +58,64 @@ const exe = async (
 };
 
 interface ItchCtx {
-  project: string | null
-  directories: {
-    name: string
-    channel: string
-  }[]
+  project: string
+  channel: string
+  BUTLER_API_KEY: string
 }
 
-const Itch: Plugin<ItchCtx> = {
+const butler = 'butler';
+
+const Itch: Module<ItchCtx> = {
   description: 'Setup the directory',
   id: 'itch',
-  config: {},
+  config: {
+  },
 
-  tasks: [{
-    title: 'Tauri setup',
-    task: async (ctx, task) => {
-      /* const butler = 'butler';
-
-      const result = await exe(`${butler} -V`, false);
-      if (result.log[0][0] !== 'v') {
-        throw new Error('Butler not found');
-      }
-
-      const { project, directories } = ctx.taskSettings;
-      if (!project) {
-        throw new Error('You must specify a project in the itch configuration!')
-      }
-
-      let uploaded = false;
-      for (let i = 0; i < directories.length; i += 1) {
-        const directory = directories[i];
-
-        const outDir = path.resolve(process.cwd(), directory.name);
-
-        if (outDir === workingDirectory) {
-          // logger.log('Publishing to itch...');
-          await exe(`${butler} push ${outDir} ${project}:${directory.channel} -j`, true);
-          // logger.success(`${directory.channel} uploaded successfully`);
-          uploaded = true;
+  tasks: [
+    {
+      title: 'Setup',
+      task: async (ctx, task) => {
+        try {
+          const { stdout } = await execa(butler, ['-V']);
+          // if (stdout.log[0][0] !== 'v') {
+          //   throw new Error('Butler not found');
+          // }
+        } catch (error) {
+          task.output = error
+          throw new Error('Butler not found. Please install it from: https://itch.io/docs/butler/')
         }
-      }
 
-      if (!uploaded) {
-        // logger.warn(`No match found in configuration for "${workingDirectory}". Skipping.`);
-      } */
-
-      // // add tauri package
-      // const yarnAddTauriCmd = execa('node', [yarn, 'add', 'tauri'], { cwd: output})
-      // yarnAddTauriCmd.stdout?.pipe(task.stdout())
-      // yarnAddTauriCmd.stderr?.pipe(task.stdout())
-      // await yarnAddTauriCmd
+        task.output = 'Finding butler'
+      },
     },
-    options: {
-      bottomBar: 5,
-    }
-  }]
+    {
+      title: 'Upload',
+      async task(ctx, task) {
+        const { project, channel, BUTLER_API_KEY } = ctx.taskSettings;
+        if (!project) {
+          throw new Error('You must specify a project in the itch configuration!')
+        }
+        if (!channel) {
+          throw new Error('You must specify a channel in the itch configuration!')
+        }
+        if (!BUTLER_API_KEY) {
+          throw new Error('You must specify an api key in the itch configuration!')
+        }
+
+        // logger.log('Publishing to itch...');
+        const butlerPush = execa(butler, ['push', '.', `${project}:${channel}`], { cwd: ctx.workingDirectory})
+        butlerPush.stdout?.pipe(task.stdout())
+        butlerPush.stderr?.pipe(task.stdout())
+        await butlerPush
+        // logger.success(`${directory.channel} uploaded successfully`);
+      },
+    },
+  ]
 }
 
-export default Itch
+export default {
+  name: 'itch',
+  modules: [
+    Itch,
+  ]
+} as Plugin

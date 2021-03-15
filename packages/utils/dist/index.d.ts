@@ -10,11 +10,16 @@ export interface TaskRunResult {
     error?: Error;
     source: string;
 }
-export interface Plugin<SETTINGS> {
+export interface Module<SETTINGS> {
     id: string;
     description: string;
-    config?: Partial<Ctx<SETTINGS>>;
+    config?: Partial<SETTINGS>;
     tasks: ListrTask<Ctx<SETTINGS>, any>[];
+}
+export declare type Task<SETTINGS> = ListrTask<Ctx<SETTINGS>, any>;
+export interface Plugin {
+    name: string;
+    modules: Module<any>[];
 }
 export interface Ctx<SETTINGS> {
     workingDirectory: string;

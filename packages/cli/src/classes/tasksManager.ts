@@ -1,51 +1,51 @@
 import deepmerge from 'deepmerge';
-import { Task, Ctx } from '@cyn/utils';
+import { Ctx, Module } from '@cyn/utils';
 import { Listr } from 'listr2';
 import { ComputedSettings } from '../models';
 
-export default class TaskManager {
-  private static instance: TaskManager
+export default class ModuleManager {
+  private static instance: ModuleManager
 
-  private tasks: Task<any>[] = [];
+  private modules: Module<any>[] = [];
 
-  static getInstance(): TaskManager {
-    if (!TaskManager.instance) {
-      TaskManager.instance = new TaskManager();
+  static getInstance(): ModuleManager {
+    if (!ModuleManager.instance) {
+      ModuleManager.instance = new ModuleManager();
     }
-    return TaskManager.instance;
+    return ModuleManager.instance;
   }
 
-  register(task: Task<any>): number {
-    return this.tasks.push(task);
+  register(task: Module<any>): number {
+    return this.modules.push(task);
   }
 
-  registerAll(tasks: Task<any>[]): void {
-    for (let i = 0; i < tasks.length; i += 1) {
-      this.register(tasks[i]);
+  registerAll(modules: Module<any>[]): void {
+    for (let i = 0; i < modules.length; i += 1) {
+      this.register(modules[i]);
     }
   }
 
-  listAll(): Task<any>[] {
-    return this.tasks;
+  listAll(): Module<any>[] {
+    return this.modules;
   }
 
-  get(taskName: string): Task<any> | undefined {
-    return this.tasks.find((task) => task.id === taskName);
+  get(moduleName: string): Module<any> | undefined {
+    return this.modules.find((task) => task.id === moduleName);
   }
 }
 
 export function startTasks(
-  taskName: string,
+  moduleName: string,
   settings: ComputedSettings,
   source: string,
 ): Promise<any> | any {
-  const task = settings[taskName];
-  if (!task) {
+  const module = settings[moduleName];
+  if (!module) {
     // logger.info(`No Tasks found for "${taskName}"`);
     return '';
   }
 
-  const { steps } = task;
+  const { steps } = module;
 
   const context: Ctx<unknown> = {
     workingDirectory: source,
@@ -66,22 +66,27 @@ export function startTasks(
       return source;
     }
 
-    const TaskInst = TaskManager.getInstance().get(step.name);
-    if (TaskInst) {
-    // @ts-ignore
-      const taskSettings = deepmerge.all([TaskInst.config ?? {}, step.config ?? {}]);
+    const moduleInstance = ModuleManager.getInstance().get(step.name);
+    if (moduleInstance) {
+      // @ts-ignore
+      const taskSettings = deepmerge.all([moduleInstance.config ?? {}, step.config ?? {}]);
 
       tasks.add({
         title: `Step: ${step.name}`,
         // @ts-ignore
-        task: (ctx, t) => {
+        task(ctx, t) {
           ctx.taskSettings = taskSettings;
 
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-          const { tasks: instanceTasks } = TaskInst;
+          const { tasks: instanceTasks } = moduleInstance;
           // ctx = { ...resultCtx };
-          return t.newListr(instanceTasks);
+          return t.newListr(instanceTasks, {
+            rendererOptions: { collapse: false },
+          });
+        },
+        options: {
+          bottomBar: 5,
         },
       });
     } else {

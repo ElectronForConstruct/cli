@@ -19,7 +19,3 @@ function TaskManagerFactory(override) {
     return new listr2_1.Manager({ ...myDefaultOptions, ...override });
 }
 exports.TaskManagerFactory = TaskManagerFactory;
-// export async function createPlugin <SETTINGS>(task: Task<SETTINGS>): Promise<() => ListrTask<SETTINGS, any>> {
-//   // @ts-ignore
-//   return (t) => t.newListr(task.tasks)
-// }

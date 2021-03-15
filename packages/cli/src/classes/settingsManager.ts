@@ -6,7 +6,7 @@ import {
   ComputedTask,
   taskSettings, ComplexConfig, Settings, ComputedSettings,
 } from '../models/index';
-import TaskManager from './tasksManager';
+import ModuleManager from './tasksManager';
 
 const defaultConfigPath = path.join(process.cwd(), 'cyn.yml');
 
@@ -73,7 +73,7 @@ export default class SettingsManager {
           throw new Error(`No config entry "${name}" found for ${taskName}`);
         }
         // Set default config
-        let computedSettings: any = TaskManager.getInstance().get(name)?.config ?? {};
+        let computedSettings: any = ModuleManager.getInstance().get(name)?.config ?? {};
 
         // Get the default key
         computedSettings = deepmerge.all([computedSettings, stepConfig ?? {}]);

@@ -1,7 +1,5 @@
 import path from 'path'
-import { Listr, ListrBaseClassOptions, ListrTask, ListrTaskWrapper, Manager } from 'listr2';
-import { DefaultRenderer } from 'listr2/dist/renderer/default.renderer';
-import { Promisable } from 'type-fest';
+import { ListrBaseClassOptions, ListrTask, Manager } from 'listr2';
 
 export const yarn = path.join(__dirname, '..', 'lib', 'yarn.js')
 
@@ -28,11 +26,18 @@ export interface TaskRunResult {
   source: string
 }
 
-export interface Plugin<SETTINGS> {
+export interface Module<SETTINGS> {
   id: string;
   description: string;
-  config?: Partial<Ctx<SETTINGS>>;
+  config?: Partial<SETTINGS>;
   tasks: ListrTask<Ctx<SETTINGS>, any>[];
+}
+
+export type Task<SETTINGS> = ListrTask<Ctx<SETTINGS>, any>
+
+export interface Plugin {
+  name: string;
+  modules: Module<any> []
 }
 
 export interface Ctx<SETTINGS> {
@@ -40,8 +45,3 @@ export interface Ctx<SETTINGS> {
   settings: any;
   taskSettings: SETTINGS;
 }
-
-// export async function createPlugin <SETTINGS>(task: Task<SETTINGS>): Promise<() => ListrTask<SETTINGS, any>> {
-//   // @ts-ignore
-//   return (t) => t.newListr(task.tasks)
-// }

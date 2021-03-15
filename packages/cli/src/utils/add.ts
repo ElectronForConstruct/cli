@@ -109,7 +109,7 @@ const add = async (plugin: string): Promise<any> => {
       const importedPlugin = await import(testPath);
       // logger.info('importedPlugin');
       // logger.success(`Plugin "${packageJSON.name}" imported`);
-      return importedPlugin;
+      return importedPlugin.default;
     }
   }
 
