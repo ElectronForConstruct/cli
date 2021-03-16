@@ -69,6 +69,7 @@ export interface InternalSettings {
 
 export interface ComputedTask {
   description: string;
+  debug?: boolean;
   steps: {
     name: string;
     config: unknown

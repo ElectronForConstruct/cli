@@ -1,49 +1,28 @@
-import { exec } from 'child_process';
-import * as path from 'path';
+import execa, { ExecaReturnValue } from 'execa'
+import { yarn } from '@cyn/utils'
 
-async function installPackages(
-  packages: string[][] = [],
+function installPackages(
+  packages: string[] = [],
   cwd: string = process.cwd(),
   dev = false,
-): Promise<boolean> {
-  return new Promise((resolve) => {
-    const yarn = path.join(__dirname, '..', '..', 'lib', 'yarn-1.22.4.js');
+) {
+  const args = []
 
-    let command = `node "${yarn}" --cwd="${cwd}"`;
-    if (packages.length > 0) {
-      command += ` add ${dev ? '-D ' : ' '}`;
+  args.push(yarn)
 
-      packages.forEach((pkg: string[]) => {
-        command +=  pkg.join(pkg.length === 2 ? '@' : '') + ' '
-      })
+  if (packages.length > 0) {
+    args.push('add')
+    if (dev) {
+      args.push('-D ');
     }
 
-    const yarnCmd = exec(command);
+    packages.forEach((pkg: string) => {
+      args.push(pkg)
+    })
+  }
 
-    if (yarnCmd && yarnCmd.stderr && yarnCmd.stdout) {
-      yarnCmd.stdout.on('data', (data) => {
-        const lines = data.toString().trim().split('\n')
-        lines.forEach((line: string) => {
-          // logger.info(line);
-        });
-      });
-
-      yarnCmd.stderr.on('data', (data) => {
-        const lines = data.toString().trim().split('\n')
-        lines.forEach((line: string) => {
-          // logger.info(line);
-        });
-      });
-    }
-
-    yarnCmd.on('exit', (code) => {
-      if (code === 0) {
-        // logger.success('Packages installed successfully');
-      } else {
-        // logger.error(`There was an error installing packages: ${code}`);
-      }
-      resolve(true);
-    });
+  return execa('node', args, {
+    cwd
   });
 }
 

@@ -10,7 +10,7 @@ src/\.env
 dashboard
 .env
 
-dist/
+dist
 
 .history/
 

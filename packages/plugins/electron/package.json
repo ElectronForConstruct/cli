@@ -28,7 +28,9 @@
     "@types/fs-extra": "^9.0.7",
     "@yarnpkg/core": "^2.1.1",
     "electron-packager": "^15.2.0",
-    "fs-extra": "^9.1.0"
+    "execa": "^5.0.0",
+    "fs-extra": "^9.1.0",
+    "type-fest": "^0.21.3"
   },
   "publishConfig": {
     "access": "public"

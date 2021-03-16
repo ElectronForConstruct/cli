@@ -55,7 +55,7 @@ export function startTasks(
   const tasks = new Listr<Ctx<unknown>>(
     [],
     {
-      // renderer: 'verbose',
+      renderer: (module.debug === true) ? 'verbose' : 'default',
       ctx: context,
     },
   );

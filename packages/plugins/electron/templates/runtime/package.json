@@ -4,9 +4,6 @@
   "main": "main.js",
   "license": "UNLICENSED",
   "private": true,
-  "devDependencies": {
-    "electron": "6.0.1"
-  },
   "dependencies": {
     "fs-extra": "^7.0.1",
     "get-port": "^4.2.0",
