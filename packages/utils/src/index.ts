@@ -26,7 +26,7 @@ export interface TaskRunResult {
   source: string
 }
 
-export interface Module<SETTINGS> {
+export interface Module<SETTINGS = any> {
   id: string;
   description: string;
   config?: Partial<SETTINGS>;
