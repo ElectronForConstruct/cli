@@ -1,0 +1,4 @@
+# src/templates/
+# src/3rd-party/
+dist
+node_modules

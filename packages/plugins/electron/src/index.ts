@@ -1,6 +1,6 @@
 import dev from './dev'
 import packageApp from './package'
-import setup from './setup'
+import setup from './wrap'
 
 import { Plugin } from '@cyn/utils'
 

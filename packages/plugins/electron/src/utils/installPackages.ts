@@ -1,4 +1,4 @@
-import execa, { ExecaReturnValue } from 'execa'
+import execa from 'execa'
 import { yarn } from '@cyn/utils'
 
 function installPackages(
@@ -13,7 +13,7 @@ function installPackages(
   if (packages.length > 0) {
     args.push('add')
     if (dev) {
-      args.push('-D ');
+      args.push('-D');
     }
 
     packages.forEach((pkg: string) => {

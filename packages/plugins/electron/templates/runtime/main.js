@@ -8,103 +8,96 @@ const path = require('path');
 const handler = require('serve-handler');
 const http = require('http');
 const getPort = require('get-port');
-const settings = require('./config');
-
-// const ipc = electron.ipcMain;
-// const { Client } = require('discord-rpc');
-
-process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = true;
-
-// Rich Presence only works with IPC, and so it won't work in browser
-// const client = new Client({ transport: 'ipc' });
+// const settings = require('./config');
 
 let mainWindow;
 
 // eslint-disable-next-line
-const args = global.args = process.argv;
+const args = process.argv;
 
-const cache = path.resolve(path.join('.', '.cache'));
+// const cache = path.resolve(path.join('.', '.cache'));
 
-fs.ensureDirSync(cache)
-app.setPath('userData', cache);
+// fs.ensureDirSync(cache)
+// app.setPath('userData', cache);
 
 console.log(args);
 console.log(__dirname);
 console.log(path.resolve('.'));
 
-const url = args[2] || __dirname;
-const isURL = url.includes('http');
+const endpoint = args[2] ?? path.join(__dirname, 'app');
+const isURL = endpoint.includes('http');
 
-console.log('settings', settings);
+// console.log('settings', settings);
 
-if (settings.debug && settings.debug.showConfig) {
-  console.log(settings);
-}
+// if (settings.debug && settings.debug.showConfig) {
+//   console.log(settings);
+// }
 
-// single instance
-const gotTheLock = app.requestSingleInstanceLock();
-if (settings.singleInstance && !gotTheLock) {
-  app.quit();
-}
+// // single instance
+// const gotTheLock = app.requestSingleInstanceLock();
+// if (settings.singleInstance && !gotTheLock) {
+//   app.quit();
+// }
 
 // crash reporter
-if (settings['crash-reporter']) {
-  if (!settings['crash-reporter'].companyName) {
-    if (settings.project.author) {
-      settings['crash-reporter'].companyName = settings.project.author;
-    } else {
-      settings['crash-reporter'].companyName = 'MyCompany';
-    }
-  }
-  electron.crashReporter.start(settings['crash-reporter']);
-}
+// if (settings['crash-reporter']) {
+//   if (!settings['crash-reporter'].companyName) {
+//     if (settings.project.author) {
+//       settings['crash-reporter'].companyName = settings.project.author;
+//     } else {
+//       settings['crash-reporter'].companyName = 'MyCompany';
+//     }
+//   }
+//   electron.crashReporter.start(settings['crash-reporter']);
+// }
 
 /* Switches */
-try {
-  const { switches } = settings;
+// try {
+//   const { switches } = settings;
 
-  switches.forEach((flag) => {
-    if (Array.isArray(flag)) {
-      app.commandLine.appendSwitch(flag[0], flag[1]);
-    } else {
-      app.commandLine.appendSwitch(flag);
-    }
-  });
-} catch (e) {
-  console.log('No command line switches provided');
-}
+//   switches.forEach((flag) => {
+//     if (Array.isArray(flag)) {
+//       app.commandLine.appendSwitch(flag[0], flag[1]);
+//     } else {
+//       app.commandLine.appendSwitch(flag);
+//     }
+//   });
+// } catch (e) {
+//   console.log('No command line switches provided');
+// }
 
 function createWindow() {
-  const { window } = settings;
+  const window = {};
+  // const { window } = settings;
 
   const defaultConfig = {
-    webPreferences: {
-      nodeIntegration: true,
-      nodeIntegrationInWorker: true,
-      nodeIntegrationInSubFrames: true,
-      preload: path.join(__dirname, 'preload.js'),
-    },
+    // webPreferences: {
+    //   nodeIntegration: true,
+    //   nodeIntegrationInWorker: true,
+    //   nodeIntegrationInSubFrames: true,
+    //   preload: path.join(__dirname, 'preload.js'),
+    // },
   };
 
   const finalConfig = Object.assign({}, window, defaultConfig);
 
   mainWindow = new BrowserWindow(finalConfig);
 
-  const ses = mainWindow.webContents.session;
-  ses.clearStorageData({
-    storages: ['cachestorage', 'serviceworkers'],
-  }).then(() => {
-    console.log('storage cleared');
-  }).catch(e => {
-    console.log('Error clearing cache:', e);
-  });
+  // const ses = mainWindow.webContents.session;
+  // ses.clearStorageData({
+  //   storages: ['cachestorage', 'serviceworkers'],
+  // }).then(() => {
+  //   console.log('storage cleared');
+  // }).catch(e => {
+  //   console.log('Error clearing cache:', e);
+  // });
 
   if (isURL) {
-    mainWindow.loadURL(url);
+    mainWindow.loadURL(endpoint);
   } else {
     const server = http.createServer((request, response) => {
       handler(request, response, {
-        public: url,
+        public: endpoint,
       });
     });
 
@@ -117,9 +110,9 @@ function createWindow() {
     });
   }
 
-  if (settings.developer && settings.developer.showChromeDevTools) {
-    mainWindow.webContents.openDevTools();
-  }
+  // if (settings.developer && settings.developer.showChromeDevTools) {
+  //   mainWindow.webContents.openDevTools();
+  // }
 
   /* ipc.on('login', function (event, clientId) {
     client.login(clientId);
@@ -173,15 +166,15 @@ function createWindow() {
   });
 }
 
-app.on('second-instance', () => {
-  // Someone tried to run a second instance, we should focus our window.
-  if (mainWindow) {
-    if (mainWindow.isMinimized()) {
-      mainWindow.restore();
-    }
-    mainWindow.focus();
-  }
-});
+// app.on('second-instance', () => {
+//   // Someone tried to run a second instance, we should focus our window.
+//   if (mainWindow) {
+//     if (mainWindow.isMinimized()) {
+//       mainWindow.restore();
+//     }
+//     mainWindow.focus();
+//   }
+// });
 
 app.on('ready', createWindow);
 

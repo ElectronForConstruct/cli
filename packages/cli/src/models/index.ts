@@ -1,3 +1,5 @@
+import { Settings } from '@cyn/utils';
+
 export interface WindowSettings {
   width: number
   height: number
@@ -31,53 +33,15 @@ export interface ProjectSettings {
   version: string
 }
 
-export interface TaskStep<T = unknown> {
-  name: string
-  config: T
-}
-
-export interface taskSettings {
-  description: string
-  // steps: (string | TaskStep)[]
-  steps: TaskStep[]
-}
-
-export type TasksSettings = Record<string, taskSettings>
-
 export interface ComplexConfig {
   [index: string]: unknown
 }
 
 export type SimpleConfig = unknown
 
-export interface Settings {
-  // config: Record<string, ComplexConfig>
-  // config: Record<string, SimpleConfig> | Record<string, ComplexConfig>
-
-  tasks?: TasksSettings
-  // extends?: string[]
-  plugins?: string[]
-
-  // Root source folder
-  input: string;
-}
-
 export interface InternalSettings {
   settings: Settings
   configFilePath: string
-}
-
-export interface ComputedTask {
-  description: string;
-  debug?: boolean;
-  steps: {
-    name: string;
-    config: unknown
-  }[]
-}
-
-export interface ComputedSettings {
-  [task: string]: ComputedTask
 }
 
 export interface SetupDirOptions {
@@ -93,8 +57,8 @@ export interface CliObject {
 }
 
 export interface Args {
-  p: string;
-  profile: string
+  // p: string;
+  // profile: string
 
   c: string;
   config: string

@@ -1,22 +1,14 @@
-import { Plugin, Module } from '@cyn/utils';
 import { cac } from 'cac';
 import { Listr } from 'listr2';
-import { dump } from 'dumper.js';
 import fs from 'fs-extra';
 import path from 'path';
-import ModuleManaher, { startTasks } from './classes/tasksManager';
-import SettingsManager from './classes/settingsManager';
-
-import add from './utils/add';
+import { Core } from '@cyn/core';
 
 import { Args } from './models';
 
-interface Ctx {
-  dummy: boolean
-  /* some variables for internal use */
-}
+const core = new Core();
 
-const tasks = new Listr<Ctx>(
+const tasks = new Listr<any>(
   [
     /* tasks */
   ],
@@ -29,88 +21,48 @@ const cli = cac();
 
 async function app(): Promise<void> {
   cli
-    .option('-p, --profile <name>', 'Specify profile')
+    // .option('-p, --profile <name>', 'Specify profile')
     .option('-c, --config <path>', 'Specify path to a configuration file')
-    .option('-w, --watch', 'Watch for changes and restart')
+    // .option('-w, --watch', 'Watch for changes and restart')
     .option('-d, --debug', 'Output the resolved config file');
-
-  const mm = ModuleManaher.getInstance();
-  const sm = SettingsManager.getInstance();
 
   // --- Load config
 
   const parsed = cli.parse();
-  let configFile;
-  if (parsed.options.config) {
-    // logger.info('Loading custom config');
-    configFile = parsed.options.config;
-  }
-  await sm.loadConfig(parsed.options.profile, configFile);
 
-  // logger.info('sm.settings', sm.settings);
+  await core.loadConfig(parsed.options.profile, parsed.options.config);
 
-  // --- Load Tasks
+  await core.loadTasks();
 
-  if (sm.settings?.plugins) {
-    const { plugins } = sm.settings;
+  const availableCommands = core.getCommands();
+  availableCommands.forEach((command) => {
+    // Make commands
+    cli
+      .command(command.name, command.description)
+      .action(async (args: Args) => {
+        // const configuration = core.computeConfiguration();
 
-    const pluginsToLoad: Promise<any>[] = [];
-    if (plugins && Array.isArray(plugins) && plugins.length > 0) {
-      for (let index = 0; index < plugins?.length ?? 0; index += 1) {
-        const pluginName = plugins[index];
+        if (args.debug) {
+          // dump(configuration);
+        }
 
-        const importedPlugin = await add(pluginName);
-        pluginsToLoad.push(importedPlugin);
-      }
-    }
+        try {
+          const t = core.getTasks(command.name);
 
-    // logger.info('after');
-
-    const externalPlugins: Plugin[] = (
-      await Promise.all(pluginsToLoad)
-    );
-
-    // eslint-disable-next-line
-    const madeExternalModules = externalPlugins
-      .filter((plugin) => plugin !== null)
-      .map((plugin) => plugin.modules)
-      // flatten
-      // eslint-disable-next-line
-      .reduce((acc, value) => acc.concat(value), [])
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    madeExternalModules.forEach((task) => {
-      const name: string = task?.id ?? 'No Title';
-      console.log(`Found module ${name}`);
-    });
-
-    mm.registerAll(madeExternalModules);
-  }
-
-  if (sm.settings?.tasks) {
-    const availableTasks = Object.entries(sm.settings.tasks ?? {});
-    availableTasks.forEach(([key, value]) => {
-      // Make commands
-      cli
-        .command(key, value.description)
-        .action(async (args: Args) => {
-          const settings = sm.computeSettings();
-
-          if (args.debug) {
-            dump(settings);
+          if (t) {
+            await t.run();
+          } else {
+            console.log('Nothing to run');
           }
-
-          try {
-            const outputDirs = await startTasks(key, settings, sm.settings.input ?? './src');
-          } catch (e) {
-            // it will collect all the errors encountered if { exitOnError: false }
-            // is set as an option but will not throw them
-            // elsewise it will throw the first error encountered as expected
-            console.error(e);
-          }
-        });
-    });
-  }
+          // console.log('ctx', ctx);
+        } catch (e) {
+          // it will collect all the errors encountered if { exitOnError: false }
+          // is set as an option but will not throw them
+          // elsewise it will throw the first error encountered as expected
+          console.error(e);
+        }
+      });
+  });
 
   // Load local commands and override any command made by the user
   const commands: any[] = [];

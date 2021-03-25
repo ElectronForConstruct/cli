@@ -15,8 +15,8 @@ const config: SetupConfig = {
 type Settings = typeof config
 
 export default {
-  description: 'Setup the directory',
-  id: 'electron/setup',
+  description: 'Wrap an app with Electron',
+  id: 'electron/wrap',
   config,
   tasks: [
     {
@@ -50,6 +50,11 @@ export default {
         install.stdout?.pipe(task.stdout())
         install.stderr?.pipe(task.stdout())
         await install
+
+        // Copy content
+        const appPath = path.join(tmpDir, 'app')
+        await fs.ensureDir(appPath);
+        await fs.copy(ctx.workingDirectory, appPath);
 
         ctx.workingDirectory = tmpDir
       }

@@ -15,15 +15,33 @@ export function TaskManagerFactory<T = any>(override?: ListrBaseClassOptions): M
   return new Manager({ ...myDefaultOptions, ...override })
 }
 
-export interface RunArguments {
-  workingDirectory: string
-  settings: unknown
-  taskSettings: unknown
-}
-
 export interface TaskRunResult {
   error?: Error,
   source: string
+}
+
+export interface TaskStep<T = unknown> {
+  name: string
+  config: T
+}
+export interface taskSettings {
+  description: string
+  // steps: (string | TaskStep)[]
+  steps: TaskStep[]
+}
+export type TasksSettings = Record<string, taskSettings>
+
+
+export interface Settings {
+  // config: Record<string, ComplexConfig>
+  // config: Record<string, SimpleConfig> | Record<string, ComplexConfig>
+
+  commands?: TasksSettings
+  // extends?: string[]
+  plugins?: string[]
+
+  // Root source folder
+  input: string;
 }
 
 export interface Module<SETTINGS = any> {
@@ -37,11 +55,25 @@ export type Task<SETTINGS> = ListrTask<Ctx<SETTINGS>, any>
 
 export interface Plugin {
   name: string;
-  modules: Module<any> []
+  modules: Module<unknown> []
 }
 
 export interface Ctx<SETTINGS> {
   workingDirectory: string;
-  settings: any;
+  settings: Settings;
   taskSettings: SETTINGS;
+  command: string;
+}
+
+export interface ComputedTask {
+  description: string;
+  debug?: boolean;
+  steps: {
+    name: string;
+    config: unknown
+  }[]
+}
+
+export interface ComputedSettings {
+  [task: string]: ComputedTask
 }
