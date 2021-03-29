@@ -3,9 +3,10 @@ import {
 } from '@cyn/utils';
 import deepmerge from 'deepmerge';
 import { dump } from 'dumper.js';
+import { cloneDeep } from 'lodash';
 
 import {
-  Listr, ListrTaskWrapper,
+  Listr, ListrTask, ListrTaskWrapper,
 } from 'listr2';
 import add from './add';
 import ModuleManager from './ModuleManager';
@@ -163,13 +164,9 @@ export class Core {
     );
 
     tasks.add({
-      title: command,
+      title: command, // build
       // @ts-ignore
-      task: (ctx, t) => {
-        const generatedTasks = this.fromTasksToListr(steps, t, context);
-
-        return generatedTasks;
-      },
+      task: (ctx, t) => this.fromStepsToListr(steps, t, ctx),
       options: {
         bottomBar: 5,
       },
@@ -185,14 +182,12 @@ export class Core {
     return ObjToArr(this.settingsManager.settings.commands, 'name');
   }
 
-  fromTasksToListr(
+  fromStepsToListr(
     steps: TaskStep<unknown>[],
     task: ListrTaskWrapper<Ctx<unknown>, any>,
     ctx: Ctx<unknown>,
   ) {
     const generatedTasks = [];
-
-    dump(steps);
 
     // eslint-disable-next-line no-restricted-syntax
     for (const step of steps) {
@@ -204,18 +199,34 @@ export class Core {
       const moduleInstanceForStep = this.moduleManager.get(step.name);
       if (moduleInstanceForStep) {
         // @ts-ignore
-        const taskSettings = deepmerge.all([moduleInstanceForStep.config ?? {}, step.config ?? {}]);
-        console.log('taskSettings', taskSettings);
-
-        ctx.taskSettings = taskSettings;
+        const taskSettings: Ctx<unknown> = deepmerge.all([
+          moduleInstanceForStep.config ?? {},
+          // @ts-ignore
+          step.config ?? {},
+        ]);
 
         const { tasks: instanceTasks } = moduleInstanceForStep;
 
-        console.log('instanceTasks', instanceTasks);
-        // aaaaa;
-        generatedTasks.push(...instanceTasks);
+        const myT: ListrTask<Ctx<unknown>> = {
+          title: step.name, // dummy
+          task: (ctx2, task2) => {
+            console.log('taskSettings', taskSettings);
+
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+            ctx2.taskSettings = cloneDeep(taskSettings);
+
+            return task2.newListr(instanceTasks, {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+              ctx: ctx2,
+              rendererOptions: { collapse: false },
+            });
+          },
+        };
+        generatedTasks.push(myT);
+      } else {
+        console.error(`Cannot find Task ${step.name}`);
       }
-      console.error(`Cannot find Task ${step.name}`);
     }
 
     return task.newListr(generatedTasks, {

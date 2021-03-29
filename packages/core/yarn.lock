@@ -100,14 +100,6 @@
     lodash "^4.17.19"
     to-fast-properties "^2.0.0"
 
-"@cyn/utils@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@cyn/utils/-/utils-0.1.0.tgz#da13d0f1e58a55b2be09636dbe3befb85b7bc953"
-  integrity sha512-Hjekz93jUdzJmKpi3W/iEMFUNFm+PoEXPz2GORjJ7s1ce2rC4DigbGiG93n1Wa7RfrOlK/hna5wrnPIVtBfMaw==
-  dependencies:
-    signale "^1.4.0"
-    typescript "^4.0.3"
-
 "@eslint/eslintrc@^0.4.0":
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/@eslint/eslintrc/-/eslintrc-0.4.0.tgz#99cc0a0584d72f1df38b900fb062ba995f395547"
@@ -269,6 +261,11 @@
   integrity sha512-MPtoySlAZQ37VoLaPcTHCu1RWJ4llDkULYZIzOYxlhxBqYPB0RsRlmMU0R6tahtFe27mIdkHV+551ZWV4PLmVw==
   dependencies:
     "@types/node" "*"
+
+"@types/lodash@^4.14.168":
+  version "4.14.168"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.168.tgz#fe24632e79b7ade3f132891afff86caa5e5ce008"
+  integrity sha512-oVfRvqHV/V6D1yifJbVRU3TMp8OT6o6BG+U9MkwuJ3U8/CsDHvalRpsxBqivn71ztOFZBTfJMvETbqHiaNSj7Q==
 
 "@types/minimist@^1.2.0":
   version "1.2.0"
@@ -4448,11 +4445,6 @@ typedoc@^0.20.30:
     shelljs "^0.8.4"
     shiki "^0.9.2"
     typedoc-default-themes "^0.12.8"
-
-typescript@^4.0.3:
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.0.3.tgz#153bbd468ef07725c1df9c77e8b453f8d36abba5"
-  integrity sha512-tEu6DGxGgRJPb/mVPIZ48e69xCn2yRmCgYmDugAVwmJ6o+0u1RI18eO7E7WBTLYLaEVVOhwQmcdhQHweux/WPg==
 
 typescript@^4.2.3:
   version "4.2.3"

@@ -1,14 +1,15 @@
 import { Plugin, Module } from '@cyn/utils';
 
-interface ItchCtx {
-  wait: number
+interface DummyCtx {
+  wait: number;
+  message: string;
 }
 
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-const Itch: Module<ItchCtx> = {
+const Itch: Module<DummyCtx> = {
   description: 'Dummy',
   id: 'dummy',
   config: {
@@ -16,9 +17,11 @@ const Itch: Module<ItchCtx> = {
 
   tasks: [
     {
-      title: 'Dummy task',
+      title: 'Waiting...',
       task: async (ctx, task) => {
         task.output = "Before sleep"
+        console.log('ctx.taskSettings', ctx)
+        task.output = ctx.taskSettings.message
         await sleep(ctx.taskSettings.wait)
         task.output = "After sleep"
       },

@@ -1,15 +1,17 @@
 import { Plugin, Module, TaskStep } from '@cyn/utils';
 import { Core } from '@cyn/core';
 
-const Parallel: Module<TaskStep> = {
+const Parallel: Module<TaskStep[]> = {
   description: 'Run tasks in parallel',
   id: 'parallel',
-  config: {},
+  config: [],
 
   tasks: [
     {
       title: 'parallel',
       task: async (ctx, task) => {
+
+        console.log('ctx', ctx.taskSettings)
 
         const core = new Core()
 
@@ -25,7 +27,7 @@ const Parallel: Module<TaskStep> = {
 
         // console.log('steps', steps)
 
-        const listr = core.fromTasksToListr(steps, task, ctx)
+        const listr = core.fromStepsToListr(steps, task, ctx)
 
         // console.log('a', listr)
 

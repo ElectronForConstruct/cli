@@ -28,6 +28,7 @@
   "license": "MIT",
   "dependencies": {
     "@cyn/utils": "^0.1.0",
+    "@types/lodash": "^4.14.168",
     "cac": "^6.7.2",
     "convict": "^6.0.0",
     "cosmiconfig": "^7.0.0",
@@ -41,6 +42,7 @@
     "got": "^11.8.2",
     "launch-editor": "^2.2.1",
     "listr2": "^3.4.3",
+    "lodash": "^4.17.21",
     "signale": "^1.4.0",
     "slash": "^3.0.0",
     "source-map-support": "^0.5.19",
