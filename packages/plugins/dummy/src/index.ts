@@ -19,11 +19,11 @@ const Itch: Module<DummyCtx> = {
     {
       title: 'Waiting...',
       task: async (ctx, task) => {
-        task.output = "Before sleep"
-        console.log('ctx.taskSettings', ctx)
+        // console.log('ctx.taskSettings', ctx)
         task.output = ctx.taskSettings.message
         await sleep(ctx.taskSettings.wait)
-        task.output = "After sleep"
+
+        return task
       },
     },
   ]

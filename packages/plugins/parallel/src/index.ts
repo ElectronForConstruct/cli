@@ -8,11 +8,8 @@ const Parallel: Module<TaskStep[]> = {
 
   tasks: [
     {
-      title: 'parallel',
+      title: 'Running multiple tasks...',
       task: async (ctx, task) => {
-
-        console.log('ctx', ctx.taskSettings)
-
         const core = new Core()
 
         core.settingsManager.settings = ctx.settings;
@@ -27,7 +24,11 @@ const Parallel: Module<TaskStep[]> = {
 
         // console.log('steps', steps)
 
-        const listr = core.fromStepsToListr(steps, task, ctx)
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const listr = core.fromStepsToListr(steps, task, ctx, {
+          concurrent: true
+        })
 
         // console.log('a', listr)
 

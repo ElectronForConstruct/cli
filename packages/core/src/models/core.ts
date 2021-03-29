@@ -6,7 +6,7 @@ import { dump } from 'dumper.js';
 import { cloneDeep } from 'lodash';
 
 import {
-  Listr, ListrTask, ListrTaskWrapper,
+  Listr, ListrSubClassOptions, ListrTask, ListrTaskWrapper,
 } from 'listr2';
 import add from './add';
 import ModuleManager from './ModuleManager';
@@ -55,7 +55,6 @@ export class Core {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       madeExternalModules.forEach((task) => {
         const name: string = task?.id ?? 'No Title';
-        console.log(`Found module ${name}`);
       });
 
       this.registerAll(madeExternalModules);
@@ -146,8 +145,6 @@ export class Core {
 
     const { steps } = module;
 
-    // console.log('steps', steps);
-
     const context: Ctx<unknown> = {
       workingDirectory: this.settingsManager.settings.input,
       settings: configuration,
@@ -186,8 +183,9 @@ export class Core {
     steps: TaskStep<unknown>[],
     task: ListrTaskWrapper<Ctx<unknown>, any>,
     ctx: Ctx<unknown>,
+    options: ListrSubClassOptions<unknown>,
   ) {
-    const generatedTasks = [];
+    const generatedTasks: ListrTask<Ctx<unknown>>[] = [];
 
     // eslint-disable-next-line no-restricted-syntax
     for (const step of steps) {
@@ -207,23 +205,24 @@ export class Core {
 
         const { tasks: instanceTasks } = moduleInstanceForStep;
 
-        const myT: ListrTask<Ctx<unknown>> = {
+        ctx.taskSettings = taskSettings;
+
+        generatedTasks.push({
           title: step.name, // dummy
-          task: (ctx2, task2) => {
-            console.log('taskSettings', taskSettings);
+          task(innerCtx, task2) {
+            innerCtx.taskSettings = taskSettings;
 
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            ctx2.taskSettings = cloneDeep(taskSettings);
-
+            // @ts-ignore
             return task2.newListr(instanceTasks, {
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-              ctx: ctx2,
-              rendererOptions: { collapse: false },
+              ctx: innerCtx,
+              rendererOptions: { collapse: true },
             });
           },
-        };
-        generatedTasks.push(myT);
+          options: {
+            ...options,
+            ctx,
+          },
+        });
       } else {
         console.error(`Cannot find Task ${step.name}`);
       }
@@ -231,6 +230,7 @@ export class Core {
 
     return task.newListr(generatedTasks, {
       rendererOptions: { collapse: false },
+      ...options,
       ctx,
     });
   }
