@@ -4,6 +4,9 @@ import path from 'path';
 import slash from 'slash';
 import fs from 'fs-extra';
 
+import { yarn } from '@cyn/utils';
+import execa from 'execa';
+
 interface PackageJSON {
   name: string;
   version: string;
@@ -20,6 +23,7 @@ const getCurrentVersion = async (packageName: string, overrideVersion: string): 
 
 // muust install package.json files
 const add = async (plugin: string): Promise<any> => {
+  console.log('add');
   // logger.info('plugin', plugin);
   const directoryExists = await fs.pathExists(plugin);
   // logger.info('directoryExists', directoryExists);
@@ -73,6 +77,7 @@ const add = async (plugin: string): Promise<any> => {
     }
 
     if (mustDownload) {
+      console.log('downloading');
       const URL: string = versionInfos.dist.tarball;
       // logger.await('Downloading plugin');
       await download({
@@ -80,6 +85,15 @@ const add = async (plugin: string): Promise<any> => {
         dir: destPath,
       });
       // logger.success('Plugin Downloaded');
+
+      const nodeModulesPath = path.join(packageBasePath, 'node_modules');
+      const pathExists = await fs.pathExists(nodeModulesPath);
+
+      console.log(pathExists);
+      console.log('nodeModulesPath', nodeModulesPath);
+      if (!pathExists) {
+        await execa('node', [yarn, 'install'], { cwd: packageBasePath });
+      }
     }
   }
 
@@ -94,7 +108,6 @@ const add = async (plugin: string): Promise<any> => {
     path.join(packageBasePath, packageJSON.main),
     path.join(packageBasePath, 'index.js'),
     path.join(packageBasePath, 'dist', 'index.js'),
-    // read package.json 'main'
   ];
 
   // logger.info('here');
