@@ -18,6 +18,7 @@ const getCurrentVersion = async (packageName: string, overrideVersion: string): 
   return response.versions[overrideVersion ?? response['dist-tags'].latest];
 };
 
+// muust install package.json files
 const add = async (plugin: string): Promise<any> => {
   // logger.info('plugin', plugin);
   const directoryExists = await fs.pathExists(plugin);
