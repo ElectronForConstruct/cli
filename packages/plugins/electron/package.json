@@ -1,6 +1,6 @@
 {
   "name": "@cyn/plugin-electron",
-  "version": "0.1.0",
+  "version": "0.2.2",
   "description": "> TODO: description",
   "author": "Me",
   "homepage": "",
@@ -24,7 +24,7 @@
     "typescript": "^3.9.7"
   },
   "dependencies": {
-    "@cyn/utils": "^0.1.0",
+    "@cyn/utils": "^0.2.2",
     "@types/fs-extra": "^9.0.7",
     "@yarnpkg/core": "^2.1.1",
     "electron-packager": "^15.2.0",

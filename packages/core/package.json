@@ -1,6 +1,6 @@
 {
   "name": "@cyn/core",
-  "version": "0.1.0",
+  "version": "0.2.2",
   "description": "description",
   "scripts": {
     "build": "tsc",
@@ -27,7 +27,7 @@
   "author": "Armaldio <armaldio@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@cyn/utils": "^0.1.0",
+    "@cyn/utils": "^0.2.2",
     "@types/lodash": "^4.14.168",
     "cac": "^6.7.2",
     "convict": "^6.0.0",

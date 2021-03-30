@@ -1,6 +1,6 @@
 {
   "name": "@cyn/cli",
-  "version": "0.1.0",
+  "version": "0.2.2",
   "description": "A command-line tool to manage your Construct Electron projects",
   "scripts": {
     "build": "tsc",
@@ -26,8 +26,8 @@
   "author": "Armaldio <armaldio@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@cyn/core": "^0.1.0",
-    "@cyn/utils": "^0.1.0",
+    "@cyn/core": "^0.2.2",
+    "@cyn/utils": "^0.2.2",
     "cac": "^6.7.2",
     "convict": "^6.0.0",
     "cosmiconfig": "^7.0.0",
