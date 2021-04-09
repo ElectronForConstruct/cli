@@ -1,23 +1,17 @@
 import { Module } from '@cyn/utils';
 
 export default class ModuleManager {
-  private modules: Module<unknown>[] = [];
+  private modules: Map<string, Module<unknown>> = new Map();
 
-  register(task: Module<unknown>): number {
-    return this.modules.push(task);
+  register(key: string, module: Module<unknown>) {
+    return this.modules.set(key, module);
   }
 
-  registerAll(modules: Module<unknown>[]): void {
-    for (let i = 0; i < modules.length; i += 1) {
-      this.register(modules[i]);
-    }
-  }
-
-  listAll(): Module<unknown>[] {
+  listAll() {
     return this.modules;
   }
 
-  get(moduleName: string): Module<unknown> | undefined {
-    return this.modules.find((task) => task.id === moduleName);
+  get(moduleName: string) {
+    return this.modules.get(moduleName);
   }
 }

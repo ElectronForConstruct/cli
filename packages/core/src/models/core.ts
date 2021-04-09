@@ -1,34 +1,107 @@
 import {
-  ComputedTask, Module, ComputedSettings, Ctx, Settings, Plugin, TaskStep,
+  ComputedTask, ComputedSettings, Settings, Plugin, Ctx,
 } from '@cyn/utils';
 import deepmerge from 'deepmerge';
 import { dump } from 'dumper.js';
 import { cloneDeep } from 'lodash';
 
-import {
-  Listr, ListrSubClassOptions, ListrTask, ListrTaskWrapper,
-} from 'listr2';
+import path from 'path';
 import add from './add';
+import { Command } from './command';
 import ModuleManager from './ModuleManager';
-import SettingsManager from './SettingsManager';
 import { ObjToArr } from './utils';
 
 // eslint-disable-next-line import/prefer-default-export
 export class Core {
-  moduleManager: ModuleManager
+  modules: ModuleManager
 
-  settingsManager: SettingsManager
+  settings: Settings
 
   constructor() {
-    this.moduleManager = new ModuleManager();
-    this.settingsManager = new SettingsManager();
+    this.modules = new ModuleManager();
+    this.settings = {
+      input: './src',
+    };
   }
 
-  async loadTasks() {
+  setInput(input: string) {
+    this.settings.input = path.resolve(input);
+    return this;
+  }
+
+  createCommand(name: string) {
+    return new Command(name);
+  }
+
+  registerPlugin(plugin: Plugin) {
+    console.log('module', plugin);
+    Object.entries(plugin).forEach(([key, module]) => {
+      this.modules.register(key, module);
+    });
+    return this;
+  }
+
+  async run(command: Command) {
+    const { steps, name } = command;
+
+    const outputs: Record<string, any> = {};
+
+    // eslint-disable-next-line no-restricted-syntax
+    for await (const step of steps) {
+      const { name: stepName, inputs: stepInputs } = step;
+
+      const plugin = this.modules.get(step.name);
+      if (plugin) {
+        const { input: pluginInputs, run } = plugin;
+
+        // TODO insude fn
+        const baseSettings: Record<string, any> = {};
+        Object.entries(pluginInputs).forEach(([key, value]) => {
+          baseSettings[key] = (value as any).default ?? '';
+        });
+
+        const stepSettings: Record<string, any> = {};
+        stepInputs.forEach((value, key) => {
+          if (typeof value === 'function') {
+            console.log('is a functions, passing', outputs);
+            // eslint-disable-next-line
+            stepSettings[key] = value(outputs);
+          } else {
+            stepSettings[key] = value;
+          }
+        });
+
+        console.log('stepSettings', stepSettings);
+
+        const taskSettings = deepmerge.all([baseSettings, stepSettings]);
+
+        const ctx: Ctx<unknown> = {
+          command: '',
+          settings: this.settings,
+          taskSettings,
+          workingDirectory: '',
+        };
+        const output = await run(ctx);
+
+        console.log('task output', output);
+
+        console.log('step.outputs', step.outputs);
+
+        step.outputs.forEach((value, key) => {
+          outputs[value] = output[key];
+        });
+        console.log('outputs2', outputs);
+      }
+    }
+  }
+
+  // ----
+
+  /* async loadTasks() {
     // --- Load Tasks
 
-    if (this.settingsManager.settings.plugins) {
-      const { plugins } = this.settingsManager.settings;
+    if (this.settings.plugins) {
+      const { plugins } = this.settings;
 
       const pluginsToLoad: Promise<any>[] = [];
       if (plugins && Array.isArray(plugins) && plugins.length > 0) {
@@ -59,15 +132,16 @@ export class Core {
 
       this.registerAll(madeExternalModules);
     }
-  }
+  } */
 
-  loadConfig(profile = '', directPath: string): Promise<void> {
-    return this.settingsManager.loadConfig(profile, directPath);
+  loadSettings(settings: Settings): Core {
+    this.settings = settings;
+    return this;
   }
 
   computexxxConfiguration(): ComputedSettings {
     const settings: ComputedSettings = {};
-    const { commands } = this.settingsManager.settings;
+    const { commands } = this.settings;
 
     if (!commands) {
       throw new Error('No tasks found');
@@ -88,13 +162,13 @@ export class Core {
           throw new Error(`No config entry "${name}" found for ${taskName}`);
         }
         // Set default config
-        let computedSettings: any = this.moduleManager.get(name)?.config ?? {};
+        let computedSettings: any = this.modules.get(name)?.config ?? {};
 
         // Get the default key
         computedSettings = deepmerge.all([computedSettings, stepConfig ?? {}]);
 
         // Merge default with current profile
-        /* if (this.settingsManager.profile) {
+        /* if (this.profile) {
           computedSettings = deepmerge.all(
             [
               computedSettings,
@@ -117,131 +191,58 @@ export class Core {
   }
 
   getSettings(): Settings {
-    return this.settingsManager.settings;
+    return this.settings;
   }
 
-  registerAll(modules: Module<unknown>[]): void {
-    return this.moduleManager.registerAll(modules);
-  }
+  // registerAll(modules: Module<unknown>[]): void {
+  //   return this.plugins.registerAll(modules);
+  // }
 
-  createTasks(command: string) {
-    const configuration = this.settingsManager.settings;
+  // createTasks(command: string) {
+  //   const configuration = this.settings;
 
-    if (!configuration.commands) {
-      console.info('No commands found');
-      return;
-    }
+  //   if (!configuration.commands) {
+  //     console.info('No commands found');
+  //     return;
+  //   }
 
-    if (!configuration.commands[command]) {
-      console.info(`Command "${command}" not found`);
-      return;
-    }
+  //   if (!configuration.commands[command]) {
+  //     console.info(`Command "${command}" not found`);
+  //     return;
+  //   }
 
-    const module = configuration.commands[command];
-    if (!module) {
-      console.info(`No Tasks found for "${command}"`);
-      return;
-    }
+  //   const module = configuration.commands[command];
+  //   if (!module) {
+  //     console.info(`No Tasks found for "${command}"`);
+  //     return;
+  //   }
 
-    const { steps } = module;
+  //   const { steps } = module;
 
-    const context: Ctx<unknown> = {
-      workingDirectory: this.settingsManager.settings.input,
-      settings: configuration,
-      taskSettings: {},
-      command,
-    };
-    const tasks = new Listr<Ctx<unknown>>(
-      [],
-      {
-      // @ts-ignore
-        renderer: (module.debug === true) ? 'verbose' : 'default',
-        ctx: context,
-      },
-    );
+  //   const context: Ctx<unknown> = {
+  //     workingDirectory: this.settings.input,
+  //     settings: configuration,
+  //     taskSettings: {},
+  //     command,
+  //   };
 
-    tasks.add({
-      title: command, // build
-      // @ts-ignore
-      task: (ctx, t) => this.fromStepsToListr(steps, t, ctx),
-      options: {
-        bottomBar: 5,
-      },
-    });
-
-    return tasks;
-  }
+  //   return tasks;
+  // }
 
   getCommands() {
-    if (!this.settingsManager.settings.commands) {
+    if (!this.settings.commands) {
       return [];
     }
-    return ObjToArr(this.settingsManager.settings.commands, 'name');
+    return ObjToArr(this.settings.commands, 'name');
   }
 
-  fromStepsToListr(
-    steps: TaskStep<unknown>[],
-    task: ListrTaskWrapper<Ctx<unknown>, any>,
-    ctx: Ctx<unknown>,
-    options: ListrSubClassOptions<unknown>,
-  ) {
-    const generatedTasks: ListrTask<Ctx<unknown>>[] = [];
+  // getTasks(command: string) {
+  //   const tasks = this.createTasks(command);
 
-    // eslint-disable-next-line no-restricted-syntax
-    for (const step of steps) {
-      if (!step) {
-        console.info('Invalid step');
-        return;
-      }
+  //   if (!tasks) {
+  //     return null;
+  //   }
 
-      const moduleInstanceForStep = this.moduleManager.get(step.name);
-      if (moduleInstanceForStep) {
-        // @ts-ignore
-        const taskSettings: Ctx<unknown> = deepmerge.all([
-          moduleInstanceForStep.config ?? {},
-          // @ts-ignore
-          step.config ?? {},
-        ]);
-
-        const { tasks: instanceTasks } = moduleInstanceForStep;
-
-        ctx.taskSettings = taskSettings;
-
-        generatedTasks.push({
-          title: step.name, // dummy
-          task(innerCtx, task2) {
-            innerCtx.taskSettings = taskSettings;
-
-            // @ts-ignore
-            return task2.newListr(instanceTasks, {
-              ctx: innerCtx,
-              rendererOptions: { collapse: true },
-            });
-          },
-          options: {
-            ...options,
-            ctx,
-          },
-        });
-      } else {
-        console.error(`Cannot find Task ${step.name}`);
-      }
-    }
-
-    return task.newListr(generatedTasks, {
-      rendererOptions: { collapse: false },
-      ...options,
-      ctx,
-    });
-  }
-
-  getTasks(command: string) {
-    const tasks = this.createTasks(command);
-
-    if (!tasks) {
-      return null;
-    }
-
-    return tasks;
-  }
+  //   return tasks;
+  // }
 }

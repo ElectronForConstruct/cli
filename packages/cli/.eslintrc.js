@@ -32,6 +32,7 @@ module.exports = {
     },
   },
   'rules': {
+    '@typescript-eslint/explicit-function-return-type': 0,
     'import/no-cycle': 0,
     'import/no-unresolved': 'error',
     'no-underscore-dangle': 0,

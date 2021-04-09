@@ -24,13 +24,16 @@ export interface TaskStep<T = unknown> {
   name: string
   config: T
 }
-export interface taskSettings {
+export interface TaskSettings {
   description: string
-  // steps: (string | TaskStep)[]
   steps: TaskStep[]
 }
-export type TasksSettings = Record<string, taskSettings>
+export type TasksSettings = Record<string, TaskSettings>
 
+export interface TaskIO<INPUT, OUTPUT> {
+  input: INPUT;
+  output: OUTPUT;
+}
 
 export interface Settings {
   // config: Record<string, ComplexConfig>
@@ -45,18 +48,15 @@ export interface Settings {
 }
 
 export interface Module<SETTINGS = any> {
-  id: string;
   description: string;
-  config?: Partial<SETTINGS>;
-  tasks: ListrTask<Ctx<SETTINGS>, any>[];
+  input: Partial<SETTINGS>;
+  output: any
+  run: (ctx: Ctx<SETTINGS>) => any;
 }
 
 export type Task<SETTINGS> = ListrTask<Ctx<SETTINGS>, any>
 
-export interface Plugin {
-  name: string;
-  modules: Module<unknown> []
-}
+export type Plugin = Record<string, Module<unknown>>
 
 export interface Ctx<SETTINGS> {
   workingDirectory: string;
