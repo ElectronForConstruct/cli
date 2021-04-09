@@ -1,4 +1,4 @@
-import { Step } from './Step';
+import { Step } from './step';
 
 // eslint-disable-next-line import/prefer-default-export
 export class Command {

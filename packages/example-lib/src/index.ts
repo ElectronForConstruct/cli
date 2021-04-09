@@ -8,22 +8,18 @@ import itchModule from '@cyn/plugin-itch';
     .setInput('./src')
     .registerPlugin(itchModule);
 
-  const command = app
-    .createCommand('build');
+  const command = app.createCommand('build');
+  const stepWindows = command.createStep('itch');
+  const stepLinux = command.createStep('itch');
 
-  const stepWindows = command
-    .createStep('itch')
+  stepWindows
     .addInput('project', 'armaldio/cyn-test')
     .addInput('channel', 'windows-beta')
     .addInput('BUTLER_API_KEY', 'G6ZSB87l287SAdq3gI7uIf5Lf2h0sR6cw3CoytBo')
     .addOutput('project', 'itchProject');
 
-  const stepLinux = command
-    .createStep('itch')
-    .addInput('project', (outputs: any) => {
-      console.log('1 outputs', outputs);
-      return outputs.itchProject;
-    })
+  stepLinux
+    .addInput('project', (outputs: any) => outputs.itchProject)
     .addInput('channel', 'linux-beta')
     .addInput('BUTLER_API_KEY', 'G6ZSB87l287SAdq3gI7uIf5Lf2h0sR6cw3CoytBo');
 
