@@ -3,6 +3,7 @@
   "license": "MIT",
   "private": "true",
   "devDependencies": {
+    "@changesets/cli": "^2.16.0",
     "lerna": "^3.22.1"
   },
   "scripts": {

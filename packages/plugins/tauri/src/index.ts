@@ -4,10 +4,7 @@ import setup from './setup'
 import { Plugin } from '@cyn/utils'
 
 export default {
-  name: 'tauri',
-  modules: [
-    dev,
-    packageApp,
-    setup
-  ]
+  'tauri/dev': dev,
+  'tauri/package': packageApp,
+  'tauri/setup': setup
 } as Plugin

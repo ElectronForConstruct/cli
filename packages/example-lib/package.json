@@ -27,7 +27,9 @@
   "license": "MIT",
   "dependencies": {
     "@cyn/core": "^0.2.2",
+    "@cyn/plugin-dummy": "^0.2.2",
     "@cyn/plugin-itch": "^0.2.2",
+    "@cyn/plugin-parallel": "^0.2.2",
     "@cyn/utils": "^0.2.2",
     "cac": "^6.7.2",
     "convict": "^6.0.0",

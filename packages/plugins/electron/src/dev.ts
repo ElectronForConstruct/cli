@@ -3,17 +3,12 @@ import execa from 'execa';
 
 export default {
   description: 'Dev',
-  id: 'electron/dev',
-  config: {},
-  tasks: [
-    {
-      title: 'Starting dev',
-      async task(ctx, task) {
-        const install = execa('node', [yarn, 'electron', '.'], { cwd: ctx.workingDirectory })
-        install.stdout?.pipe(task.stdout())
-        install.stderr?.pipe(task.stdout())
-        await install
-      }
-    }
-  ]
+  input: {},
+  output: {},
+  async run(ctx) {
+    const install = execa('node', [yarn, 'electron', '.'], { cwd: ctx.workingDirectory })
+    install.stdout?.pipe(process.stdout)
+    install.stderr?.pipe(process.stderr)
+    await install
+  }
 } as Module<any>

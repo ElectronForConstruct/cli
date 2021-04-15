@@ -1,46 +1,17 @@
-import { Plugin, Module, TaskStep } from '@cyn/utils';
-import { Core } from '@cyn/core';
+import { Module } from '@cyn/utils';
+import { Step } from '@cyn/core/dist/models/step';
 
-const Parallel: Module<TaskStep[]> = {
+const Parallel: Module<{ steps: Step<unknown, unknown>[]}, unknown[]> = {
   description: 'Run tasks in parallel',
   id: 'parallel',
-  config: [],
-
-  tasks: [
-    {
-      title: 'Running multiple tasks...',
-      task: async (ctx, task) => {
-        const core = new Core()
-
-        core.settingsManager.settings = ctx.settings;
-
-        await core.loadTasks();
-
-        const steps = ctx.taskSettings
-
-        if (!steps) {
-          return task.newListr([])
-        }
-
-        // console.log('steps', steps)
-
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const listr = core.fromStepsToListr(steps, task, ctx, {
-          concurrent: true
-        })
-
-        // console.log('a', listr)
-
-        return listr
-      },
-    },
-  ]
+  inputs: {
+    steps: []
+  },
+  async run(ctx) {
+    return Promise.all(ctx.taskSettings.steps.map(step => {
+      return step.run();
+    }));
+  }
 }
 
-export default {
-  name: 'parallel',
-  modules: [
-    Parallel,
-  ]
-} as Plugin
+export const parallel = Parallel

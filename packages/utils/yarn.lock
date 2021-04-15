@@ -423,3 +423,8 @@ wrap-ansi@^7.0.0:
     ansi-styles "^4.0.0"
     string-width "^4.1.0"
     strip-ansi "^6.0.0"
+
+zod@^3.0.0-alpha.33:
+  version "3.0.0-alpha.33"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-3.0.0-alpha.33.tgz#8562cc92e57b7df7e0f99f3376181782d7233cfb"
+  integrity sha512-zxh7bbKBd1gPiHhjFL1f4QNJm7fnw8IJir84pFhqVsHalSBFsxIhDTduV9MdpCTpyfOvRnFgOF0rqrdLeQTEyA==

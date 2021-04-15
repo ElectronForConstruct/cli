@@ -3,24 +3,14 @@ import execa from 'execa';
 
 export default {
   description: 'Start tauri in dev mode',
-  id: 'tauri/dev',
-  config: {},
+  input: {},
+  output: {},
+  async run(ctx) {
+      // task.output = 'workingDirectory' + mainCtx.workingDirectory
 
-  tasks: [
-    {
-      title: 'Tauri dev',
-      task: async (ctx, task): Promise<void> => {
-
-        // task.output = 'workingDirectory' + mainCtx.workingDirectory
-
-        const tauriDevCmd = execa('node', [yarn, 'tauri', 'dev'], { cwd: ctx.workingDirectory })
-        tauriDevCmd.stdout?.pipe(task.stdout())
-        tauriDevCmd.stderr?.pipe(task.stdout())
-        await tauriDevCmd
-      },
-      options: {
-        bottomBar: 5
-      }
-    },
-  ],
-} as Module
+      const tauriDevCmd = execa('node', [yarn, 'tauri', 'dev'], { cwd: ctx.workingDirectory })
+      tauriDevCmd.stdout?.pipe(process.stdout)
+      tauriDevCmd.stderr?.pipe(process.stderr)
+      await tauriDevCmd
+  }
+} as Module<any>

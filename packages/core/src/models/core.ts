@@ -1,7 +1,6 @@
 import {
-  Settings, Plugin, Ctx,
+  Settings, Plugin,
 } from '@cyn/utils';
-import deepmerge from 'deepmerge';
 
 import path from 'path';
 import { Command } from './command';
@@ -27,7 +26,7 @@ export class Core {
   }
 
   createCommand(name: string) {
-    return new Command(name);
+    return new Command(name, this.settings);
   }
 
   registerPlugin(plugin: Plugin) {
@@ -38,7 +37,7 @@ export class Core {
     return this;
   }
 
-  async run(command: Command) {
+  /* async run(command: Command) {
     const { steps, name } = command;
 
     const outputs: Record<string, any> = {};
@@ -82,15 +81,15 @@ export class Core {
 
         console.log('task output', output);
 
-        console.log('step.outputs', step.outputs);
+        console.log('step.outputs', step.mappedOutputs);
 
-        step.outputs.forEach((value, key) => {
+        step.mappedOutputs.forEach((value, key) => {
           outputs[value] = output[key];
         });
         console.log('outputs2', outputs);
       }
     }
-  }
+  } */
 
   loadSettings(settings: Settings): Core {
     this.settings = settings;

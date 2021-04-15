@@ -1,37 +1,34 @@
-import { Plugin, Module } from '@cyn/utils';
+import { Module } from '@cyn/utils';
 
 interface DummyCtx {
   wait: number;
   message: string;
 }
 
+interface DummyOutput {
+  wait: number;
+}
+
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-const Itch: Module<DummyCtx> = {
+const Dummy: Module<DummyCtx, DummyOutput> = {
   description: 'Dummy',
   id: 'dummy',
-  config: {
+  inputs: {
+    message: '',
+    wait: 1000
   },
 
-  tasks: [
-    {
-      title: 'Waiting...',
-      task: async (ctx, task) => {
-        // console.log('ctx.taskSettings', ctx)
-        task.output = ctx.taskSettings.message
-        await sleep(ctx.taskSettings.wait)
+  async run(ctx) {
+    await sleep(ctx.taskSettings.wait)
+    console.log('I\'m done')
 
-        return task
-      },
-    },
-  ]
+    return {
+      wait: ctx.taskSettings.wait
+    }
+  }
 }
 
-export default {
-  name: 'dummy',
-  modules: [
-    Itch,
-  ]
-} as Plugin
+export const dummy = Dummy

@@ -25,86 +25,81 @@ const config = {
 
 export default {
   description: 'Package your app',
-  id: 'electron/package',
-  config,
-  tasks: [
-    {
-      title: 'Package',
-      async task(ctx) {
-        const buildSettings = ctx.taskSettings;
+  input: {},
+  output: {},
+  async run(ctx) {
+    const buildSettings = ctx.taskSettings;
 
-        const pkgPath = path.join(ctx.workingDirectory, 'package.json');
-        const pkgRawContent = await fs.readFile(pkgPath, 'utf8');
-        const pkgJson = JSON.parse(pkgRawContent) as PackageJson;
+    const pkgPath = path.join(ctx.workingDirectory, 'package.json');
+    const pkgRawContent = await fs.readFile(pkgPath, 'utf8');
+    const pkgJson = JSON.parse(pkgRawContent) as PackageJson;
 
-        if (!buildSettings.electronVersion) {
-          buildSettings.electronVersion = pkgJson.devDependencies?.electron;
-        }
-
-        // resolve out directory
-        if (buildSettings.out && !path.isAbsolute(buildSettings.out)) {
-          buildSettings.out = path.join(process.cwd(), buildSettings.out);
-        }
-
-        // set src dir to tmpdir
-        buildSettings.dir = ctx.workingDirectory;
-
-        if (!buildSettings.appVersion && pkgJson.version) {
-          buildSettings.appVersion = pkgJson.version;
-        }
-
-        if (!buildSettings.name && pkgJson.name) {
-          buildSettings.name = pkgJson.name;
-        }
-
-        if (
-          buildSettings.win32metadata && buildSettings.win32metadata.CompanyName && pkgJson.author
-        ) {
-          buildSettings.win32metadata.CompanyName = pkgJson.author.toString();
-        }
-
-        // buildSettings.quiet = true;
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        buildSettings.author = pkgJson.author;
-
-        // Package for real
-        try {
-          // logger.start('Packaging started');
-
-          // const log: string[] = [];
-          // const unhook = hookStdout((string: string) => {
-          //   log.push(string);
-          // });
-
-          const result = await packager(buildSettings);
-
-          const isDirectory = (source: string): boolean => fs.lstatSync(source).isDirectory();
-
-          if (buildSettings.out) {
-            const { out } = buildSettings;
-            const folders = fs
-              .readdirSync(out)
-              .map((name: string) => path.join(out ?? '', name))
-              .filter(isDirectory);
-
-            // logger.success('Files packed successfully!');
-
-            if (Array.isArray(folders)) {
-              prettyDisplayFolders(folders);
-            } else {
-              prettyDisplayFolders([folders]);
-            }
-
-            return {
-              source: folders,
-            };
-          }
-        } catch (e) {
-          // logger.error('An error occurred while packaging your apps');
-          // logger.error(e);
-        }
-      }
+    if (!buildSettings.electronVersion) {
+      buildSettings.electronVersion = pkgJson.devDependencies?.electron;
     }
-  ]
+
+    // resolve out directory
+    if (buildSettings.out && !path.isAbsolute(buildSettings.out)) {
+      buildSettings.out = path.join(process.cwd(), buildSettings.out);
+    }
+
+    // set src dir to tmpdir
+    buildSettings.dir = ctx.workingDirectory;
+
+    if (!buildSettings.appVersion && pkgJson.version) {
+      buildSettings.appVersion = pkgJson.version;
+    }
+
+    if (!buildSettings.name && pkgJson.name) {
+      buildSettings.name = pkgJson.name;
+    }
+
+    if (
+      buildSettings.win32metadata && buildSettings.win32metadata.CompanyName && pkgJson.author
+    ) {
+      buildSettings.win32metadata.CompanyName = pkgJson.author.toString();
+    }
+
+    // buildSettings.quiet = true;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    buildSettings.author = pkgJson.author;
+
+    // Package for real
+    try {
+      // logger.start('Packaging started');
+
+      // const log: string[] = [];
+      // const unhook = hookStdout((string: string) => {
+      //   log.push(string);
+      // });
+
+      const result = await packager(buildSettings);
+
+      const isDirectory = (source: string): boolean => fs.lstatSync(source).isDirectory();
+
+      if (buildSettings.out) {
+        const { out } = buildSettings;
+        const folders = fs
+          .readdirSync(out)
+          .map((name: string) => path.join(out ?? '', name))
+          .filter(isDirectory);
+
+        // logger.success('Files packed successfully!');
+
+        if (Array.isArray(folders)) {
+          prettyDisplayFolders(folders);
+        } else {
+          prettyDisplayFolders([folders]);
+        }
+
+        return {
+          source: folders,
+        };
+      }
+    } catch (e) {
+      // logger.error('An error occurred while packaging your apps');
+      // logger.error(e);
+    }
+  }
 } as Module<BuildSettings>

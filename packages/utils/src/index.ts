@@ -1,18 +1,25 @@
 import path from 'path'
-import { ListrBaseClassOptions, ListrTask, Manager } from 'listr2';
-
+import { Promisable } from 'type-fest';
 export const yarn = path.join(__dirname, '..', 'lib', 'yarn.js')
 
-export function TaskManagerFactory<T = any>(override?: ListrBaseClassOptions): Manager<T> {
-  const myDefaultOptions: ListrBaseClassOptions = {
-    concurrent: false,
-    exitOnError: false,
-    rendererOptions: {
-      collapse: false,
-      collapseSkips: false
-    }
+class Input <T> {
+  required: boolean;
+  validator: (value: T) => boolean;
+  value: T | null;
+
+  constructor(required = true, validator = () => true) {
+    this.required = required
+    this.validator = validator
+    this.value = null
   }
-  return new Manager({ ...myDefaultOptions, ...override })
+
+  define(value: T) {
+    this.value = value
+  }
+}
+
+export const createInput = (required = true, validator = () => true) => {
+  return new Input(required, validator)
 }
 
 export interface TaskRunResult {
@@ -47,22 +54,21 @@ export interface Settings {
   input: string;
 }
 
-export interface Module<SETTINGS = any> {
+export interface Module<Input, Output> {
   description: string;
-  input: Partial<SETTINGS>;
-  output: any
-  run: (ctx: Ctx<SETTINGS>) => any;
+
+  id: string;
+
+  inputs: Input;
+
+  run(ctx: Ctx<Input>): Promisable<Output>;
 }
 
-export type Task<SETTINGS> = ListrTask<Ctx<SETTINGS>, any>
-
-export type Plugin = Record<string, Module<unknown>>
+export type Plugin = Record<string, Module<Object, unknown>>
 
 export interface Ctx<SETTINGS> {
-  workingDirectory: string;
   settings: Settings;
   taskSettings: SETTINGS;
-  command: string;
 }
 
 export interface ComputedTask {

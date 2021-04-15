@@ -1,32 +1,36 @@
 import execa from 'execa'
-import { Plugin, Module } from '@cyn/utils';
+import { Module } from '@cyn/utils';
 
 const butler = 'butler';
 
-const Itch: Module<any> = {
+interface InputType {
+  project: string;
+  channel: string;
+  BUTLER_API_KEY: string;
+}
+
+interface OutputType {
+  project: string,
+  result: number
+}
+
+const Itch: Module<InputType, OutputType> = {
+  id: 'itch',
   description: 'Itch.io release upload',
-  input: {
-    project: {
-      type: String,
-      required: true
-    },
-    channel: {
-      type: String,
-      required: true
-    },
-    BUTLER_API_KEY: {
-      type: String,
-      required: true
-    }
-  },
-  output: {
-    project: {
-      type: String,
-      required: true
-    }
+
+  // inputs = {
+  //   project: createInput<string>(),
+  //   channel: createInput<string>(),
+  //   BUTLER_API_KEY: createInput<string>(),
+  // }
+
+  inputs: {
+    project: 'aaa',
+    channel: 'aaa',
+    BUTLER_API_KEY: 'aaa'
   },
 
-  run: async (ctx) => {
+  async run (ctx) {
     console.log('ctx', ctx)
 
     try {
@@ -57,11 +61,10 @@ const Itch: Module<any> = {
     // await butlerPush
 
     return {
-      project
+      project,
+      result: 0
     }
   }
 }
 
-export default {
-  'itch': Itch
-} as Plugin
+export const itch = Itch

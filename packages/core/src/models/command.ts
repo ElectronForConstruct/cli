@@ -1,23 +1,23 @@
+import { Module, Settings } from '@cyn/utils';
 import { Step } from './step';
 
 // eslint-disable-next-line import/prefer-default-export
 export class Command {
   name: string;
 
-  steps: Step[]
+  steps: Step<unknown, unknown>[]
 
-  constructor(name: string) {
+  settings: Settings;
+
+  constructor(name: string, settings: Settings) {
     this.name = name;
     this.steps = [];
+
+    this.settings = settings;
   }
 
-  addStep(step: Step) {
-    this.steps.push(step);
-    return this;
-  }
-
-  createStep(name: string) {
-    const step = new Step(name);
+  createStep<I, O>(module: Module<I, O>) {
+    const step = new Step<I, O>(module, this.settings);
     return step;
   }
 }

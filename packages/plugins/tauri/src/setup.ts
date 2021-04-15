@@ -28,11 +28,10 @@ interface SetupCtx {
 export default {
   description: 'Setup the directory',
   id: 'tauri/setup',
-  config: {},
+  input: {},
+  output: {},
 
-  tasks: [{
-    title: 'Tauri setup',
-    async task (ctx, task) {
+  async run(ctx) {
       const tmpDir = path.join(os.tmpdir(), `cyn_tauri_${path.basename(process.cwd())}`);
 
       // copy input folder to temp
@@ -42,8 +41,8 @@ export default {
 
       // add tauri package
       const yarnAddTauriCmd = execa('node', [yarn, 'add', 'tauri'], { cwd: output})
-      yarnAddTauriCmd.stdout?.pipe(task.stdout())
-      yarnAddTauriCmd.stderr?.pipe(task.stdout())
+      yarnAddTauriCmd.stdout?.pipe(process.stdout)
+      yarnAddTauriCmd.stderr?.pipe(process.stderr)
       await yarnAddTauriCmd
 
       // Init tauri
@@ -66,17 +65,13 @@ export default {
         '--force',
         'conf'
       ], { cwd: output })
-      tauriInitCmd.stdout?.pipe(task.stdout())
-      tauriInitCmd.stderr?.pipe(task.stdout())
+      tauriInitCmd.stdout?.pipe(process.stdout)
+      tauriInitCmd.stderr?.pipe(process.stderr)
       await tauriInitCmd
 
       // Merge config file
       // await fs.writeFile(path.join(tmpDir, 'src-tauri', 'tauri.conf.json'), JSON.stringify(ctx.taskSettings, null, 2))
 
       ctx.workingDirectory = tmpDir
-    },
-    options: {
-      bottomBar: 5,
     }
-  }]
 } as Module<SetupCtx>

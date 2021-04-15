@@ -1,24 +1,40 @@
+import {
+  Ctx, Module, Settings,
+} from '@cyn/utils';
+
 // eslint-disable-next-line import/prefer-default-export
-export class Step {
-  name: string;
+export class Step<Input, Output> {
+  // name: string;
 
-  inputs: Map<string, any>
+  inputs: Input | undefined
 
-  outputs: Map<string, string>
+  module: Module<Input, Output>
 
-  constructor(name: string) {
-    this.name = name;
-    this.inputs = new Map();
-    this.outputs = new Map();
+  settings: Settings;
+
+  constructor(module: Module<Input, Output>, settings: Settings) {
+    this.module = module;
+
+    this.settings = settings;
   }
 
-  addInput(name: string, value: any) {
-    this.inputs.set(name, value);
+  setInputs(inputs: Input) {
+    this.inputs = inputs;
     return this;
   }
 
-  addOutput(name: string, value: string) {
-    this.outputs.set(name, value);
-    return this;
+  async run() {
+    if (!this.inputs) {
+      throw new Error('Inputs have not been defined');
+    }
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    const { inputs, run } = this.module;
+    const settings = { ...inputs, ...this.inputs };
+
+    const ctx: Ctx<Input> = {
+      settings: this.settings,
+      taskSettings: settings,
+    };
+    return run(ctx);
   }
 }
