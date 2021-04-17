@@ -6,7 +6,7 @@ interface DummyCtx {
 }
 
 interface DummyOutput {
-  wait: number;
+  message: string;
 }
 
 function sleep(ms: number) {
@@ -22,13 +22,21 @@ const Dummy: Module<DummyCtx, DummyOutput> = {
   },
 
   async run(ctx) {
-    await sleep(ctx.taskSettings.wait)
-    console.log('I\'m done')
+    const split = ctx.taskSettings.wait / 5
+
+    for (let index = 0; index < 5; index++) {
+      await sleep(split)
+      ctx.logger.log('Round ' + index)
+    }
+    ctx.logger.log(ctx.taskSettings.message)
 
     return {
-      wait: ctx.taskSettings.wait
+      message: ctx.taskSettings.message
     }
   }
 }
 
 export const dummy = Dummy
+export default {
+  dummy: Dummy
+}

@@ -4,26 +4,19 @@ import path from 'path';
 import slash from 'slash';
 import fs from 'fs-extra';
 
-import { yarn } from '@cyn/utils';
+import { Module, yarn } from '@cyn/utils';
 import execa from 'execa';
-
-interface PackageJSON {
-  name: string;
-  version: string;
-  main: string;
-}
+import { PackageJson } from 'type-fest';
 
 const getCurrentVersion = async (packageName: string, overrideVersion: string): Promise<any> => {
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   const npmURL = `https://registry.npmjs.org/${packageName}`;
   // logger.await(`Fetching ${npmURL}`);
   const response:any = await got(npmURL).json();
   return response.versions[overrideVersion ?? response['dist-tags'].latest];
 };
 
-// muust install package.json files
-const add = async (plugin: string): Promise<any> => {
-  console.log('add');
+// must install package.json files
+const add = async (plugin: string): Promise<Record<string, Module<unknown, unknown>>> => {
   // logger.info('plugin', plugin);
   const directoryExists = await fs.pathExists(plugin);
   // logger.info('directoryExists', directoryExists);
@@ -102,13 +95,14 @@ const add = async (plugin: string): Promise<any> => {
   }
 
   const packageJSONRaw = await fs.readFile(packageJSONPath, 'utf8');
-  const packageJSON: PackageJSON = JSON.parse(packageJSONRaw);
+  const packageJSON: PackageJson = JSON.parse(packageJSONRaw);
 
-  const paths = [
-    path.join(packageBasePath, packageJSON.main),
-    path.join(packageBasePath, 'index.js'),
-    path.join(packageBasePath, 'dist', 'index.js'),
-  ];
+  const paths = [];
+  if (packageJSON.main) {
+    paths.push(path.join(packageBasePath, packageJSON.main));
+  }
+  paths.push(path.join(packageBasePath, 'index.js'));
+  paths.push(path.join(packageBasePath, 'dist', 'index.js'));
 
   // logger.info('here');
 

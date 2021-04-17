@@ -3,7 +3,7 @@ import { parallel } from '@cyn/plugin-parallel';
 import { dummy } from '@cyn/plugin-dummy';
 import { itch } from '@cyn/plugin-itch';
 
-/* (async (): Promise<void> => {
+(async (): Promise<void> => {
   const core = new Core();
 
   const app = core.setInput('./src');
@@ -29,7 +29,7 @@ import { itch } from '@cyn/plugin-itch';
     .run();
 
   console.log('output2', output2);
-})(); */
+})();
 
 (async (): Promise<void> => {
   const core = new Core();

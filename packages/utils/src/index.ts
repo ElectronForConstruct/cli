@@ -27,27 +27,13 @@ export interface TaskRunResult {
   source: string
 }
 
-export interface TaskStep<T = unknown> {
-  name: string
-  config: T
-}
-export interface TaskSettings {
-  description: string
-  steps: TaskStep[]
-}
-export type TasksSettings = Record<string, TaskSettings>
-
 export interface TaskIO<INPUT, OUTPUT> {
   input: INPUT;
   output: OUTPUT;
 }
 
 export interface Settings {
-  // config: Record<string, ComplexConfig>
-  // config: Record<string, SimpleConfig> | Record<string, ComplexConfig>
-
   commands?: TasksSettings
-  // extends?: string[]
   plugins?: string[]
 
   // Root source folder
@@ -66,20 +52,31 @@ export interface Module<Input, Output> {
 
 export type Plugin = Record<string, Module<Object, unknown>>
 
+export interface Logger {
+  log(str: string): void;
+}
+
+export const defaultLogger: Logger = {
+  log(str) {
+    console.log(str)
+  }
+}
+
 export interface Ctx<SETTINGS> {
   settings: Settings;
   taskSettings: SETTINGS;
+  logger: Logger
 }
 
-export interface ComputedTask {
-  description: string;
+export interface TaskStep<T = unknown> {
+  plugin: string
+  id: string
+  inputs: T
+  outputs: Record<string, string>
+}
+export interface TaskSettings {
+  description: string
+  steps: TaskStep[]
   debug?: boolean;
-  steps: {
-    name: string;
-    config: unknown
-  }[]
 }
-
-export interface ComputedSettings {
-  [task: string]: ComputedTask
-}
+export type TasksSettings = Record<string, TaskSettings>

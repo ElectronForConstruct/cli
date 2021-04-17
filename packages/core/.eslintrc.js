@@ -33,7 +33,6 @@ module.exports = {
   },
   'rules': {
     '@typescript-eslint/explicit-module-boundary-types': 0,
-    '@typescript-eslint/explicit-function-return-type': 0,
     'import/no-cycle': 0,
     'import/no-unresolved': 'error',
     'no-underscore-dangle': 0,
@@ -61,8 +60,6 @@ module.exports = {
     ],
 
     '@typescript-eslint/ban-ts-comment': 0,
-    '@typescript-eslint/no-unsafe-assignment': 1,
     '@typescript-eslint/no-unsafe-member-access': 0,
-    '@typescript-eslint/no-unsafe-return': 1
   },
 };

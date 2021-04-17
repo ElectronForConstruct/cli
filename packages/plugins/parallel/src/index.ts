@@ -15,3 +15,6 @@ const Parallel: Module<{ steps: Step<unknown, unknown>[]}, unknown[]> = {
 }
 
 export const parallel = Parallel
+export default {
+  parallel: Parallel
+}

@@ -2,80 +2,28 @@ import { cac } from 'cac';
 import { Listr } from 'listr2';
 import fs from 'fs-extra';
 import path from 'path';
-import { Core } from '@cyn/core';
 
-import { Args } from './models';
+import { Settings } from '@cyn/utils';
+import { Args, CLICore, CLICtx } from './models';
+import { loadConfig } from './config';
+import add from './utils/add';
 
-const core = new Core();
+const modules: Record<string, any> = {};
 
-const tasks = new Listr<any>(
-  [
-    /* tasks */
-  ],
-  {
-    /* options */
-  },
-);
+const core = new CLICore();
+
+// const tasks = new Listr<any>(
+//   [
+//     /* tasks */
+//   ],
+//   {
+//     /* options */
+//   },
+// );
 
 const cli = cac();
 
-/* fromStepsToListr(
-  steps: TaskStep<unknown>[],
-  task: ListrTaskWrapper<Ctx<unknown>, any>,
-  ctx: Ctx<unknown>,
-  options: ListrSubClassOptions<unknown>,
-) {
-  const generatedTasks: ListrTask<Ctx<unknown>>[] = [];
-
-  // eslint-disable-next-line no-restricted-syntax
-  for (const step of steps) {
-    if (!step) {
-      console.info('Invalid step');
-      return;
-    }
-
-    const moduleInstanceForStep = this.moduleManager.get(step.name);
-    if (moduleInstanceForStep) {
-      // @ts-ignore
-      const taskSettings: Ctx<unknown> = deepmerge.all([
-        moduleInstanceForStep.config ?? {},
-        // @ts-ignore
-        step.config ?? {},
-      ]);
-
-      const { tasks: instanceTasks } = moduleInstanceForStep;
-
-      ctx.taskSettings = taskSettings;
-
-      generatedTasks.push({
-        title: step.name, // dummy
-        task(innerCtx, task2) {
-          innerCtx.taskSettings = taskSettings;
-
-          // @ts-ignore
-          return task2.newListr(instanceTasks, {
-            ctx: innerCtx,
-            rendererOptions: { collapse: true },
-          });
-        },
-        options: {
-          ...options,
-          ctx,
-        },
-      });
-    } else {
-      console.error(`Cannot find Task ${step.name}`);
-    }
-  }
-
-  return task.newListr(generatedTasks, {
-    rendererOptions: { collapse: false },
-    ...options,
-    ctx,
-  });
-} */
-
-function app(): void {
+async function app() {
   cli
     // .option('-p, --profile <name>', 'Specify profile')
     .option('-c, --config <path>', 'Specify path to a configuration file')
@@ -86,16 +34,30 @@ function app(): void {
 
   const parsed = cli.parse();
 
-  // await core.loadConfig(parsed.options.profile, parsed.options.config);
+  const config = await loadConfig(parsed.options.config);
 
-  // await core.loadTasks();
+  const settings = config.config as Settings;
 
-  const availableCommands = core.getCommands();
-  availableCommands.forEach((command) => {
+  if (!settings.commands) {
+    throw new Error('No commands available');
+  }
+
+  if (settings?.plugins) {
+    // eslint-disable-next-line no-restricted-syntax
+    for await (const plugin of settings.plugins) {
+      const importedModules = await add(plugin);
+      Object.entries(importedModules).forEach(([, module]) => {
+        modules[module.id] = module;
+      });
+    }
+  }
+
+  Object.entries(settings.commands).forEach(([commandName, command]) => {
+    const myCommand = core.createCommand(commandName);
     // Make commands
     cli
-      .command(command.name, command.description)
-      .action((args: Args) => {
+      .command(myCommand.name, command.description)
+      .action(async (args: Args) => {
         // const configuration = core.computeConfiguration();
 
         if (args.debug) {
@@ -103,32 +65,48 @@ function app(): void {
         }
 
         try {
-          // const t = core.getTasks(command.name);
+          const tasks = new Listr<CLICtx<unknown>>(
+            [],
+            {
+            // @ts-ignore
+              renderer: (module.debug === true) ? 'verbose' : 'default',
+              // ctx: context,
+            },
+          );
 
-          // const tasks = new Listr<Ctx<unknown>>(
-          //   [],
-          //   {
-          //   // @ts-ignore
-          //     renderer: (module.debug === true) ? 'verbose' : 'default',
-          //     ctx: context,
-          //   },
-          // );
+          command.steps.forEach((_step) => {
+            const step = myCommand.createStep(modules[_step.plugin], _step.id);
 
-          // tasks.add({
-          //   title: command, // build
-          //   // @ts-ignore
-          //   task: (ctx, t) => this.fromStepsToListr(steps, t, ctx),
-          //   options: {
-          //     bottomBar: 5,
-          //   },
-          // });
+            tasks.add({
+              title: _step.id, // build
+              task: async (ctx, t) => {
+                // TODO replace ${{ outputs['dummy-1'].message }}
 
-          // if (t) {
-          //   await t.run();
-          // } else {
-          //   console.log('Nothing to run');
-          // }
-          // console.log('ctx', ctx);
+                step.setInputs(_step.inputs);
+                step.setLogger({
+                  log: (str: string) => {
+                    t.output = str;
+                  },
+                });
+
+                const output = await step.run();
+
+                ctx.outputs[step.id] = output;
+
+                return ctx;
+              },
+              options: {
+                bottomBar: 5,
+              },
+            });
+          });
+
+          if (tasks) {
+            const ctx = await tasks.run();
+            console.log('ctx', ctx);
+          } else {
+            console.log('Nothing to run');
+          }
         } catch (e) {
           // it will collect all the errors encountered if { exitOnError: false }
           // is set as an option but will not throw them
@@ -155,7 +133,6 @@ function app(): void {
     // logger.info('Error reading package.json file');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   cli.version(pkg?.version ?? '0.0.0');
 
   // Run
