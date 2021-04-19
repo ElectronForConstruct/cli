@@ -4,7 +4,7 @@ import path from 'path';
 import slash from 'slash';
 import fs from 'fs-extra';
 
-import { Module, yarn } from '@cyn/utils';
+import { Plugin, yarn } from '@cyn/utils';
 import execa from 'execa';
 import { PackageJson } from 'type-fest';
 
@@ -16,7 +16,7 @@ const getCurrentVersion = async (packageName: string, overrideVersion: string): 
 };
 
 // must install package.json files
-const add = async (plugin: string): Promise<Record<string, Module<unknown, unknown>>> => {
+const add = async (plugin: string): Promise<Plugin> => {
   // logger.info('plugin', plugin);
   const directoryExists = await fs.pathExists(plugin);
   // logger.info('directoryExists', directoryExists);

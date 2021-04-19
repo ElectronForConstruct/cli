@@ -46,14 +46,18 @@ async function app() {
     // eslint-disable-next-line no-restricted-syntax
     for await (const plugin of settings.plugins) {
       const importedModules = await add(plugin);
-      Object.entries(importedModules).forEach(([, module]) => {
-        modules[module.id] = module;
+      console.log('importedModules', importedModules);
+      importedModules.modules.forEach((MyModule) => {
+        const modInstance = new MyModule();
+        modules[modInstance.id] = module;
       });
     }
   }
 
+  console.log('modules', modules);
+
   Object.entries(settings.commands).forEach(([commandName, command]) => {
-    const myCommand = core.createCommand(commandName);
+    const myCommand = core.createCLICommand(commandName);
     // Make commands
     cli
       .command(myCommand.name, command.description)
@@ -75,12 +79,14 @@ async function app() {
           );
 
           command.steps.forEach((_step) => {
-            const step = myCommand.createStep(modules[_step.plugin], _step.id);
+            const step = myCommand.createCLIStep(modules[_step.plugin], _step.id);
 
             tasks.add({
               title: _step.id, // build
               task: async (ctx, t) => {
                 // TODO replace ${{ outputs['dummy-1'].message }}
+
+                console.log('_step.inputs', _step.inputs);
 
                 step.setInputs(_step.inputs);
                 step.setLogger({

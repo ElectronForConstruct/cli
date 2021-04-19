@@ -1,5 +1,5 @@
 import execa from 'execa'
-import { Module } from '@cyn/utils';
+import { Module, Plugin } from '@cyn/utils';
 
 const butler = 'butler';
 
@@ -13,15 +13,15 @@ interface OutputType {
   project: string,
 }
 
-const Itch: Module<InputType, OutputType> = {
-  id: 'itch',
-  description: 'Itch.io release upload',
+class Itch extends Module<InputType, OutputType> {
+  id = 'itch'
+  description = 'Itch.io release upload'
 
-  inputs: {
+  inputs = {
     project: 'aaa',
     channel: 'aaa',
     BUTLER_API_KEY: 'aaa'
-  },
+  }
 
   async run (ctx) {
     try {
@@ -65,5 +65,5 @@ const Itch: Module<InputType, OutputType> = {
 export const itch = Itch
 
 export default {
-  itch: Itch
-}
+  modules: [Itch]
+} as Plugin

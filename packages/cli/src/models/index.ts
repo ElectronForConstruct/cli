@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
-import { Ctx, Module, Settings } from '@cyn/utils';
+import { Ctx, AModule, Settings } from '@cyn/utils';
 import { Step as CoreStep } from '@cyn/core/dist/models/step';
 import { Command as CoreCommand } from '@cyn/core/dist/models/command';
 import { Core as CoreCore } from '@cyn/core';
@@ -11,7 +11,7 @@ export interface CLICtx<T> extends Ctx<T> {
 export class CLIStep<Input, Output> extends CoreStep<Input, Output> {
   id: string;
 
-  constructor(plugin: Module<Input, Output>, id: string, settings: Settings) {
+  constructor(plugin: AModule<Input, Output>, id: string, settings: Settings) {
     super(plugin, settings);
 
     this.id = id;
@@ -19,16 +19,14 @@ export class CLIStep<Input, Output> extends CoreStep<Input, Output> {
 }
 
 export class CLICommand extends CoreCommand {
-  // @ts-expect-error
-  createStep<I, O>(module: Module<I, O>, id: string) {
+  createCLIStep<I, O>(module: AModule<I, O>, id: string) {
     const step = new CLIStep<I, O>(module, id, this.settings);
     return step;
   }
 }
 
 export class CLICore extends CoreCore {
-  // @ts-expect-error
-  createCommand(name: string) {
+  createCLICommand(name: string) {
     return new CLICommand(name, this.settings);
   }
 }

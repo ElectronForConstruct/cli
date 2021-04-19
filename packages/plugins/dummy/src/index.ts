@@ -1,4 +1,4 @@
-import { Module } from '@cyn/utils';
+import { Module, Plugin } from '@cyn/utils';
 
 interface DummyCtx {
   wait: number;
@@ -13,13 +13,13 @@ function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-const Dummy: Module<DummyCtx, DummyOutput> = {
-  description: 'Dummy',
-  id: 'dummy',
-  inputs: {
+class Dummy extends Module<DummyCtx, DummyOutput> {
+  description ='Dummy'
+  id = 'dummy'
+  inputs = {
     message: '',
     wait: 1000
-  },
+  }
 
   async run(ctx) {
     const split = ctx.taskSettings.wait / 5
@@ -37,6 +37,7 @@ const Dummy: Module<DummyCtx, DummyOutput> = {
 }
 
 export const dummy = Dummy
+
 export default {
-  dummy: Dummy
-}
+  modules: [Dummy]
+} as Plugin

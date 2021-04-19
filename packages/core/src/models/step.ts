@@ -1,5 +1,5 @@
 import {
-  Ctx, Module, Settings, Logger, defaultLogger,
+  Ctx, AModule, Settings, Logger, defaultLogger,
 } from '@cyn/utils';
 
 // eslint-disable-next-line import/prefer-default-export
@@ -8,13 +8,13 @@ export class Step<Input, Output> {
 
   inputs: Input | undefined
 
-  plugin: Module<Input, Output>
+  plugin: AModule<Input, Output>
 
   settings: Settings;
 
   logger: Logger;
 
-  constructor(plugin: Module<Input, Output>, settings: Settings) {
+  constructor(plugin: AModule<Input, Output>, settings: Settings) {
     this.plugin = plugin;
 
     this.settings = settings;
@@ -35,6 +35,9 @@ export class Step<Input, Output> {
     if (!this.inputs) {
       throw new Error('Inputs have not been defined');
     }
+
+    console.log('this.plugin', this.plugin);
+
     // eslint-disable-next-line @typescript-eslint/unbound-method
     const { inputs, run } = this.plugin;
     const settings = { ...inputs, ...this.inputs };

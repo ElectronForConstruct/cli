@@ -40,17 +40,21 @@ export interface Settings {
   input: string;
 }
 
-export interface Module<Input, Output> {
-  description: string;
+export abstract class Module<Input, Output> {
+  abstract description: string;
 
-  id: string;
+  abstract id: string;
 
-  inputs: Input;
+  abstract inputs: Input;
 
-  run(ctx: Ctx<Input>): Promisable<Output>;
+  abstract run(ctx: Ctx<Input>): Promisable<Output>;
 }
 
-export type Plugin = Record<string, Module<Object, unknown>>
+export type AModule<I, O> = new () => Module<I, O>
+
+export type Plugin = {
+  modules: AModule<unknown, unknown>[]
+}
 
 export interface Logger {
   log(str: string): void;

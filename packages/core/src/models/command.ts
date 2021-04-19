@@ -1,4 +1,4 @@
-import { Module, Settings } from '@cyn/utils';
+import { AModule, Settings } from '@cyn/utils';
 import { Step } from './step';
 
 // eslint-disable-next-line import/prefer-default-export
@@ -16,7 +16,7 @@ export class Command {
     this.settings = settings;
   }
 
-  createStep<I, O>(module: Module<I, O>) {
+  createStep<I, O>(module: AModule<I, O>) {
     const step = new Step<I, O>(module, this.settings);
     return step;
   }
