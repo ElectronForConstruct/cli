@@ -8,7 +8,12 @@ function default_1(plop) {
                 name: 'name',
                 message: 'What is the name of your plugin',
                 default: 'myPlugin',
-            },
+            }, /* {
+                type: 'confirm',
+                name: 'typescript',
+                message: 'Use Typescript',
+                default: true,
+            } */
         ],
         actions: (data) => {
             return [{

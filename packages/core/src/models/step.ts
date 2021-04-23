@@ -31,22 +31,20 @@ export class Step<Input, Output> {
     this.logger = logger;
   }
 
-  async run() {
+  run() {
     if (!this.inputs) {
       throw new Error('Inputs have not been defined');
     }
 
-    console.log('this.plugin', this.plugin);
+    const Plugin = this.plugin;
 
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    const { inputs, run } = this.plugin;
-    const settings = { ...inputs, ...this.inputs };
-
-    const ctx: Ctx<Input> = {
+    const ctx: Ctx = {
       settings: this.settings,
-      taskSettings: settings,
       logger: this.logger,
+      cwd: '',
     };
-    return run(ctx);
+    const plugin = new Plugin(ctx);
+
+    return plugin.run({ ...plugin.inputs, ...this.inputs });
   }
 }

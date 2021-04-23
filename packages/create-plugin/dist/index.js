@@ -15,7 +15,7 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
@@ -29,7 +29,7 @@ const path = __importStar(require("path"));
 const plop_1 = require("plop");
 const minimist_1 = __importDefault(require("minimist"));
 const args = process.argv.slice(2);
-const argv = minimist_1.default(args);
+const argv = (0, minimist_1.default)(args);
 plop_1.Plop.launch({
     cwd: argv.cwd,
     configPath: path.join(__dirname, 'plopfile.js'),
@@ -40,5 +40,5 @@ plop_1.Plop.launch({
         ...env,
         dest: process.cwd()
     };
-    return plop_1.run(options, undefined, true);
+    return (0, plop_1.run)(options, undefined, true);
 });

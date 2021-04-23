@@ -40,21 +40,40 @@ export interface Settings {
   input: string;
 }
 
+export interface Ctx {
+  settings: Settings;
+  cwd: string;
+  logger: Logger;
+}
+
 export abstract class Module<Input, Output> {
   abstract description: string;
-
-  abstract id: string;
-
   abstract inputs: Input;
 
-  abstract run(ctx: Ctx<Input>): Promisable<Output>;
+  protected settings: Settings;
+  protected cwd: string;
+  protected logger: Logger;
+
+  constructor(context: Ctx) {
+    this.settings = context.settings
+    this.cwd = context.cwd
+    this.logger = context.logger
+  }
+
+  run(task: Input): Promisable<Output> {
+    throw new Error('Not Implemented')
+  };
 }
 
-export type AModule<I, O> = new () => Module<I, O>
+type AbstractConstructorHelper<T> = (new (...args: any) => { [x: string]: any; }) & T;
+type AbstractContructorParameters<T> = ConstructorParameters<AbstractConstructorHelper<T>>;
 
-export type Plugin = {
-  modules: AModule<unknown, unknown>[]
-}
+// Params resolved to [string, number]
+type Params = AbstractContructorParameters<typeof Module>;
+
+export type AModule<I, O> = new (...args: Params) => Module<I, O>
+
+export type Plugin = Record<string, AModule<unknown, unknown>>
 
 export interface Logger {
   log(str: string): void;
@@ -64,12 +83,6 @@ export const defaultLogger: Logger = {
   log(str) {
     console.log(str)
   }
-}
-
-export interface Ctx<SETTINGS> {
-  settings: Settings;
-  taskSettings: SETTINGS;
-  logger: Logger
 }
 
 export interface TaskStep<T = unknown> {

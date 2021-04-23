@@ -8,6 +8,8 @@
     "strict": true,
     "moduleResolution": "node",
     "sourceMap": true,
+    "noImplicitAny": true,
+    "noImplicitOverride": true,
     "importHelpers": true,
     "removeComments": true,
     "outDir": "dist",

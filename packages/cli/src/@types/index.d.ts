@@ -37,3 +37,8 @@ declare module 'download-tarball' {
   }): Promise<any>;
   export = download
 }
+
+declare module 'string-replace-all-ponyfill' {
+  function replaceAll(str: string, regex: RegExp | string, fn: string | (() => string)): string
+  export = replaceAll
+}

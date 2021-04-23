@@ -2,13 +2,15 @@ import { cac } from 'cac';
 import { Listr } from 'listr2';
 import fs from 'fs-extra';
 import path from 'path';
-
-import { Settings } from '@cyn/utils';
+import traverse from 'traverse';
+import { AModule, Settings } from '@cyn/utils';
+import replaceAll from 'string-replace-all-ponyfill';
+import dotProp from 'dot-prop';
 import { Args, CLICore, CLICtx } from './models';
 import { loadConfig } from './config';
 import add from './utils/add';
 
-const modules: Record<string, any> = {};
+const modules: Record<string, AModule<unknown, unknown>> = {};
 
 const core = new CLICore();
 
@@ -47,14 +49,11 @@ async function app() {
     for await (const plugin of settings.plugins) {
       const importedModules = await add(plugin);
       console.log('importedModules', importedModules);
-      importedModules.modules.forEach((MyModule) => {
-        const modInstance = new MyModule();
-        modules[modInstance.id] = module;
+      Object.entries(importedModules).forEach(([key, MyModule]) => {
+        modules[key] = MyModule;
       });
     }
   }
-
-  console.log('modules', modules);
 
   Object.entries(settings.commands).forEach(([commandName, command]) => {
     const myCommand = core.createCLICommand(commandName);
@@ -72,9 +71,12 @@ async function app() {
           const tasks = new Listr<CLICtx<unknown>>(
             [],
             {
-            // @ts-ignore
-              renderer: (module.debug === true) ? 'verbose' : 'default',
-              // ctx: context,
+              // @ts-ignore
+              renderer: (command.debug === true) ? 'verbose' : 'default',
+              // @ts-ignore
+              ctx: {
+                outputs: {},
+              },
             },
           );
 
@@ -84,11 +86,23 @@ async function app() {
             tasks.add({
               title: _step.id, // build
               task: async (ctx, t) => {
-                // TODO replace ${{ outputs['dummy-1'].message }}
+                // eslint-disable-next-line array-callback-return,func-names
+                const inputs = traverse(_step.inputs).map(function (value) {
+                  if (this.isLeaf && typeof value === 'string') {
+                    const regexp = /{{(.*?)}}/g;
+                    if (regexp.test(value)) {
+                      // @ts-ignore
+                      const result = replaceAll(value, regexp, (fullMatch, grp1) => {
+                        const search = grp1.trim();
+                        const prop = dotProp.get(ctx, search);
+                        return prop;
+                      });
+                      this.update(result);
+                    }
+                  }
+                });
 
-                console.log('_step.inputs', _step.inputs);
-
-                step.setInputs(_step.inputs);
+                step.setInputs(inputs);
                 step.setLogger({
                   log: (str: string) => {
                     t.output = str;

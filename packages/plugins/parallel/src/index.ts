@@ -3,13 +3,12 @@ import { Step } from '@cyn/core/dist/models/step';
 
 class Parallel extends Module<{ steps: Step<unknown, unknown>[]}, unknown[]> {
   description = 'Run tasks in parallel'
-  id = 'parallel'
   inputs = {
     steps: []
   }
 
-  async run(ctx) {
-    return Promise.all(ctx.taskSettings.steps.map(step => {
+  async run(task) {
+    return Promise.all(task.steps.map(step => {
       return step.run();
     }));
   }
@@ -17,5 +16,5 @@ class Parallel extends Module<{ steps: Step<unknown, unknown>[]}, unknown[]> {
 
 export const parallel = Parallel
 export default {
-  modules: [Parallel]
+  parallel: Parallel
 }
