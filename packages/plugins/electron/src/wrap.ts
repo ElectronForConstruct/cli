@@ -12,14 +12,19 @@ const config: SetupConfig = {
   },
 };
 
-type Settings = typeof config
+interface Output {
+  temp: string;
+}
 
-export default {
-  description: 'Wrap an app with Electron',
-  input: {},
-  output: {},
-  async run(ctx) {
-    const settings = ctx.taskSettings;
+type Input = typeof config
+
+export default class extends Module<Input, Output> {
+  description = 'Wrap an app with Electron'
+
+  inputs = config
+
+  async run(ctx: Input) {
+    const settings = ctx;
 
     // create temporary directory
     const tmpDir = path.join(process.cwd(), 'tmp', `cyn_${path.basename(process.cwd())}`);
@@ -40,7 +45,7 @@ export default {
     await fs.writeFile(pkgJSONPath, JSON.stringify(pkgJSON), 'utf8');
 
     // Generate configuration
-    await fs.writeFile(path.join(tmpDir, 'config.js'), `module.exports=${JSON.stringify(ctx.taskSettings)}`, 'utf8');
+    await fs.writeFile(path.join(tmpDir, 'config.js'), `module.exports=${JSON.stringify(ctx)}`, 'utf8');
 
     // Install dependencies
     const install = installPkg([`electron@${settings.version}`], tmpDir, true);
@@ -51,8 +56,10 @@ export default {
     // Copy content
     const appPath = path.join(tmpDir, 'app')
     await fs.ensureDir(appPath);
-    await fs.copy(ctx.workingDirectory, appPath);
+    await fs.copy(this.cwd, appPath);
 
-    ctx.workingDirectory = tmpDir
+    return {
+      temp: tmpDir
+    }
   }
-} as Module<Settings>
+}

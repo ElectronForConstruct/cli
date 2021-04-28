@@ -12,5 +12,8 @@
     "watch": "lerna run watch --stream --parallel",
     "prerelease": "npx lerna version --no-push",
     "release": "npx lerna publish from-git --yes"
+  },
+  "dependencies": {
+    "@wasmer/wasi": "^0.12.0"
   }
 }

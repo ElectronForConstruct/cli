@@ -4,7 +4,7 @@ import { Step as CoreStep } from '@cyn/core/dist/models/step';
 import { Command as CoreCommand } from '@cyn/core/dist/models/command';
 import { Core as CoreCore } from '@cyn/core';
 
-export interface CLICtx<T> extends Ctx<T> {
+export interface CLICtx extends Ctx {
   outputs: Record<string, any>
 }
 

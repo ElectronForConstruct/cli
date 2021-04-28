@@ -1,10 +1,10 @@
-import { Module } from '@cyn/utils';
+import { AModule } from '@cyn/utils';
 
 export default class ModuleManager {
-  private modules: Map<string, Module<unknown, unknown>> =
-    new Map<string, Module<unknown, unknown>>();
+  private modules: Map<string, AModule<unknown, unknown>> =
+    new Map<string, AModule<unknown, unknown>>();
 
-  register(key: string, module: Module<unknown, unknown>) {
+  register(key: string, module: AModule<unknown, unknown>) {
     return this.modules.set(key, module);
   }
 

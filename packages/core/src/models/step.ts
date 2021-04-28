@@ -1,6 +1,7 @@
 import {
   Ctx, AModule, Settings, Logger, defaultLogger,
 } from '@cyn/utils';
+import { Promisable } from 'type-fest';
 
 // eslint-disable-next-line import/prefer-default-export
 export class Step<Input, Output> {
@@ -31,7 +32,7 @@ export class Step<Input, Output> {
     this.logger = logger;
   }
 
-  run() {
+  run(): Promisable<Output> {
     if (!this.inputs) {
       throw new Error('Inputs have not been defined');
     }

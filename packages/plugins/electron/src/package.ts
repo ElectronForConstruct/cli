@@ -5,7 +5,7 @@ import prettyDisplayFolders from './utils/prettyFolder';
 import { PackageJson } from 'type-fest'
 import { Module } from '@cyn/utils';
 
-const config = {
+const config: BuildSettings = {
   // electronVersion: '8.0.0',
   dir: process.cwd(),
   asar: true,
@@ -23,14 +23,18 @@ const config = {
   tmpdir: path.join(process.cwd(), '.cyn', 'tmp')
 }
 
-export default {
-  description: 'Package your app',
-  input: {},
-  output: {},
-  async run(ctx) {
-    const buildSettings = ctx.taskSettings;
+interface Output {
+  source: string[]
+}
 
-    const pkgPath = path.join(ctx.workingDirectory, 'package.json');
+export default class extends Module<BuildSettings, Output> {
+  description = 'Package your app'
+  inputs = config
+
+  async run(ctx: BuildSettings) {
+    const buildSettings = ctx;
+
+    const pkgPath = path.join(this.cwd, 'package.json');
     const pkgRawContent = await fs.readFile(pkgPath, 'utf8');
     const pkgJson = JSON.parse(pkgRawContent) as PackageJson;
 
@@ -44,7 +48,7 @@ export default {
     }
 
     // set src dir to tmpdir
-    buildSettings.dir = ctx.workingDirectory;
+    buildSettings.dir = this.cwd;
 
     if (!buildSettings.appVersion && pkgJson.version) {
       buildSettings.appVersion = pkgJson.version;
@@ -100,6 +104,13 @@ export default {
     } catch (e) {
       // logger.error('An error occurred while packaging your apps');
       // logger.error(e);
+      return {
+        source: []
+      }
+    }
+
+    return {
+      source: []
     }
   }
-} as Module<BuildSettings>
+}

@@ -1,13 +1,17 @@
 import { Module } from '@cyn/utils';
 import { Step } from '@cyn/core/dist/models/step';
 
-class Parallel extends Module<{ steps: Step<unknown, unknown>[]}, unknown[]> {
+interface Input {
+  steps: Step <unknown, unknown> []
+}
+
+class Parallel extends Module<Input, unknown[]> {
   description = 'Run tasks in parallel'
   inputs = {
     steps: []
   }
 
-  async run(task) {
+  override async run(task: Input) {
     return Promise.all(task.steps.map(step => {
       return step.run();
     }));

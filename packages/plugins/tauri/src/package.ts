@@ -1,8 +1,11 @@
 import { Module } from '@cyn/utils';
 
-export default {
-  description: 'Package your app',
-  run(ctx) {
+export default class extends Module<any, any> {
+  description = 'Package your app'
+
+  inputs = {}
+
+  run(ctx: any) {
       console.log('ok')
   }
-} as Module<any>
+}

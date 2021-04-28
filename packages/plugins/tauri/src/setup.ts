@@ -4,7 +4,7 @@ import fs from 'fs-extra';
 import { Module, yarn } from '@cyn/utils';
 import execa from 'execa'
 
-interface SetupCtx {
+interface Input {
   build: {
     distDir: string
     devPath: string
@@ -25,18 +25,40 @@ interface SetupCtx {
   }
 }
 
-export default {
-  description: 'Setup the directory',
-  id: 'tauri/setup',
-  input: {},
-  output: {},
+interface Output {
+  temp: string;
+}
 
-  async run(ctx) {
+export default class extends Module<Input, Output> {
+  description = 'Setup the directory'
+
+  inputs = {
+    build: {
+      distDir: '',
+      devPath: ''
+    },
+    tauri: {
+      window: {
+        title: 'My App'
+      },
+      embeddedServer: {
+        active: true
+      },
+      bundle: {
+        identifier: 'com.my.app'
+      },
+      allowlist: {
+        all: true
+      }
+    }
+  }
+
+  async run(ctx: Input) {
       const tmpDir = path.join(os.tmpdir(), `cyn_tauri_${path.basename(process.cwd())}`);
 
       // copy input folder to temp
       const output = path.join(tmpDir)
-      const input = path.join(process.cwd(), ctx.workingDirectory)
+      const input = path.join(process.cwd(), this.cwd)
       await fs.copy(input, output, { overwrite: true, recursive: true });
 
       // add tauri package
@@ -55,11 +77,11 @@ export default {
         '-A',
         'AAA',
         '-W',
-        ctx.taskSettings.tauri.window.title,
+        ctx.tauri.window.title,
         '-D',
-        ctx.taskSettings.build.distDir,
+        ctx.build.distDir,
         '-P',
-        ctx.taskSettings.build.devPath,
+        ctx.build.devPath,
         '--force',
         'template',
         '--force',
@@ -72,6 +94,8 @@ export default {
       // Merge config file
       // await fs.writeFile(path.join(tmpDir, 'src-tauri', 'tauri.conf.json'), JSON.stringify(ctx.taskSettings, null, 2))
 
-      ctx.workingDirectory = tmpDir
-    }
-} as Module<SetupCtx>
+    return {
+        temp: tmpDir
+      }
+  }
+}

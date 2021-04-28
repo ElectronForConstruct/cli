@@ -23,7 +23,7 @@ class Itch extends Module<InputType, OutputType> {
     BUTLER_API_KEY: 'aaa'
   }
 
-  async run (ctx) {
+  async run(ctx: InputType) {
     try {
       await execa(butler, ['-V']);
     } catch (error) {
@@ -35,7 +35,7 @@ class Itch extends Module<InputType, OutputType> {
     // task.output = 'Finding butler'
     console.log('Finding butler')
 
-    const { project, channel, BUTLER_API_KEY } = ctx.taskSettings;
+    const { project, channel, BUTLER_API_KEY } = ctx;
     if (!project) {
       throw new Error('You must specify a project in the itch configuration!')
     }
@@ -46,12 +46,12 @@ class Itch extends Module<InputType, OutputType> {
       throw new Error('You must specify an api key in the itch configuration!')
     }
 
-    const butlerPush = execa(butler, ['push', '.', `${project}:${channel}`], { cwd: ctx.workingDirectory})
+    const butlerPush = execa(butler, ['push', '.', `${project}:${channel}`], { cwd: this.cwd})
     butlerPush.stdout?.on('data', (data) => {
-      ctx.logger.log(data.toString())
+      this.logger.log(data.toString())
     })
     butlerPush.stderr?.on('data', (data) => {
-      ctx.logger.log(data.toString())
+      this.logger.log(data.toString())
     })
 
     await butlerPush
@@ -65,5 +65,5 @@ class Itch extends Module<InputType, OutputType> {
 export const itch = Itch
 
 export default {
-  modules: [Itch]
+  itch: Itch
 } as Plugin

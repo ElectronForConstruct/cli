@@ -68,7 +68,7 @@ async function app() {
         }
 
         try {
-          const tasks = new Listr<CLICtx<unknown>>(
+          const tasks = new Listr<CLICtx>(
             [],
             {
               // @ts-ignore
