@@ -2,10 +2,10 @@ import dev from './dev'
 import packageApp from './package'
 import setup from './wrap'
 
-import { Plugin } from '@cyn/utils'
+import { Plugin } from '@cyn/core'
 
 export default {
-  'electron/dev': dev,
-  'electron/package': packageApp,
-  'electron/setuptask': setup,
+  Dev: dev,
+  Package: packageApp,
+  SetupTask: setup,
 } as Plugin

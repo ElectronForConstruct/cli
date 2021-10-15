@@ -1,4 +1,4 @@
-import { AModule, Settings } from '@cyn/utils';
+import { AModule, Settings } from './utils';
 import { Step } from './step';
 
 // eslint-disable-next-line import/prefer-default-export

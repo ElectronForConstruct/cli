@@ -1,4 +1,4 @@
-import { AModule } from '@cyn/utils';
+import { AModule } from './utils';
 
 export default class ModuleManager {
   private modules: Map<string, AModule<unknown, unknown>> =

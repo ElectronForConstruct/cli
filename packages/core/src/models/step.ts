@@ -1,7 +1,7 @@
+import { Promisable } from 'type-fest';
 import {
   Ctx, AModule, Settings, Logger, defaultLogger,
-} from '@cyn/utils';
-import { Promisable } from 'type-fest';
+} from './utils';
 
 // eslint-disable-next-line import/prefer-default-export
 export class Step<Input, Output> {

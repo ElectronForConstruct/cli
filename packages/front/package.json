@@ -1,0 +1,27 @@
+{
+  "name": "@cyn/front",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "@baklavajs/events": "1.8.2",
+    "@baklavajs/plugin-options-vue3": "^1.9.2",
+    "@baklavajs/plugin-renderer-vue3": "^1.9.2",
+    "@cyn/core": "^0.2.2",
+    "@cyn/plugin-construct": "^0.2.2",
+    "@cyn/plugin-electron": "^0.2.2",
+    "@cyn/plugin-itch": "^0.2.2",
+    "@cyn/plugin-tauri": "^0.2.2",
+    "baklavajs": "^1.9.2",
+    "litegraph.js": "^0.7.10",
+    "vue": "^3.2.6"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^1.9.3",
+    "@vue/compiler-sfc": "^3.2.20",
+    "vite": "^2.6.7"
+  }
+}

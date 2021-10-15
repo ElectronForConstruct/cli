@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import prettyDisplayFolders from './utils/prettyFolder';
 import { PackageJson } from 'type-fest'
-import { Module } from '@cyn/utils';
+import { Module } from '@cyn/core';
 
 const config: BuildSettings = {
   // electronVersion: '8.0.0',

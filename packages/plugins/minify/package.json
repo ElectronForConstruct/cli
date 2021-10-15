@@ -26,7 +26,7 @@
     "typescript": "4.3.0-beta"
   },
   "dependencies": {
-    "@cyn/utils": "^0.0.2",
+    "@cyn/core": "^0.2.2",
     "fs-extra": "^9.0.1",
     "glob": "^7.1.6",
     "slash": "^3.0.0",

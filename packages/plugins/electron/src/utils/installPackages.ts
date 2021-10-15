@@ -1,5 +1,5 @@
 import execa from 'execa'
-import { yarn } from '@cyn/utils'
+import { yarn } from '@cyn/core'
 
 function installPackages(
   packages: string[] = [],

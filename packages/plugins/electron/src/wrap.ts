@@ -2,7 +2,7 @@ import SetupConfig from './utils/models';
 import installPkg from './utils/installPackages'
 import fs from 'fs-extra'
 import path from 'path'
-import { Module } from '@cyn/utils'
+import { Module } from '@cyn/core'
 
 const config: SetupConfig = {
   version: '10.1.2',

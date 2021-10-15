@@ -1,11 +1,5 @@
-import {
-  Settings, Plugin,
-} from '@cyn/utils';
-
-import path from 'path';
-import { Command } from './command';
 import ModuleManager from './moduleManager';
-import { ObjToArr } from './utils';
+import { Settings, Plugin } from './utils';
 
 // eslint-disable-next-line import/prefer-default-export
 export class Core {
@@ -18,15 +12,6 @@ export class Core {
     this.settings = {
       input: './src',
     };
-  }
-
-  setInput(input: string) {
-    this.settings.input = path.resolve(input);
-    return this;
-  }
-
-  createCommand(name: string) {
-    return new Command(name, this.settings);
   }
 
   registerPlugin(plugin: Plugin) {
@@ -44,12 +29,5 @@ export class Core {
 
   getSettings(): Settings {
     return this.settings;
-  }
-
-  getCommands() {
-    if (!this.settings.commands) {
-      return [];
-    }
-    return ObjToArr(this.settings.commands, 'name');
   }
 }

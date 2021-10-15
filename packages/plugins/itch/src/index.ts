@@ -1,5 +1,4 @@
-import execa from 'execa'
-import { Module, Plugin } from '@cyn/utils';
+import { Module, Plugin, Node } from '@cyn/core';
 
 const butler = 'butler';
 
@@ -13,17 +12,25 @@ interface OutputType {
   project: string,
 }
 
-class Itch extends Module<InputType, OutputType> {
-  id = 'itch'
-  description = 'Itch.io release upload'
+class Itch extends Node {
+  type = 'itch'
+  name = 'Itch.io release upload'
 
-  inputs = {
-    project: 'aaa',
-    channel: 'aaa',
-    BUTLER_API_KEY: 'aaa'
+  constructor() {
+    super();
+
+    this.addInputInterface("Project", "StringOption", '');
+    this.addInputInterface("Channel", "StringOption", '');
+    this.addInputInterface("API Key", "StringOption", '');
+
+    // this.addOption("Operation", "SelectOption", "Add", undefined, {
+    //   items: ["Add", "Subtract"]
+    // });
+    this.addOutputInterface("Folder");
   }
 
   async run(ctx: InputType) {
+    const execa = (await import ('execa')).default
     try {
       await execa(butler, ['-V']);
     } catch (error) {
