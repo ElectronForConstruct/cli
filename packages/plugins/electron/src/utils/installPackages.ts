@@ -1,14 +1,16 @@
 import execa from 'execa'
 import { yarn } from '@cyn/core'
 
-function installPackages(
+async function installPackages(
   packages: string[] = [],
   cwd: string = process.cwd(),
   dev = false,
 ) {
+  const yarnPath = await yarn();
+
   const args = []
 
-  args.push(yarn)
+  args.push(yarnPath)
 
   if (packages.length > 0) {
     args.push('add')

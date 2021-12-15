@@ -1,4 +1,4 @@
 # src/templates/
 # src/3rd-party/
-dist
+*dist/*
 node_modules

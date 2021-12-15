@@ -1,4 +1,4 @@
-import { Module, Plugin, Node } from '@cyn/core';
+import { Node } from '@cyn/core';
 
 const butler = 'butler';
 
@@ -19,17 +19,21 @@ class Itch extends Node {
   constructor() {
     super();
 
-    this.addInputInterface("Project", "StringOption", '');
-    this.addInputInterface("Channel", "StringOption", '');
-    this.addInputInterface("API Key", "StringOption", '');
+    this.addInputInterface(INPUT_FOLDER, "StringOption", '');
+    this.addInputInterface(INPUT_FLOW, "StringOption", '');
+
+    this.addInputInterface(PROJECT, "StringOption", '');
+    this.addInputInterface(CHANNEL, "StringOption", '');
+    this.addInputInterface(API_KEY, "StringOption", '');
 
     // this.addOption("Operation", "SelectOption", "Add", undefined, {
     //   items: ["Add", "Subtract"]
     // });
-    this.addOutputInterface("Folder");
+    this.addOutputInterface(OUTPUT_FOLDER);
+    this.addOutputInterface(OUTPUT_FLOW);
   }
 
-  async run(ctx: InputType) {
+  async run(props: InputType, ctx: any) {
     const execa = (await import ('execa')).default
     try {
       await execa(butler, ['-V']);
@@ -42,7 +46,7 @@ class Itch extends Node {
     // task.output = 'Finding butler'
     console.log('Finding butler')
 
-    const { project, channel, BUTLER_API_KEY } = ctx;
+    const { project, channel, BUTLER_API_KEY } = props;
     if (!project) {
       throw new Error('You must specify a project in the itch configuration!')
     }
@@ -53,12 +57,12 @@ class Itch extends Node {
       throw new Error('You must specify an api key in the itch configuration!')
     }
 
-    const butlerPush = execa(butler, ['push', '.', `${project}:${channel}`], { cwd: this.cwd})
+    const butlerPush = execa(butler, ['push', '.', `${project}:${channel}`], { cwd: ctx.cwd})
     butlerPush.stdout?.on('data', (data) => {
-      this.logger.log(data.toString())
+      console.log(data.toString())
     })
     butlerPush.stderr?.on('data', (data) => {
-      this.logger.log(data.toString())
+      console.log(data.toString())
     })
 
     await butlerPush
@@ -70,7 +74,10 @@ class Itch extends Node {
 }
 
 export const itch = Itch
-
-export default {
-  itch: Itch
-} as Plugin
+export const INPUT_FLOW = "In"
+export const OUTPUT_FLOW = "Out"
+export const INPUT_FOLDER = "Input Folder"
+export const OUTPUT_FOLDER = "Output Folder"
+export const PROJECT = "Project"
+export const CHANNEL = "Channel"
+export const API_KEY = "API Key"

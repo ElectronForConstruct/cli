@@ -1,27 +1,58 @@
 {
   "name": "@cyn/front",
   "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "test:unit": "vue-cli-service test:unit",
+    "test:e2e": "vue-cli-service test:e2e",
+    "lint": "vue-cli-service lint",
+    "dev": "vite"
   },
   "dependencies": {
+    "@baklavajs/core": "^1.9.1",
     "@baklavajs/events": "1.8.2",
+    "@baklavajs/plugin-engine": "^1.9.2",
     "@baklavajs/plugin-options-vue3": "^1.9.2",
     "@baklavajs/plugin-renderer-vue3": "^1.9.2",
     "@cyn/core": "^0.2.2",
-    "@cyn/plugin-construct": "^0.2.2",
     "@cyn/plugin-electron": "^0.2.2",
     "@cyn/plugin-itch": "^0.2.2",
-    "@cyn/plugin-tauri": "^0.2.2",
-    "baklavajs": "^1.9.2",
-    "litegraph.js": "^0.7.10",
-    "vue": "^3.2.6"
+    "core-js": "^3.19.3",
+    "eslint-plugin-vuejs-accessibility": "^1.1.0",
+    "register-service-worker": "^1.7.2",
+    "vue": "^3.2.6",
+    "vue-router": "^4.0.0-0",
+    "vuex": "^4.0.0-0"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^1.9.3",
-    "@vue/compiler-sfc": "^3.2.20",
-    "vite": "^2.6.7"
-  }
+    "@types/jest": "^27.0.3",
+    "@typescript-eslint/eslint-plugin": "^5.6.0",
+    "@typescript-eslint/parser": "^5.6.0",
+    "@vitejs/plugin-vue": "^1.10.2",
+    "@vue/cli-plugin-babel": "~4.5.15",
+    "@vue/cli-plugin-e2e-cypress": "~4.5.15",
+    "@vue/cli-plugin-eslint": "~4.5.15",
+    "@vue/cli-plugin-pwa": "~4.5.15",
+    "@vue/cli-plugin-router": "~4.5.15",
+    "@vue/cli-plugin-typescript": "~4.5.15",
+    "@vue/cli-plugin-unit-jest": "~4.5.15",
+    "@vue/cli-plugin-vuex": "~4.5.15",
+    "@vue/cli-service": "~4.5.15",
+    "@vue/compiler-sfc": "^3.2.24",
+    "@vue/eslint-config-airbnb": "^6.0.0",
+    "@vue/eslint-config-typescript": "^9.1.0",
+    "@vue/test-utils": "^2.0.0-0",
+    "eslint": "7",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-vue": "^8.2.0",
+    "sass": "^1.44.0",
+    "sass-loader": "^12.4.0",
+    "typescript": "~4.5.2",
+    "vite": "^2.7.1",
+    "vue-jest": "^5.0.0-0"
+  },
+  "_id": "@cyn/front@0.0.0",
+  "readme": "ERROR: No README data found!"
 }

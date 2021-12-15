@@ -48,10 +48,10 @@ export default class extends Module<Input, Output> {
     await fs.writeFile(path.join(tmpDir, 'config.js'), `module.exports=${JSON.stringify(ctx)}`, 'utf8');
 
     // Install dependencies
-    const install = installPkg([`electron@${settings.version}`], tmpDir, true);
-    install.stdout?.pipe(process.stdout)
-    install.stderr?.pipe(process.stderr)
-    await install
+    const install = await installPkg([`electron@${settings.version}`], tmpDir, true);
+    // install.stdout?.pipe(process.stdout)
+    // install.stderr?.pipe(process.stderr)
+    // await install
 
     // Copy content
     const appPath = path.join(tmpDir, 'app')
