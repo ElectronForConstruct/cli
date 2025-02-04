@@ -1,3 +1,7 @@
+# Electron for construct is **deprecated** - Switch to [Pipelab](https://pipelab.app) - [Github](https://github.com/CynToolkit/pipelab)
+
+[![Pipelab Logo](https://raw.githubusercontent.com/CynToolkit/pipelab/refs/heads/develop/readme/full_white_bg_black_text.png)](https://pipelab.app)
+
 # Electron For Construct
 ## A command-line tool to manage your Construct Electron projects
 
